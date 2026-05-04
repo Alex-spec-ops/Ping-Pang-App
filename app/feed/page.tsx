@@ -1,13 +1,12 @@
 import TopBar from "../../components/TopBar";
 import FeedList from "../../components/FeedList";
-import { getActivitiesSorted } from "../../lib/data";
+import { activities } from "../../lib/data";
 
 export const metadata = {
   title: "Feed — PingPang",
 };
 
 export default function FeedPage() {
-  const items = getActivitiesSorted();
   return (
     <>
       <TopBar
@@ -23,7 +22,7 @@ export default function FeedPage() {
           </button>
         }
       />
-      <FeedList items={items} />
+      <FeedList items={activities} />
     </>
   );
 }

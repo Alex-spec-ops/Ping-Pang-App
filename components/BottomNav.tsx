@@ -18,6 +18,12 @@ const tabs: Tab[] = [
     match: (p) => p === "/" || p.startsWith("/feed"),
   },
   {
+    href: "/map",
+    label: "Carte",
+    icon: "🗺",
+    match: (p) => p.startsWith("/map"),
+  },
+  {
     href: "/play",
     label: "Jouer",
     icon: "⚔️",

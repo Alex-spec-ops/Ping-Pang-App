@@ -1,4 +1,4 @@
-import type { Activity, LiveMatch, Match, MatchMode, Player } from "./types";
+import type { Activity, Comment, LiveMatch, Match, MatchMode, Player } from "./types";
 import { isCompetitive } from "./types";
 
 export const players: Player[] = [
@@ -139,6 +139,7 @@ export const players: Player[] = [
 ];
 
 export const CURRENT_USER_ID = "p5";
+export const CURRENT_USER_FRIENDS = new Set(["p1", "p2", "p6", "p7"]);
 
 export const matches: Match[] = [
   {
@@ -221,6 +222,54 @@ export const matches: Match[] = [
     format: "BO5",
     mode: "casual",
   },
+  {
+    id: "m6",
+    player1Id: "p3",
+    player2Id: "p4",
+    sets: [
+      { p1: 11, p2: 7 },
+      { p1: 11, p2: 9 },
+      { p1: 8, p2: 11 },
+      { p1: 11, p2: 6 },
+    ],
+    winnerId: "p3",
+    ratingChange: { p1: 5, p2: -5 },
+    playedAt: "2026-04-20T14:00:00Z",
+    venue: "WTT Finals",
+    format: "BO7",
+    mode: "tournament",
+  },
+  {
+    id: "m7",
+    player1Id: "p1",
+    player2Id: "p2",
+    sets: [
+      { p1: 11, p2: 9 },
+      { p1: 9, p2: 11 },
+      { p1: 12, p2: 10 },
+    ],
+    winnerId: "p1",
+    playedAt: "2026-04-30T19:00:00Z",
+    venue: "Montpellier TT",
+    format: "BO5",
+    mode: "casual",
+  },
+  {
+    id: "m8",
+    player1Id: "p5",
+    player2Id: "p8",
+    sets: [
+      { p1: 11, p2: 9 },
+      { p1: 7, p2: 11 },
+      { p1: 11, p2: 13 },
+    ],
+    winnerId: "p8",
+    ratingChange: { p1: -15, p2: 15 },
+    playedAt: "2026-04-24T18:00:00Z",
+    venue: "Paris 13 TT",
+    format: "BO5",
+    mode: "ranked",
+  },
 ];
 
 export const activities: Activity[] = [
@@ -289,6 +338,207 @@ export const activities: Activity[] = [
     likes: 9,
     comments: 4,
   },
+  // ── new entries ─────────────────────────────────────────────────
+  {
+    id: "a8",
+    kind: "tournament",
+    playerId: "p6",
+    createdAt: "2026-04-29T09:00:00Z",
+    tournamentTitle: "Open de Paris — Printemps 2026",
+    tournamentDate: "2026-05-18",
+    tournamentVenue: "Paris 13 TT",
+    tournamentParticipants: 34,
+    tournamentMaxParticipants: 64,
+    tournamentPrize: "Classement officiel + coupes",
+    likes: 45,
+    comments: 12,
+  },
+  {
+    id: "a9",
+    kind: "achievement",
+    playerId: "p3",
+    achievementTitle: "Classement mondial n°1 — WTT 2026 🌍",
+    createdAt: "2026-04-29T15:00:00Z",
+    likes: 2840,
+    comments: 412,
+  },
+  {
+    id: "a10",
+    kind: "club_announce",
+    playerId: "p5",
+    createdAt: "2026-04-30T10:00:00Z",
+    announceTitle: "Soirée portes ouvertes — vendredi 2 mai",
+    announceBody:
+      "Paris 13 TT ouvre ses portes vendredi soir de 19h à 23h. Tables libres, débutants bienvenus. Amenez vos raquettes !",
+    likes: 31,
+    comments: 8,
+  },
+  {
+    id: "a11",
+    kind: "match",
+    playerId: "p8",
+    matchId: "m3",
+    createdAt: "2026-04-28T12:00:00Z",
+    likes: 8,
+    comments: 1,
+  },
+  {
+    id: "a12",
+    kind: "training",
+    playerId: "p1",
+    trainingMinutes: 120,
+    trainingTitle: "Préparation physique + multiballes",
+    createdAt: "2026-04-29T08:00:00Z",
+    likes: 340,
+    comments: 18,
+  },
+  {
+    id: "a13",
+    kind: "tournament",
+    playerId: "p6",
+    createdAt: "2026-04-24T14:00:00Z",
+    tournamentTitle: "Lyon Open Juniors & Seniors",
+    tournamentDate: "2026-05-31",
+    tournamentVenue: "Lyon TT — Salle Bellecour",
+    tournamentParticipants: 12,
+    tournamentMaxParticipants: 48,
+    tournamentPrize: "500 € + points FFTT",
+    likes: 29,
+    comments: 7,
+  },
+  {
+    id: "a14",
+    kind: "match",
+    playerId: "p3",
+    matchId: "m6",
+    createdAt: "2026-04-20T15:00:00Z",
+    likes: 1540,
+    comments: 88,
+  },
+  {
+    id: "a15",
+    kind: "achievement",
+    playerId: "p5",
+    achievementTitle: "10 matchs consécutifs enregistrés 🏓",
+    createdAt: "2026-04-23T21:00:00Z",
+    likes: 14,
+    comments: 3,
+  },
+  {
+    id: "a16",
+    kind: "training",
+    playerId: "p6",
+    trainingMinutes: 75,
+    trainingTitle: "Smash + revers topspin",
+    createdAt: "2026-04-22T17:00:00Z",
+    likes: 19,
+    comments: 2,
+  },
+  {
+    id: "a17",
+    kind: "follow",
+    playerId: "p5",
+    targetPlayerId: "p1",
+    createdAt: "2026-04-27T09:00:00Z",
+    likes: 3,
+    comments: 0,
+  },
+  {
+    id: "a18",
+    kind: "match",
+    playerId: "p1",
+    matchId: "m7",
+    createdAt: "2026-04-30T20:00:00Z",
+    likes: 620,
+    comments: 41,
+  },
+  {
+    id: "a19",
+    kind: "club_announce",
+    playerId: "p6",
+    createdAt: "2026-04-21T09:00:00Z",
+    announceTitle: "Nouveau coach certifié chez Lyon TT",
+    announceBody:
+      "On accueille Marco Bianchi (ex-entraîneur national italien) pour des stages intensifs à partir de mai. Inscriptions ouvertes !",
+    likes: 67,
+    comments: 14,
+  },
+  {
+    id: "a20",
+    kind: "training",
+    playerId: "p3",
+    trainingMinutes: 180,
+    trainingTitle: "Camp d'entraînement — prépa WTT",
+    createdAt: "2026-04-18T10:00:00Z",
+    likes: 980,
+    comments: 56,
+  },
+  {
+    id: "a21",
+    kind: "match",
+    playerId: "p5",
+    matchId: "m8",
+    createdAt: "2026-04-24T19:00:00Z",
+    likes: 6,
+    comments: 2,
+  },
+  {
+    id: "a22",
+    kind: "tournament",
+    playerId: "p8",
+    createdAt: "2026-04-17T11:00:00Z",
+    tournamentTitle: "Berlin International Open 2026",
+    tournamentDate: "2026-06-07",
+    tournamentVenue: "Sporthalle Tempelhof, Berlin",
+    tournamentParticipants: 55,
+    tournamentMaxParticipants: 128,
+    tournamentPrize: "WTT ranking points",
+    likes: 112,
+    comments: 23,
+  },
+  {
+    id: "a23",
+    kind: "achievement",
+    playerId: "p7",
+    achievementTitle: "50 victoires classées franchies 🎯",
+    createdAt: "2026-04-19T20:00:00Z",
+    likes: 88,
+    comments: 11,
+  },
+  {
+    id: "a24",
+    kind: "training",
+    playerId: "p4",
+    trainingMinutes: 90,
+    trainingTitle: "Analyse vidéo + exercices de service",
+    createdAt: "2026-04-16T09:00:00Z",
+    likes: 210,
+    comments: 9,
+  },
+  {
+    id: "a25",
+    kind: "match",
+    playerId: "p2",
+    matchId: "m7",
+    createdAt: "2026-04-30T20:30:00Z",
+    likes: 480,
+    comments: 33,
+  },
+];
+
+export const comments: Comment[] = [
+  { id: "c1",  activityId: "a1",  playerId: "p6", text: "Belle victoire ! 🏓",                    createdAt: "2026-04-28T20:30:00Z" },
+  { id: "c2",  activityId: "a1",  playerId: "p7", text: "Bien joué @leon_amateur !",              createdAt: "2026-04-28T21:00:00Z" },
+  { id: "c3",  activityId: "a3",  playerId: "p5", text: "Incroyable match 👏",                   createdAt: "2026-04-27T17:30:00Z" },
+  { id: "c4",  activityId: "a3",  playerId: "p2", text: "Revanche bientôt 😤",                   createdAt: "2026-04-27T18:00:00Z" },
+  { id: "c5",  activityId: "a4",  playerId: "p6", text: "Bravo Léon ! Prochain objectif 1600 ?", createdAt: "2026-04-26T22:30:00Z" },
+  { id: "c6",  activityId: "a8",  playerId: "p5", text: "Je m'inscris ! 🙋",                     createdAt: "2026-04-29T09:30:00Z" },
+  { id: "c7",  activityId: "a8",  playerId: "p7", text: "Paris 13 TT toujours aux avant-postes", createdAt: "2026-04-29T10:00:00Z" },
+  { id: "c8",  activityId: "a9",  playerId: "p1", text: "Méritée ! Longue règne 👑",             createdAt: "2026-04-29T15:20:00Z" },
+  { id: "c9",  activityId: "a9",  playerId: "p5", text: "Un monstre 🐉",                          createdAt: "2026-04-29T16:00:00Z" },
+  { id: "c10", activityId: "a10", playerId: "p6", text: "On viendra depuis Lyon ! 🚄",            createdAt: "2026-04-30T10:30:00Z" },
+  { id: "c11", activityId: "a18", playerId: "p5", text: "Grande forme en ce moment @felix_fr !",  createdAt: "2026-04-30T20:15:00Z" },
+  { id: "c12", activityId: "a21", playerId: "p6", text: "Courage, la revanche approche 💪",       createdAt: "2026-04-24T19:30:00Z" },
 ];
 
 export const liveMatches: LiveMatch[] = [
@@ -347,6 +597,10 @@ export function getActivitiesSorted(): Activity[] {
   return [...activities].sort((a, b) =>
     b.createdAt.localeCompare(a.createdAt),
   );
+}
+
+export function getCommentsForActivity(activityId: string) {
+  return comments.filter((c) => c.activityId === activityId);
 }
 
 export function getLeaderboard(): Player[] {

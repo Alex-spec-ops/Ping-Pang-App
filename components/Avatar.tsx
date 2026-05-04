@@ -1,6 +1,7 @@
-type Size = "sm" | "md" | "lg" | "xl";
+type Size = "xs" | "sm" | "md" | "lg" | "xl";
 
 const sizes: Record<Size, string> = {
+  xs: "h-6 w-6 text-sm",
   sm: "h-8 w-8 text-base",
   md: "h-10 w-10 text-lg",
   lg: "h-14 w-14 text-2xl",

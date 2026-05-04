@@ -26,6 +26,40 @@ body {
   overscroll-behavior-y: none;
 }
 
+/* ── Streak animations ───────────────────────────────────────────────────── */
+
+@keyframes flame-pulse {
+  0%, 100% { transform: scale(1) rotate(-3deg); }
+  50%       { transform: scale(1.14) rotate(3deg); }
+}
+
+@keyframes streak-glow {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.82; transform: scale(1.015); }
+}
+
+@keyframes celebrate-pop {
+  0%   { transform: scale(1) rotate(0deg); }
+  25%  { transform: scale(1.35) rotate(-8deg); }
+  55%  { transform: scale(1.25) rotate(6deg); }
+  80%  { transform: scale(1.06) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes shimmer-badge {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Feed: offset for sticky filter bar (below sticky TopBar ~57px) */
+:root {
+  --feed-offset: 57px;
+}
+
 body {
   font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
 }

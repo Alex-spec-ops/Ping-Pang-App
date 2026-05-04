@@ -38,20 +38,48 @@ export function isCompetitive(mode: MatchMode): boolean {
   return mode !== "casual";
 }
 
-export type ActivityKind = "match" | "training" | "achievement" | "follow";
+export type ActivityKind =
+  | "match"
+  | "training"
+  | "achievement"
+  | "follow"
+  | "tournament"
+  | "club_announce";
 
 export type Activity = {
   id: string;
   kind: ActivityKind;
   playerId: string;
   createdAt: string;
+  // match
   matchId?: string;
+  // training
   trainingMinutes?: number;
   trainingTitle?: string;
+  // achievement
   achievementTitle?: string;
+  // follow
   targetPlayerId?: string;
+  // tournament
+  tournamentTitle?: string;
+  tournamentDate?: string;
+  tournamentVenue?: string;
+  tournamentParticipants?: number;
+  tournamentMaxParticipants?: number;
+  tournamentPrize?: string;
+  // club_announce
+  announceTitle?: string;
+  announceBody?: string;
   likes: number;
   comments: number;
+};
+
+export type Comment = {
+  id: string;
+  activityId: string;
+  playerId: string;
+  text: string;
+  createdAt: string;
 };
 
 export type LiveMatch = {

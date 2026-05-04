@@ -1,29 +1,35 @@
-import TopBar from "../../components/TopBar";
-import PlayerProfile from "../../components/PlayerProfile";
-import { CURRENT_USER_ID, getPlayer } from "../../lib/data";
+import ProfileScreen from "../../components/profile/ProfileScreen";
+import { CURRENT_USER_ID, getPlayer, getMatchesForPlayer } from "../../lib/data";
+import {
+  getProfileStats,
+  getProgressionData,
+  getBadges,
+  getSubscriptionInfo,
+} from "../../lib/profile";
 
 export const metadata = {
   title: "Mon profil — PingPang",
 };
 
 export default function MyProfilePage() {
-  const me = getPlayer(CURRENT_USER_ID);
+  const player = getPlayer(CURRENT_USER_ID);
+  if (!player) return <p className="p-8 text-center text-sm text-zinc-500">Joueur introuvable.</p>;
+
+  const stats = getProfileStats(CURRENT_USER_ID);
+  const progression = getProgressionData(CURRENT_USER_ID);
+  const badges = getBadges(CURRENT_USER_ID);
+  const matches = getMatchesForPlayer(CURRENT_USER_ID);
+  const subscription = getSubscriptionInfo(CURRENT_USER_ID);
+
   return (
-    <>
-      <TopBar
-        title="Mon profil"
-        subtitle={me ? `@${me.username}` : undefined}
-        right={
-          <button
-            type="button"
-            aria-label="Réglages"
-            className="grid h-9 w-9 place-items-center rounded-full bg-zinc-100 text-lg dark:bg-zinc-800"
-          >
-            ⚙️
-          </button>
-        }
-      />
-      <PlayerProfile playerId={CURRENT_USER_ID} />
-    </>
+    <ProfileScreen
+      player={player}
+      stats={stats}
+      progression={progression}
+      badges={badges}
+      matches={matches}
+      subscription={subscription}
+      isOwnProfile={true}
+    />
   );
 }
