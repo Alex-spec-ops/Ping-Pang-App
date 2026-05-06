@@ -12,7 +12,6 @@ type Mode = {
   title: string;
   desc: string;
   cta: string;
-  accent: string;
   icon: string;
 };
 
@@ -22,7 +21,6 @@ const competitive: Mode[] = [
     title: "Partie classée",
     desc: "ELO en jeu. Affronte un joueur d'un niveau proche.",
     cta: "Trouver un adversaire",
-    accent: "bg-emerald-600",
     icon: "🎯",
   },
   {
@@ -30,7 +28,6 @@ const competitive: Mode[] = [
     title: "Blitz BO3 classé",
     desc: "Format court, 3 manches gagnantes. ELO en jeu.",
     cta: "Lancer un blitz",
-    accent: "bg-sky-600",
     icon: "⚡",
   },
   {
@@ -38,7 +35,6 @@ const competitive: Mode[] = [
     title: "Tournoi du jour",
     desc: "Bracket de 8 ou 16 joueurs, points et gains à la clé.",
     cta: "Voir les tournois",
-    accent: "bg-amber-600",
     icon: "🏆",
   },
 ];
@@ -49,7 +45,6 @@ const casual: Mode[] = [
     title: "Défier un ami",
     desc: "Match amical, sans ELO. Génère un code et invite un pongiste.",
     cta: "Créer un défi",
-    accent: "bg-violet-600",
     icon: "🤝",
   },
   {
@@ -57,7 +52,6 @@ const casual: Mode[] = [
     title: "Entraînement libre",
     desc: "Joue pour t'amuser ou t'échauffer. Aucun impact sur le classement.",
     cta: "Démarrer une session",
-    accent: "bg-zinc-600",
     icon: "🏓",
   },
   {
@@ -65,7 +59,6 @@ const casual: Mode[] = [
     title: "Soirée club",
     desc: "Enregistre un match en club hors compétition officielle.",
     cta: "Saisir un score",
-    accent: "bg-teal-600",
     icon: "🍻",
   },
 ];
@@ -79,18 +72,19 @@ export default function PlayPage() {
         title="🏆 Compétitif"
         subtitle="ELO en jeu, comptabilisé au classement"
         modes={competitive}
-        ringTone="ring-emerald-200 dark:ring-emerald-900"
       />
 
       <Section
         title="🤝 Amical"
         subtitle="Hors classement, juste pour le plaisir"
         modes={casual}
-        ringTone="ring-zinc-200 dark:ring-zinc-800"
       />
 
       <section className="px-4 pb-4">
-        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+        <h2
+          className="mb-2 text-xs font-semibold uppercase tracking-wider"
+          style={{ color: "var(--color-muted)", fontFamily: "var(--font-ui)" }}
+        >
           🔴 En direct
         </h2>
         <ul className="space-y-3">
@@ -102,9 +96,13 @@ export default function PlayPage() {
             return (
               <li
                 key={m.id}
-                className="overflow-hidden rounded-2xl bg-white ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800"
+                className="overflow-hidden"
+                style={{ border: "var(--border-thin)" }}
               >
-                <div className="flex items-center justify-between bg-rose-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white">
+                <div
+                  className="flex items-center justify-between px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white"
+                  style={{ background: "var(--color-red)" }}
+                >
                   <span>● Live · {m.format}</span>
                   <span>👁 {m.viewers.toLocaleString("fr-FR")}</span>
                 </div>
@@ -115,19 +113,19 @@ export default function PlayPage() {
                       <p className="truncate text-sm font-medium">
                         {p1.fullName}
                       </p>
-                      <p className="text-[10px] text-zinc-500">
+                      <p className="text-[10px]" style={{ color: "var(--color-muted)" }}>
                         {p1.countryFlag} {p1.rating}
                       </p>
                     </div>
                   </div>
                   <div className="text-center">
                     <p className="text-2xl font-bold tabular-nums">
-                      {won.p1} <span className="text-zinc-300">·</span> {won.p2}
+                      {won.p1} <span style={{ color: "var(--color-line)" }}>·</span> {won.p2}
                     </p>
-                    <p className="text-[10px] text-zinc-500">
+                    <p className="text-[10px]" style={{ color: "var(--color-muted)" }}>
                       {setScoreLine(m.sets)}
                       {m.sets.length > 0 ? " · " : ""}
-                      <span className="font-semibold text-rose-600">
+                      <span className="font-semibold" style={{ color: "var(--color-red)" }}>
                         {m.currentSet.p1}-{m.currentSet.p2}
                       </span>
                     </p>
@@ -137,7 +135,7 @@ export default function PlayPage() {
                       <p className="truncate text-sm font-medium">
                         {p2.fullName}
                       </p>
-                      <p className="text-[10px] text-zinc-500">
+                      <p className="text-[10px]" style={{ color: "var(--color-muted)" }}>
                         {p2.countryFlag} {p2.rating}
                       </p>
                     </div>
@@ -157,40 +155,49 @@ function Section({
   title,
   subtitle,
   modes,
-  ringTone,
 }: {
   title: string;
   subtitle: string;
   modes: Mode[];
-  ringTone: string;
 }) {
   return (
     <section className="px-4 py-4">
       <div className="mb-2">
-        <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+        <h2
+          className="text-xs font-semibold uppercase tracking-wider"
+          style={{ color: "var(--color-muted)", fontFamily: "var(--font-ui)" }}
+        >
           {title}
         </h2>
-        <p className="text-[11px] text-zinc-400">{subtitle}</p>
+        <p className="text-[11px]" style={{ color: "var(--color-muted)" }}>{subtitle}</p>
       </div>
       <ul className="space-y-3">
         {modes.map((q) => (
           <li
             key={q.id}
-            className={`overflow-hidden rounded-2xl bg-white ring-1 ${ringTone} dark:bg-zinc-900`}
+            className="overflow-hidden"
+            style={{ border: "var(--border-thin)", background: "var(--color-bg)" }}
           >
             <div className="flex items-start gap-3 p-4">
               <span
-                className={`grid h-12 w-12 shrink-0 place-items-center rounded-xl text-2xl text-white ${q.accent}`}
+                className="grid h-12 w-12 shrink-0 place-items-center text-2xl text-white"
+                style={{ background: "var(--color-forest)" }}
                 aria-hidden
               >
                 {q.icon}
               </span>
               <div className="flex-1">
-                <h3 className="font-semibold">{q.title}</h3>
-                <p className="mt-0.5 text-sm text-zinc-500">{q.desc}</p>
+                <h3
+                  className="font-semibold"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  {q.title}
+                </h3>
+                <p className="mt-0.5 text-sm" style={{ color: "var(--color-muted)" }}>{q.desc}</p>
                 <button
                   type="button"
-                  className={`mt-3 rounded-full px-4 py-1.5 text-sm font-semibold text-white ${q.accent}`}
+                  className="mt-3 px-4 py-1.5 text-sm font-semibold text-white"
+                  style={{ background: "var(--color-forest)", fontFamily: "var(--font-ui)" }}
                 >
                   {q.cta}
                 </button>

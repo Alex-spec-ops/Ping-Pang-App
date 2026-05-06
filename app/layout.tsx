@@ -1,34 +1,46 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Playfair_Display, Inter_Tight, Caveat } from "next/font/google";
 import "./globals.css";
 import "./profile.css";
 import "./clubs.css";
 import BottomNav from "../components/BottomNav";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const interTight = Inter_Tight({
+  variable: "--font-inter-tight",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  display: "swap",
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "PingPang — Le réseau des pongistes",
+  title: "Ping Pang Paris — FOR ATHLETES, by athletes",
   description:
-    "Strava + Chess.com pour le tennis de table. Suis tes matchs, ton ELO, défie le monde.",
-  applicationName: "PingPang",
+    "Club de tennis de table nouvelle génération, entièrement digitalisé. Réservez votre table, suivez vos matchs, défiez le monde.",
+  applicationName: "Ping Pang Paris",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "PingPang",
+    title: "Ping Pang",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#10b981",
+  themeColor: "#0e3d2e",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -43,10 +55,16 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${playfair.variable} ${interTight.variable} ${caveat.variable} h-full`}
     >
-      <body className="min-h-full bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
-        <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-white shadow-sm dark:bg-zinc-950">
+      <body
+        className="min-h-full"
+        style={{ background: "var(--color-bg)", color: "var(--color-ink)" }}
+      >
+        <div
+          className="mx-auto flex min-h-dvh max-w-md flex-col shadow-sm"
+          style={{ background: "var(--color-bg)" }}
+        >
           <main className="flex-1 pb-20">{children}</main>
         </div>
         <BottomNav />

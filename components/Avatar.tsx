@@ -17,7 +17,8 @@ export default function Avatar({
 }) {
   return (
     <span
-      className={`inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-100 to-sky-100 ring-1 ring-zinc-200 dark:from-emerald-900/40 dark:to-sky-900/40 dark:ring-zinc-700 ${sizes[size]}`}
+      className={`inline-flex shrink-0 items-center justify-center rounded-full ${sizes[size]}`}
+      style={{ background: "var(--color-cream)", border: "var(--border-thin)" }}
     >
       <span aria-hidden>{emoji}</span>
     </span>

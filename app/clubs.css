@@ -28,7 +28,7 @@
 .club-stats-row { display:flex; align-items:center; gap:.75rem; padding:.6rem 0; }
 .club-stat-item { display:flex; flex-direction:column; align-items:center; gap:1px; }
 .club-stat-value { font-size:.9375rem; font-weight:800; }
-.club-stat-value--accent { color:#059669; }
+.club-stat-value--accent { color:var(--color-forest); }
 .club-stat-label { font-size:.5625rem; color:#a1a1aa; text-transform:uppercase; letter-spacing:.04em; text-align:center; }
 .club-stats-divider { width:1px; height:28px; background:#e4e4e7; }
 .dark .club-stats-divider { background:#3f3f46; }
@@ -48,8 +48,8 @@
 .club-achievements-grid { display:flex; gap:.5rem; overflow-x:auto; padding-bottom:4px; }
 .club-achievement-card { flex-shrink:0; display:flex; flex-direction:column; align-items:center; gap:3px; padding:.5rem .6rem; border-radius:.75rem; border:1.5px solid #e4e4e7; width:80px; text-align:center; }
 .dark .club-achievement-card { border-color:#27272a; }
-.club-achievement-card--unlocked { background:#ecfdf5; border-color:#6ee7b7; }
-.dark .club-achievement-card--unlocked { background:#064e3b22; border-color:#065f46; }
+.club-achievement-card--unlocked { background:var(--color-cream); border-color:var(--color-forest); }
+.dark .club-achievement-card--unlocked { background:var(--color-cream); border-color:var(--color-forest); }
 .club-achievement-card--locked { background:#f9fafb; opacity:.65; }
 .dark .club-achievement-card--locked { background:#18181b; }
 .club-achievement-emoji { font-size:1.5rem; }
@@ -70,7 +70,7 @@
 .club-member-name { font-size:.8125rem; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .club-member-meta { font-size:.5625rem; color:#a1a1aa; }
 .club-member-score { text-align:right; flex-shrink:0; }
-.club-member-wins { font-size:.8125rem; font-weight:800; color:#059669; }
+.club-member-wins { font-size:.8125rem; font-weight:800; color:var(--color-forest); }
 .club-member-wr { font-size:.5625rem; color:#a1a1aa; }
 .club-member-badge { padding:1px 6px; border-radius:9999px; font-size:.55rem; font-weight:700; border:1px solid; }
 
@@ -137,7 +137,7 @@
 .clubs-list-header { display:flex; justify-content:space-between; align-items:flex-start; padding:1rem 1rem .5rem; }
 .clubs-list-title { font-size:1.25rem; font-weight:800; }
 .clubs-list-sub { font-size:.75rem; color:#a1a1aa; }
-.btn-create-club { padding:.45rem 1rem; border-radius:9999px; background:#059669; color:#fff; font-size:.8125rem; font-weight:700; flex-shrink:0; }
+.btn-create-club { padding:.45rem 1rem; border-radius:9999px; background:var(--color-forest); color:#fff; font-size:.8125rem; font-weight:700; flex-shrink:0; }
 .clubs-search-wrap { padding:0 1rem .5rem; }
 .clubs-search-input { width:100%; border-radius:9999px; background:#f3f4f6; padding:.5rem 1rem; font-size:.875rem; outline:none; }
 .dark .clubs-search-input { background:#27272a; color:#f4f4f5; }
@@ -170,14 +170,14 @@
 .clubs-ranking-name { font-size:.875rem; font-weight:700; }
 .clubs-ranking-meta { font-size:.6rem; color:#a1a1aa; }
 .clubs-ranking-wr { text-align:right; flex-shrink:0; }
-.clubs-ranking-wr-val { font-size:.9375rem; font-weight:800; color:#059669; }
+.clubs-ranking-wr-val { font-size:.9375rem; font-weight:800; color:var(--color-forest); }
 .clubs-ranking-wr-lab { font-size:.5625rem; color:#a1a1aa; text-transform:uppercase; }
 
 /* ── Players Page Sub-tabs ───────────────────────────────── */
 .players-tab-bar { display:flex; border-bottom:1px solid #f3f4f6; }
 .dark .players-tab-bar { border-color:#27272a; }
 .players-tab { flex:1; padding:.7rem; font-size:.8125rem; font-weight:600; color:#a1a1aa; text-align:center; border-bottom:2.5px solid transparent; transition:color .15s,border-color .15s; }
-.players-tab--active { color:#059669; border-bottom-color:#059669; }
+.players-tab--active { color:var(--color-forest); border-bottom-color:var(--color-forest); }
 
 /* ── Mini club card (players page) ──────────────────────── */
 .club-card-mini { display:flex; align-items:center; gap:.625rem; padding:.625rem .75rem; background:#f9fafb; border-radius:.875rem; border:1px solid #f3f4f6; text-decoration:none; color:inherit; transition:background .12s; }
@@ -201,7 +201,7 @@
 .create-label { font-size:.6875rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; color:#71717a; }
 .create-input { border:1.5px solid #e4e4e7; border-radius:.625rem; padding:.5rem .75rem; font-size:.875rem; background:#fff; outline:none; }
 .dark .create-input { background:#27272a; border-color:#3f3f46; color:#f4f4f5; }
-.create-input:focus { border-color:#10b981; }
+.create-input:focus { border-color:var(--color-forest); }
 .create-textarea { resize:none; line-height:1.5; }
 .create-char-count { font-size:.5625rem; color:#a1a1aa; align-self:flex-end; }
 .create-hint { font-size:.6875rem; color:#a1a1aa; }

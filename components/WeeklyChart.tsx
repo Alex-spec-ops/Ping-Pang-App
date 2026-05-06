@@ -1,21 +1,12 @@
 import type { WeekData } from "../lib/streak";
 
 const STATUS_COLOR: Record<string, string> = {
-  active:            "#10b981",
-  missed:            "#e4e4e7",
+  active:            "#0e3d2e",
+  missed:            "#e5e5e0",
   frozen:            "#60a5fa",
-  "current-active":  "#10b981",
-  "current-pending": "#a1a1aa",
+  "current-active":  "#0e3d2e",
+  "current-pending": "#9a9a93",
   "current-risk":    "#f59e0b",
-};
-
-const STATUS_COLOR_DARK: Record<string, string> = {
-  active:            "#34d399",
-  missed:            "#3f3f46",
-  frozen:            "#93c5fd",
-  "current-active":  "#34d399",
-  "current-pending": "#52525b",
-  "current-risk":    "#fbbf24",
 };
 
 export default function WeeklyChart({ weeks }: { weeks: WeekData[] }) {
@@ -61,31 +52,18 @@ export default function WeeklyChart({ weeks }: { weeks: WeekData[] }) {
         const x = i * SLOT + BAR_OFFSET;
         const y = Y_BASE - barH;
         const isCurrent = i === weeks.length - 1;
-        const fill = STATUS_COLOR[week.status] ?? "#e4e4e7";
-        const fillDark = STATUS_COLOR_DARK[week.status] ?? "#3f3f46";
+        const fill = STATUS_COLOR[week.status] ?? "#e5e5e0";
 
         return (
           <g key={week.key}>
-            {/* Bar (light mode) */}
+            {/* Bar */}
             {barH > 0 && (
               <rect
                 x={x} y={y}
                 width={BAR_W} height={barH}
-                rx={3}
+                rx={0}
                 fill={fill}
                 fillOpacity={isCurrent ? 1 : 0.75}
-                className="dark:hidden"
-              />
-            )}
-            {/* Bar (dark mode) */}
-            {barH > 0 && (
-              <rect
-                x={x} y={y}
-                width={BAR_W} height={barH}
-                rx={3}
-                fill={fillDark}
-                fillOpacity={isCurrent ? 1 : 0.8}
-                className="hidden dark:block"
               />
             )}
 

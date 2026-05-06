@@ -3,17 +3,26 @@
 import { useState } from "react";
 import type { WeekData } from "../lib/streak";
 
-const STATUS_STYLE: Record<
-  string,
-  { bg: string; text: string; ring?: string }
-> = {
-  active:           { bg: "bg-emerald-500",                          text: "text-white" },
-  missed:           { bg: "bg-zinc-200 dark:bg-zinc-800",            text: "text-zinc-400 dark:text-zinc-600" },
-  frozen:           { bg: "bg-blue-400",                             text: "text-white" },
-  "current-active": { bg: "bg-emerald-500",                          text: "text-white",  ring: "ring-2 ring-emerald-300 ring-offset-2 dark:ring-offset-zinc-950" },
-  "current-pending":{ bg: "bg-zinc-300 dark:bg-zinc-700",            text: "text-zinc-500 dark:text-zinc-400", ring: "ring-2 ring-zinc-300 dark:ring-zinc-600 ring-offset-2 dark:ring-offset-zinc-950" },
-  "current-risk":   { bg: "bg-amber-400",                            text: "text-white",  ring: "ring-2 ring-amber-300 ring-offset-2 dark:ring-offset-zinc-950" },
-};
+type StyleDef = { bg: string; color: string; ring?: string };
+
+function getStyle(status: string): StyleDef {
+  switch (status) {
+    case "active":
+      return { bg: "var(--color-forest)", color: "#fff" };
+    case "current-active":
+      return { bg: "var(--color-forest)", color: "#fff", ring: "0 0 0 2px var(--color-cream), 0 0 0 4px var(--color-forest)" };
+    case "missed":
+      return { bg: "var(--color-line)", color: "var(--color-muted)" };
+    case "frozen":
+      return { bg: "#60a5fa", color: "#fff" };
+    case "current-pending":
+      return { bg: "var(--color-line)", color: "var(--color-muted)", ring: "0 0 0 2px var(--color-cream), 0 0 0 4px var(--color-line)" };
+    case "current-risk":
+      return { bg: "#f59e0b", color: "#fff", ring: "0 0 0 2px var(--color-cream), 0 0 0 4px #f59e0b" };
+    default:
+      return { bg: "var(--color-line)", color: "var(--color-muted)" };
+  }
+}
 
 export default function WeekHistoryGrid({ weeks }: { weeks: WeekData[] }) {
   const [tooltip, setTooltip] = useState<number | null>(null);
@@ -22,7 +31,7 @@ export default function WeekHistoryGrid({ weeks }: { weeks: WeekData[] }) {
     <div className="grid grid-cols-4 gap-x-3 gap-y-4">
       {weeks.map((week, i) => {
         const isCurrent = i === weeks.length - 1;
-        const style = STATUS_STYLE[week.status] ?? STATUS_STYLE.missed;
+        const style = getStyle(week.status);
         const showTooltip = tooltip === i;
 
         return (
@@ -35,8 +44,11 @@ export default function WeekHistoryGrid({ weeks }: { weeks: WeekData[] }) {
             {/* Bubble */}
             <button
               type="button"
-              className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold transition-transform hover:scale-110 active:scale-95 ${style.bg} ${style.text} ${style.ring ?? ""}`}
+              className="flex h-12 w-12 items-center justify-center rounded-full text-sm font-bold transition-transform hover:scale-110 active:scale-95"
               style={{
+                background: style.bg,
+                color: style.color,
+                boxShadow: style.ring,
                 animation:
                   isCurrent && week.status === "current-active"
                     ? "celebrate-pop 0.6s ease-out"
@@ -61,19 +73,25 @@ export default function WeekHistoryGrid({ weeks }: { weeks: WeekData[] }) {
             </button>
 
             {/* Week label */}
-            <span className="text-center text-[9px] leading-tight text-zinc-500 dark:text-zinc-400">
+            <span className="text-center text-[9px] leading-tight" style={{ color: "var(--color-muted)" }}>
               {week.label}
             </span>
 
             {/* Tooltip */}
             {showTooltip && (
-              <div className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-zinc-900 px-2.5 py-1.5 text-[11px] text-white shadow-lg dark:bg-zinc-700">
+              <div
+                className="absolute bottom-full left-1/2 z-10 mb-2 -translate-x-1/2 whitespace-nowrap px-2.5 py-1.5 text-[11px] text-white shadow-lg"
+                style={{ background: "var(--color-ink)" }}
+              >
                 {week.matchCount > 0
                   ? `${week.matchCount} match${week.matchCount > 1 ? "s" : ""}`
                   : isCurrent
                   ? "En cours…"
                   : "Aucun match"}
-                <div className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-zinc-900 dark:border-t-zinc-700" />
+                <div
+                  className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent"
+                  style={{ borderTopColor: "var(--color-ink)" }}
+                />
               </div>
             )}
           </div>

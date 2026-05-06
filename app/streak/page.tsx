@@ -24,7 +24,8 @@ export default function StreakPage() {
           <button
             type="button"
             aria-label="Partager"
-            className="grid h-9 w-9 place-items-center rounded-full bg-zinc-100 text-lg dark:bg-zinc-800"
+            className="grid h-9 w-9 place-items-center text-lg"
+            style={{ border: "var(--border-thin)", background: "var(--color-cream)" }}
           >
             ↑
           </button>
@@ -33,13 +34,13 @@ export default function StreakPage() {
 
       {/* ── Risk warning ─────────────────────────────────── */}
       {isAtRisk && (
-        <div className="mx-4 mt-3 flex gap-3 rounded-xl bg-amber-50 p-3.5 ring-1 ring-amber-200 dark:bg-amber-950/30 dark:ring-amber-900">
+        <div className="mx-4 mt-3 flex gap-3 p-3.5" style={{ background: "#fffbeb", border: "1px solid #f59e0b" }}>
           <span className="shrink-0 text-xl">⚠️</span>
           <div>
-            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+            <p className="text-sm font-semibold" style={{ color: "#92400e" }}>
               Ton streak est en danger !
             </p>
-            <p className="mt-0.5 text-xs text-amber-700 dark:text-amber-400">
+            <p className="mt-0.5 text-xs" style={{ color: "#b45309" }}>
               Joue au moins un match avant ce soir pour maintenir ta série.
             </p>
           </div>
@@ -53,19 +54,19 @@ export default function StreakPage() {
 
       {/* ── Badges ───────────────────────────────────────── */}
       <section className="px-4 pt-6">
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-muted)", fontFamily: "var(--font-ui)" }}>
           Badges de régularité
         </h2>
         <div className="grid grid-cols-2 gap-2">
           {badges.map((badge) => (
             <div
               key={badge.weeks}
-              className={`flex items-center gap-3 rounded-xl p-3 transition-all ${
-                badge.unlocked
-                  ? "bg-emerald-50 ring-1 ring-emerald-200 dark:bg-emerald-950/30 dark:ring-emerald-900"
-                  : "bg-zinc-50 ring-1 ring-zinc-100 dark:bg-zinc-900 dark:ring-zinc-800"
-              }`}
-              style={{ opacity: badge.unlocked ? 1 : 0.5 }}
+              className="flex items-center gap-3 p-3 transition-all"
+              style={{
+                opacity: badge.unlocked ? 1 : 0.45,
+                border: badge.unlocked ? "1px solid var(--color-forest)" : "var(--border-thin)",
+                background: badge.unlocked ? "var(--color-cream)" : "var(--color-bg)",
+              }}
             >
               <span
                 className="text-2xl"
@@ -82,11 +83,8 @@ export default function StreakPage() {
               <div className="min-w-0">
                 <p className="truncate text-xs font-bold">{badge.label}</p>
                 <p
-                  className={`text-[10px] ${
-                    badge.unlocked
-                      ? "text-emerald-600 dark:text-emerald-400"
-                      : "text-zinc-400"
-                  }`}
+                  className="text-[10px]"
+                  style={{ color: badge.unlocked ? "var(--color-forest)" : "var(--color-muted)", fontFamily: "var(--font-ui)" }}
                 >
                   {badge.unlocked ? "Débloqué ✓" : `${badge.description} requises`}
                 </p>
@@ -99,7 +97,8 @@ export default function StreakPage() {
         {!data.isPremium && (
           <button
             type="button"
-            className="mt-3 w-full rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 py-2.5 text-sm font-semibold text-white shadow-sm"
+            className="mt-3 w-full py-2.5 text-sm font-semibold text-white"
+            style={{ background: "var(--color-forest)", fontFamily: "var(--font-ui)" }}
           >
             🧊 Premium — Protège ton streak avec le Gel
           </button>
@@ -109,13 +108,13 @@ export default function StreakPage() {
       {/* ── 12-week history grid ─────────────────────────── */}
       <section className="px-4 pt-6">
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          <h2 className="text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-muted)", fontFamily: "var(--font-ui)" }}>
             Historique des 12 semaines
           </h2>
-          <span className="flex items-center gap-1.5 text-[10px] text-zinc-400">
-            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" />
+          <span className="flex items-center gap-1.5 text-[10px]" style={{ color: "var(--color-muted)" }}>
+            <span className="inline-block h-2 w-2 rounded-full" style={{ background: "var(--color-forest)" }} />
             Actif
-            <span className="ml-1.5 inline-block h-2 w-2 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+            <span className="ml-1.5 inline-block h-2 w-2 rounded-full" style={{ background: "var(--color-line)" }} />
             Manqué
           </span>
         </div>
@@ -124,15 +123,15 @@ export default function StreakPage() {
 
       {/* ── Weekly evolution chart ───────────────────────── */}
       <section className="px-4 pt-6 pb-8">
-        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "var(--color-muted)", fontFamily: "var(--font-ui)" }}>
           Évolution hebdomadaire
         </h2>
-        <div className="rounded-xl bg-zinc-50 px-3 pt-4 pb-2 ring-1 ring-zinc-100 dark:bg-zinc-900 dark:ring-zinc-800">
+        <div className="px-3 pt-4 pb-2" style={{ background: "var(--color-cream)", border: "var(--border-thin)" }}>
           <WeeklyChart weeks={weekHistory} />
           <div className="mt-1 flex justify-center gap-5">
-            <ChartLegend color="bg-emerald-500" label="Match joué" />
-            <ChartLegend color="bg-zinc-300 dark:bg-zinc-600" label="Semaine manquée" />
-            <ChartLegend color="bg-amber-400" label="En attente" />
+            <ChartLegend color="var(--color-forest)" label="Match joué" />
+            <ChartLegend color="var(--color-line)" label="Semaine manquée" />
+            <ChartLegend color="#f59e0b" label="En attente" />
           </div>
         </div>
       </section>
@@ -143,8 +142,8 @@ export default function StreakPage() {
 function ChartLegend({ color, label }: { color: string; label: string }) {
   return (
     <div className="flex items-center gap-1.5">
-      <span className={`h-2 w-2 rounded-full ${color}`} />
-      <span className="text-[10px] text-zinc-500">{label}</span>
+      <span className="h-2 w-2 rounded-full" style={{ background: color }} />
+      <span className="text-[10px]" style={{ color: "var(--color-muted)" }}>{label}</span>
     </div>
   );
 }

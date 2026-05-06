@@ -7,16 +7,23 @@ type Props = {
 export default function TopBar({ title, subtitle, right }: Props) {
   return (
     <header
-      className="sticky top-0 z-30 border-b border-zinc-200 bg-white/90 backdrop-blur dark:border-zinc-800 dark:bg-black/90"
-      style={{ paddingTop: "env(safe-area-inset-top)" }}
+      className="sticky top-0 z-30 backdrop-blur"
+      style={{
+        borderBottom: "var(--border-thin)",
+        background: "rgba(250,250,247,0.95)",
+        paddingTop: "env(safe-area-inset-top)",
+      }}
     >
       <div className="mx-auto flex max-w-md items-end justify-between gap-3 px-4 py-3">
         <div className="min-w-0">
-          <h1 className="truncate text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
+          <h1
+            className="truncate text-xl font-bold tracking-tight"
+            style={{ fontFamily: "var(--font-display)", color: "var(--color-ink)" }}
+          >
             {title}
           </h1>
           {subtitle ? (
-            <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
+            <p className="truncate text-xs" style={{ color: "var(--color-muted)" }}>
               {subtitle}
             </p>
           ) : null}

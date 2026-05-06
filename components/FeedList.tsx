@@ -89,23 +89,21 @@ export default function FeedList({ items }: { items: Activity[] }) {
       onTouchEnd={onTouchEnd}
     >
       {/* ── Filter bar ─────────────────────────────────── */}
-      <div className="sticky top-[--feed-offset] z-20 flex items-center gap-2 overflow-x-auto border-b border-zinc-100 bg-white/95 px-4 py-2 backdrop-blur dark:border-zinc-800 dark:bg-black/95">
+      <div
+        className="sticky top-[--feed-offset] z-20 flex items-center gap-2 overflow-x-auto px-4 py-2 backdrop-blur"
+        style={{ borderBottom: "var(--border-thin)", background: "rgba(250,250,247,0.97)" }}
+      >
         {FILTERS.map((f) => (
           <button
             key={f.id}
             type="button"
             onClick={() => setFilter(f.id)}
-            className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-              filter === f.id
-                ? f.id === "events"
-                  ? "bg-emerald-600 text-white"
-                  : f.id === "friends"
-                  ? "bg-violet-600 text-white"
-                  : f.id === "club"
-                  ? "bg-indigo-600 text-white"
-                  : "bg-zinc-900 text-white dark:bg-white dark:text-black"
-                : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300"
-            }`}
+            className="shrink-0 px-3 py-1.5 text-xs font-medium transition-colors"
+            style={{
+              fontFamily: "var(--font-ui)",
+              background: filter === f.id ? "var(--color-forest)" : "var(--color-line)",
+              color: filter === f.id ? "#fff" : "var(--color-muted)",
+            }}
           >
             {f.label}
           </button>
@@ -117,8 +115,10 @@ export default function FeedList({ items }: { items: Activity[] }) {
           onClick={doRefresh}
           disabled={refreshing}
           aria-label="Actualiser"
-          className="ml-auto shrink-0 grid h-7 w-7 place-items-center rounded-full bg-zinc-100 text-sm text-zinc-600 transition-all hover:bg-zinc-200 disabled:opacity-50 dark:bg-zinc-800 dark:text-zinc-300"
+          className="ml-auto shrink-0 grid h-7 w-7 place-items-center text-sm transition-all disabled:opacity-50"
           style={{
+            border: "var(--border-thin)",
+            color: "var(--color-muted)",
             animation: refreshing ? "spin 0.8s linear infinite" : undefined,
           }}
         >
@@ -129,8 +129,8 @@ export default function FeedList({ items }: { items: Activity[] }) {
       {/* ── Pull indicator ─────────────────────────────── */}
       {(pullDelta > 0 || refreshing) && (
         <div
-          className="flex items-center justify-center text-xs text-zinc-400 transition-all"
-          style={{ height: refreshing ? 40 : pullDelta }}
+          className="flex items-center justify-center text-xs transition-all"
+          style={{ height: refreshing ? 40 : pullDelta, color: "var(--color-muted)" }}
         >
           <span
             style={{
@@ -151,7 +151,7 @@ export default function FeedList({ items }: { items: Activity[] }) {
         {visible.length === 0 ? (
           <div className="py-14 text-center">
             <p className="text-3xl">🏓</p>
-            <p className="mt-3 text-sm font-medium text-zinc-500">
+            <p className="mt-3 text-sm font-medium" style={{ color: "var(--color-muted)" }}>
               Aucun contenu pour ce filtre.
             </p>
           </div>
@@ -164,13 +164,13 @@ export default function FeedList({ items }: { items: Activity[] }) {
             {/* ── Sentinel / load-more ────────────────── */}
             {hasMore ? (
               <div ref={sentinelRef} className="flex justify-center py-5">
-                <div className="flex items-center gap-2 text-xs text-zinc-400">
+                <div className="flex items-center gap-2 text-xs" style={{ color: "var(--color-muted)" }}>
                   <span style={{ animation: "spin 1s linear infinite" }}>↻</span>
                   Chargement…
                 </div>
               </div>
             ) : (
-              <p className="py-8 text-center text-xs text-zinc-400">
+              <p className="py-8 text-center text-xs" style={{ color: "var(--color-muted)" }}>
                 — {sorted.length} post{sorted.length > 1 ? "s" : ""} au total —
               </p>
             )}

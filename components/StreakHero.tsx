@@ -23,24 +23,24 @@ export default function StreakHero({ data }: { data: StreakData }) {
   let statusLabel: string;
 
   if (isBroken) {
-    gradFrom = "#18181b"; // zinc-900
-    gradTo = "#27272a";   // zinc-800
-    accentText = "#a1a1aa";
+    gradFrom = "#0e0e0e"; // ink
+    gradTo = "#1a1a1a";
+    accentText = "#9a9a93";
     statusLabel = "Streak perdu";
   } else if (isAtRisk) {
-    gradFrom = "#7c2d12"; // orange-900
-    gradTo = "#92400e";   // amber-800
+    gradFrom = "#7c2d12";
+    gradTo = "#92400e";
     accentText = "#fcd34d";
     statusLabel = "⚠️ En danger !";
   } else if (isCurrentActive) {
-    gradFrom = "#064e3b"; // emerald-900
-    gradTo = "#065f46";   // emerald-800
-    accentText = "#6ee7b7";
+    gradFrom = "#0e3d2e"; // forest
+    gradTo = "#0a2d22";   // forest-deep
+    accentText = "#c9a86a"; // gold
     statusLabel = "✓ Semaine validée";
   } else {
-    gradFrom = "#022c22"; // emerald-950
-    gradTo = "#064e3b";   // emerald-900
-    accentText = "#34d399";
+    gradFrom = "#0e3d2e"; // forest
+    gradTo = "#0a2d22";
+    accentText = "rgba(255,255,255,0.7)";
     statusLabel = "Joue cette semaine !";
   }
 

@@ -55,22 +55,29 @@ export default function PlayersPageClient() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={tab === "joueurs" ? "Rechercher un joueur…" : "Rechercher un club, une ville…"}
-          className="w-full rounded-full bg-zinc-100 px-4 py-2 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 dark:bg-zinc-900"
+          className="w-full px-4 py-2 text-sm outline-none"
+          style={{
+            border: "var(--border-thin)",
+            background: "var(--color-cream)",
+            fontFamily: "var(--font-ui)",
+            color: "var(--color-ink)",
+          }}
         />
       </div>
 
       {/* ── JOUEURS TAB ── */}
       {tab === "joueurs" && (
-        <ol className="divide-y divide-zinc-100 border-t border-zinc-100 dark:divide-zinc-800 dark:border-zinc-800">
+        <ol style={{ borderTop: "var(--border-thin)" }}>
           {filteredPlayers.map((p, idx) => {
             const rank = idx + 1;
             return (
               <li key={p.id}>
                 <Link
                   href={`/profile/${p.id}`}
-                  className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                  className="flex items-center gap-3 px-4 py-3 transition-colors"
+                  style={{ borderBottom: "var(--border-thin)" }}
                 >
-                  <span className="w-7 text-center text-sm font-semibold text-zinc-500">
+                  <span className="w-7 text-center text-sm font-semibold" style={{ color: "var(--color-muted)" }}>
                     {medal(rank) ?? rank}
                   </span>
                   <Avatar emoji={p.avatar} size="md" />
@@ -79,13 +86,13 @@ export default function PlayersPageClient() {
                       {p.fullName}{" "}
                       <span className="text-xs font-normal text-zinc-500">{p.countryFlag}</span>
                     </p>
-                    <p className="truncate text-xs text-zinc-500">
+                    <p className="truncate text-xs" style={{ color: "var(--color-muted)" }}>
                       @{p.username}{p.club ? ` · ${p.club}` : ""}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold">{p.rating}</p>
-                    <p className="text-[10px] text-zinc-500">ELO</p>
+                    <p className="text-[10px]" style={{ color: "var(--color-muted)" }}>ELO</p>
                   </div>
                 </Link>
               </li>
@@ -99,7 +106,7 @@ export default function PlayersPageClient() {
         <div className="px-4 pb-4">
           <div className="mt-1 flex items-center justify-between mb-3">
             <p className="text-xs text-zinc-500">{filteredClubs.length} clubs trouvés</p>
-            <Link href="/clubs" className="text-xs font-semibold text-emerald-600">
+            <Link href="/clubs" className="text-xs font-semibold" style={{ color: "var(--color-forest)" }}>
               Voir tout →
             </Link>
           </div>

@@ -69,7 +69,7 @@ export default function ActivityCard({
   const comments = getCommentsForActivity(activity.id);
 
   return (
-    <article className="border-b border-zinc-100 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-950">
+    <article className="px-4 py-4" style={{ borderBottom: "1px solid var(--color-line)", background: "var(--color-bg)" }}>
       {/* ── Header ── */}
       <header className="mb-3 flex items-center gap-3">
         <Link href={`/profile/${player.id}`} className="shrink-0">
@@ -84,7 +84,7 @@ export default function ActivityCard({
               {player.fullName}
             </Link>
             {player.club && (
-              <span className="shrink-0 rounded-full bg-emerald-100 px-1.5 py-0.5 text-[9px] font-semibold text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400">
+              <span className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold" style={{ fontFamily: "var(--font-ui)", background: "var(--color-forest)", color: "#fff" }}>
                 {player.club}
               </span>
             )}
@@ -144,17 +144,17 @@ export default function ActivityCard({
             key={r}
             type="button"
             onClick={() => toggleReaction(r)}
-            className={`flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-medium transition-all ${
-              reactions.has(r)
-                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
-                : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-            }`}
+            className="flex h-8 items-center gap-1 px-2.5 text-xs font-medium transition-all"
+            style={{
+              fontFamily: "var(--font-ui)",
+              background: reactions.has(r) ? "var(--color-forest)" : "transparent",
+              color: reactions.has(r) ? "#fff" : "var(--color-muted)",
+              border: reactions.has(r) ? "none" : "1px solid var(--color-line)",
+            }}
           >
             <span>{r}</span>
-            {r === "👍" && (
-              <span className={reactions.has(r) ? "text-emerald-700 dark:text-emerald-300" : "text-zinc-400"}>
-                {likeCount > 0 ? fmtCount(likeCount) : ""}
-              </span>
+            {r === "👍" && likeCount > 0 && (
+              <span>{fmtCount(likeCount)}</span>
             )}
           </button>
         ))}
@@ -165,21 +165,22 @@ export default function ActivityCard({
             setShowComments((v) => !v);
             if (!showComments) setTimeout(() => inputRef.current?.focus(), 150);
           }}
-          className={`ml-1 flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-medium transition-all ${
-            showComments
-              ? "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300"
-              : "text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
-          }`}
+          className="ml-1 flex h-8 items-center gap-1 px-2.5 text-xs font-medium transition-all"
+          style={{
+            fontFamily: "var(--font-ui)",
+            background: showComments ? "var(--color-forest)" : "transparent",
+            color: showComments ? "#fff" : "var(--color-muted)",
+            border: showComments ? "none" : "1px solid var(--color-line)",
+          }}
         >
           <span>💬</span>
-          {activity.comments > 0 && (
-            <span className="text-zinc-400">{fmtCount(activity.comments)}</span>
-          )}
+          {activity.comments > 0 && <span>{fmtCount(activity.comments)}</span>}
         </button>
 
         <button
           type="button"
-          className="ml-auto flex h-8 items-center gap-1 rounded-full px-2.5 text-xs font-medium text-zinc-500 transition-all hover:bg-zinc-100 dark:hover:bg-zinc-800"
+          className="ml-auto flex h-8 items-center gap-1 px-2.5 text-xs font-medium"
+          style={{ fontFamily: "var(--font-ui)", color: "var(--color-muted)" }}
         >
           <span>↗</span>
           <span>Partager</span>
@@ -222,12 +223,14 @@ export default function ActivityCard({
               value={commentInput}
               onChange={(e) => setCommentInput(e.target.value)}
               placeholder="Écrire un commentaire… @mention"
-              className="min-w-0 flex-1 rounded-xl bg-zinc-100 px-3 py-2 text-xs outline-none ring-1 ring-transparent focus:ring-emerald-400 dark:bg-zinc-800 dark:focus:ring-emerald-600"
+              className="min-w-0 flex-1 px-3 py-2 text-xs outline-none"
+              style={{ background: "var(--color-cream)", border: "var(--border-thin)", fontFamily: "var(--font-display)" }}
             />
             <button
               type="button"
               disabled={!commentInput.trim()}
-              className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
+              className="px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
+              style={{ background: "var(--color-forest)", fontFamily: "var(--font-ui)" }}
               onClick={() => setCommentInput("")}
             >
               ↩
@@ -262,17 +265,19 @@ function MatchBody({ matchId, posterId }: { matchId: string; posterId: string })
   return (
     <Link
       href={`/match/${match.id}`}
-      className="block overflow-hidden rounded-xl ring-1 ring-zinc-200 transition-colors hover:bg-zinc-50 dark:ring-zinc-800 dark:hover:bg-zinc-900"
+      className="block overflow-hidden transition-colors"
+      style={{ border: "var(--border-thin)" }}
     >
       {/* Result banner */}
       <div
-        className={`flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white ${
-          competitive
-            ? posterWon
-              ? "bg-emerald-600"
-              : "bg-rose-600"
-            : "bg-zinc-500"
-        }`}
+        className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-white"
+        style={{
+          fontFamily: "var(--font-ui)",
+          letterSpacing: "0.08em",
+          background: competitive
+            ? posterWon ? "var(--color-forest)" : "var(--color-red)"
+            : "var(--color-muted)",
+        }}
       >
         <span>{posterWon ? "✓ Victoire" : "✕ Défaite"}</span>
         <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[9px]">
@@ -318,11 +323,8 @@ function MatchBody({ matchId, posterId }: { matchId: string; posterId: string })
                 {row.sets.map((score, i) => (
                   <td
                     key={i}
-                    className={`py-1 text-center tabular-nums font-semibold ${
-                      row.wins[i]
-                        ? "text-emerald-600 dark:text-emerald-400"
-                        : "text-zinc-400"
-                    }`}
+                    className="py-1 text-center tabular-nums font-semibold"
+                  style={{ color: row.wins[i] ? "var(--color-forest)" : "var(--color-muted)" }}
                   >
                     {score}
                   </td>
@@ -343,21 +345,16 @@ function MatchBody({ matchId, posterId }: { matchId: string; posterId: string })
       </div>
 
       {/* ELO delta */}
-      <div className="border-t border-zinc-100 px-3 py-1.5 text-[11px] dark:border-zinc-800">
+      <div className="px-3 py-1.5 text-[11px]" style={{ borderTop: "var(--border-thin)", fontFamily: "var(--font-ui)" }}>
         {delta !== null ? (
-          <span>
+          <span style={{ color: "var(--color-muted)" }}>
             ELO :{" "}
-            <span
-              className={`font-semibold ${
-                delta >= 0 ? "text-emerald-600" : "text-rose-600"
-              }`}
-            >
-              {delta >= 0 ? "+" : ""}
-              {delta}
+            <span style={{ fontWeight: 600, color: delta >= 0 ? "var(--color-forest)" : "var(--color-red)" }}>
+              {delta >= 0 ? "+" : ""}{delta}
             </span>
           </span>
         ) : (
-          <span className="italic text-zinc-400">Hors classement</span>
+          <span className="italic" style={{ color: "var(--color-muted)" }}>Hors classement</span>
         )}
       </div>
     </Link>
@@ -383,48 +380,43 @@ function TournamentBody({ activity }: { activity: Activity }) {
     : null;
 
   return (
-    <div className="overflow-hidden rounded-xl ring-1 ring-emerald-200 dark:ring-emerald-900/40">
-      <div className="bg-emerald-600 px-3 py-2">
-        <p className="text-sm font-bold text-white">🏆 {activity.tournamentTitle}</p>
+    <div className="overflow-hidden" style={{ border: "var(--border-thin)" }}>
+      <div className="px-3 py-2" style={{ background: "var(--color-forest)" }}>
+        <p className="text-sm font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>🏆 {activity.tournamentTitle}</p>
       </div>
-      <div className="space-y-1.5 bg-emerald-50 px-3 py-3 dark:bg-emerald-950/20">
+      <div className="space-y-1.5 px-3 py-3" style={{ background: "var(--color-cream)" }}>
         {dateLabel && (
-          <p className="flex items-center gap-1.5 text-xs text-emerald-800 dark:text-emerald-300">
+          <p className="flex items-center gap-1.5 text-xs" style={{ color: "var(--color-ink)" }}>
             <span>📅</span> {dateLabel}
           </p>
         )}
         {activity.tournamentVenue && (
-          <p className="flex items-center gap-1.5 text-xs text-emerald-800 dark:text-emerald-300">
+          <p className="flex items-center gap-1.5 text-xs" style={{ color: "var(--color-ink)" }}>
             <span>📍</span> {activity.tournamentVenue}
           </p>
         )}
         {activity.tournamentPrize && (
-          <p className="flex items-center gap-1.5 text-xs text-emerald-800 dark:text-emerald-300">
+          <p className="flex items-center gap-1.5 text-xs" style={{ color: "var(--color-ink)" }}>
             <span>🎖</span> {activity.tournamentPrize}
           </p>
         )}
         {pct !== null && (
           <div className="pt-1">
-            <div className="mb-1 flex justify-between text-[10px] text-emerald-700 dark:text-emerald-400">
-              <span>
-                {activity.tournamentParticipants} /{" "}
-                {activity.tournamentMaxParticipants} participants
-              </span>
+            <div className="mb-1 flex justify-between text-[10px]" style={{ fontFamily: "var(--font-ui)", color: "var(--color-muted)" }}>
+              <span>{activity.tournamentParticipants} / {activity.tournamentMaxParticipants} participants</span>
               <span>{pct}%</span>
             </div>
-            <div className="h-1.5 overflow-hidden rounded-full bg-emerald-200 dark:bg-emerald-900">
-              <div
-                className="h-full rounded-full bg-emerald-600 transition-all"
-                style={{ width: `${pct}%` }}
-              />
+            <div className="h-1.5 overflow-hidden" style={{ background: "var(--color-line)" }}>
+              <div className="h-full transition-all" style={{ width: `${pct}%`, background: "var(--color-forest)" }} />
             </div>
           </div>
         )}
       </div>
-      <div className="bg-emerald-50 px-3 pb-3 dark:bg-emerald-950/20">
+      <div className="px-3 pb-3" style={{ background: "var(--color-cream)" }}>
         <button
           type="button"
-          className="w-full rounded-lg bg-emerald-600 py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          className="w-full py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          style={{ fontFamily: "var(--font-ui)", background: "var(--color-forest)", letterSpacing: "0.05em" }}
         >
           S'inscrire →
         </button>
@@ -436,15 +428,15 @@ function TournamentBody({ activity }: { activity: Activity }) {
 function ClubAnnounceBody({ activity }: { activity: Activity }) {
   const poster = getPlayer(activity.playerId);
   return (
-    <div className="overflow-hidden rounded-xl ring-1 ring-indigo-200 dark:ring-indigo-900/40">
-      <div className="bg-indigo-600 px-3 py-2">
-        <p className="text-sm font-bold text-white">📢 {activity.announceTitle}</p>
+    <div className="overflow-hidden" style={{ border: "var(--border-ink)" }}>
+      <div className="px-3 py-2" style={{ background: "var(--color-ink)" }}>
+        <p className="text-sm font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>📢 {activity.announceTitle}</p>
         {poster?.club && (
-          <p className="text-[10px] text-indigo-200">{poster.club}</p>
+          <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.6)", fontFamily: "var(--font-ui)", letterSpacing: "0.06em" }}>{poster.club}</p>
         )}
       </div>
-      <div className="bg-indigo-50 px-3 py-3 dark:bg-indigo-950/20">
-        <p className="text-xs leading-relaxed text-indigo-900 dark:text-indigo-200">
+      <div className="px-3 py-3" style={{ background: "var(--color-cream)" }}>
+        <p className="text-xs leading-relaxed" style={{ color: "var(--color-ink)" }}>
           {activity.announceBody}
         </p>
       </div>

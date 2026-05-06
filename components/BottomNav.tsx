@@ -11,36 +11,11 @@ type Tab = {
 };
 
 const tabs: Tab[] = [
-  {
-    href: "/feed",
-    label: "Feed",
-    icon: "🏓",
-    match: (p) => p === "/" || p.startsWith("/feed"),
-  },
-  {
-    href: "/map",
-    label: "Carte",
-    icon: "🗺",
-    match: (p) => p.startsWith("/map"),
-  },
-  {
-    href: "/play",
-    label: "Jouer",
-    icon: "⚔️",
-    match: (p) => p.startsWith("/play") || p.startsWith("/match"),
-  },
-  {
-    href: "/players",
-    label: "Joueurs",
-    icon: "🏆",
-    match: (p) => p.startsWith("/players"),
-  },
-  {
-    href: "/profile",
-    label: "Profil",
-    icon: "👤",
-    match: (p) => p.startsWith("/profile"),
-  },
+  { href: "/feed",    label: "Feed",    icon: "🏓", match: (p) => p === "/" || p.startsWith("/feed") },
+  { href: "/map",     label: "Carte",   icon: "🗺",  match: (p) => p.startsWith("/map") },
+  { href: "/play",    label: "Jouer",   icon: "⚔️",  match: (p) => p.startsWith("/play") || p.startsWith("/match") },
+  { href: "/players", label: "Joueurs", icon: "🏆", match: (p) => p.startsWith("/players") },
+  { href: "/profile", label: "Profil",  icon: "👤", match: (p) => p.startsWith("/profile") },
 ];
 
 export default function BottomNav() {
@@ -48,8 +23,13 @@ export default function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-zinc-200 bg-white/95 backdrop-blur dark:border-zinc-800 dark:bg-black/95"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="fixed bottom-0 left-0 right-0 z-40"
+      style={{
+        borderTop: "1px solid var(--color-line)",
+        background: "rgba(255,255,255,0.97)",
+        backdropFilter: "blur(12px)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+      }}
     >
       <ul className="mx-auto flex max-w-md items-stretch justify-around">
         {tabs.map((t) => {
@@ -58,14 +38,24 @@ export default function BottomNav() {
             <li key={t.href} className="flex-1">
               <Link
                 href={t.href}
-                className={`flex h-16 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors ${
-                  active
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-zinc-500 dark:text-zinc-400"
-                }`}
+                className="flex h-16 flex-col items-center justify-center gap-1 transition-colors"
+                style={{
+                  fontFamily: "var(--font-ui)",
+                  fontSize: "10px",
+                  fontWeight: 600,
+                  letterSpacing: "0.08em",
+                  textTransform: "uppercase",
+                  color: active ? "var(--color-forest)" : "var(--color-muted)",
+                }}
               >
                 <span className="text-xl leading-none">{t.icon}</span>
                 <span>{t.label}</span>
+                {active && (
+                  <span
+                    className="absolute bottom-0 h-0.5 w-8"
+                    style={{ background: "var(--color-forest)" }}
+                  />
+                )}
               </Link>
             </li>
           );

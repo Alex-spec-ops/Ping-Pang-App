@@ -1,30 +1,90 @@
 @import "tailwindcss";
 
+/* ── Design tokens — Ping Pang Paris ────────────────────────────────────── */
 :root {
-  --background: #fafafa;
-  --foreground: #0a0a0a;
-  --brand: #10b981;
+  /* Couleurs */
+  --color-bg:           #ffffff;
+  --color-ink:          #0e0e0e;
+  --color-forest:       #0e3d2e;
+  --color-forest-deep:  #0a2d22;
+  --color-cream:        #fafaf7;
+  --color-line:         #e5e5e0;
+  --color-muted:        #6b6b6b;
+  --color-gold:         #c9a86a;
+  --color-silver:       #9a9a93;
+  --color-red:          #d7222a;
+
+  /* Typographie */
+  --font-display: var(--font-playfair), Georgia, serif;
+  --font-ui:      var(--font-inter-tight), 'Inter', 'Helvetica Neue', sans-serif;
+  --font-script:  var(--font-caveat), cursive;
+
+  /* Espacements */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 16px;
+  --space-4: 24px; --space-5: 32px; --space-6: 48px;
+  --space-7: 64px; --space-8: 96px; --space-9: 128px;
+
+  /* Rayons */
+  --radius-none: 0;
+  --radius-pill: 999px;
+
+  /* Bordures */
+  --border-thin: 1px solid var(--color-line);
+  --border-ink:  1px solid var(--color-ink);
+
+  /* Conteneur */
+  --container: 1280px;
+  --gutter:    32px;
+
+  /* Motion */
+  --ease-out:       cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast:  200ms;
+  --duration-base:  400ms;
+  --duration-slow:  600ms;
+
+  /* Feed */
+  --feed-offset: 57px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-brand: var(--brand);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--color-bg);
+  --color-foreground: var(--color-ink);
+  --color-brand:      var(--color-forest);
+  --font-sans:        var(--font-display);
+  --font-ui:          var(--font-ui);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #000000;
-    --foreground: #fafafa;
-  }
-}
-
-html,
-body {
+html, body {
   overscroll-behavior-y: none;
+  background: var(--color-bg);
+  color: var(--color-ink);
 }
+
+body {
+  font-family: var(--font-display);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Focus global ────────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-forest);
+  outline-offset: 2px;
+}
+
+/* ── Fade-up au scroll ───────────────────────────────────────────────────── */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fade-up var(--duration-slow) var(--ease-out) both;
+}
+
+/* ── Hover flèche lien ───────────────────────────────────────────────────── */
+.arrow-link:hover .arrow { transform: translateX(4px); }
+.arrow { display: inline-block; transition: transform var(--duration-fast); }
 
 /* ── Streak animations ───────────────────────────────────────────────────── */
 

@@ -126,7 +126,7 @@ export default function MapPageClient() {
         window.__gmCb = res;
         const s = document.createElement("script");
         s.setAttribute("data-gmap", "1");
-        s.src = `https://maps.googleapis.com/maps/api/js?key=${GMAP_KEY}&callback=__gmCb&loading=async`;
+        s.src = `https://maps.googleapis.com/maps/api/js?key=${GMAP_KEY}&libraries=marker&callback=__gmCb&loading=async`;
         s.async = true;
         document.head.appendChild(s);
       });
@@ -140,8 +140,9 @@ export default function MapPageClient() {
       const map = new gm.Map(mapRef.current, {
         center: { lat: 48.8566, lng: 2.3522 },
         zoom: 13,
-        disableDefaultUI: true,          // on gère nos propres contrôles
-        gestureHandling: "greedy",       // scroll = zoom sur mobile
+        mapId: "DEMO_MAP_ID",            // requis pour AdvancedMarkerElement
+        disableDefaultUI: true,
+        gestureHandling: "greedy",
         styles: GMAP_STYLES,
       });
 
@@ -152,16 +153,20 @@ export default function MapPageClient() {
           setNewVenueCoords(coords);
           setAddMode("form");
 
-          if (tempMarker.current) tempMarker.current.setMap(null);
-          const t = new gm.Marker({
+          if (tempMarker.current?.map !== undefined) tempMarker.current.map = null;
+          const t = new gm.marker.AdvancedMarkerElement({
             position: { lat: coords[0], lng: coords[1] },
             map,
-            draggable: true,
-            icon: makePinIcon("#f97316", gm),
+            content: makePinElement("#f97316"),
             title: "Nouveau lieu",
+            gmpDraggable: true,
           });
-          t.addListener("dragend", (ev: any) => {
-            setNewVenueCoords([ev.latLng.lat(), ev.latLng.lng()]);
+          t.addListener("dragend", () => {
+            const pos = t.position as any;
+            if (!pos) return;
+            const lat = typeof pos.lat === "function" ? pos.lat() : pos.lat;
+            const lng = typeof pos.lng === "function" ? pos.lng() : pos.lng;
+            setNewVenueCoords([lat, lng]);
           });
           tempMarker.current = t;
         }
@@ -200,14 +205,14 @@ export default function MapPageClient() {
     if (!gm || !map) return;
 
     // Supprimer tous les markers existants
-    markerMap.current.forEach((m) => m.setMap(null));
+    markerMap.current.forEach((m) => { m.map = null; });
     markerMap.current.clear();
 
     filtered.forEach((venue) => {
-      const marker = new gm.Marker({
+      const marker = new gm.marker.AdvancedMarkerElement({
         position: { lat: venue.lat, lng: venue.lng },
         map,
-        icon: makePinIcon(pinColor(venue.rating), gm),
+        content: makePinElement(pinColor(venue.rating)),
         title: venue.name,
       });
       marker.addListener("click", () => setSelectedVenue(venue));
@@ -250,18 +255,13 @@ export default function MapPageClient() {
         if (!gm || !map) return;
         map.panTo({ lat: coords[0], lng: coords[1] });
         map.setZoom(15);
-        if (userMarker.current) userMarker.current.setMap(null);
-        userMarker.current = new gm.Marker({
+        if (userMarker.current) userMarker.current.map = null;
+        const dot = document.createElement("div");
+        dot.style.cssText = "width:18px;height:18px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 0 0 3px rgba(59,130,246,0.35)";
+        userMarker.current = new gm.marker.AdvancedMarkerElement({
           position: { lat: coords[0], lng: coords[1] },
           map,
-          icon: {
-            path: gm.SymbolPath.CIRCLE,
-            scale: 10,
-            fillColor: "#3b82f6",
-            fillOpacity: 0.9,
-            strokeColor: "white",
-            strokeWeight: 2.5,
-          },
+          content: dot,
           title: "Vous êtes ici",
           zIndex: 999,
         });
@@ -275,9 +275,7 @@ export default function MapPageClient() {
 
   const cancelAddMode = () => {
     setAddMode("idle");
-    if (tempMarker.current && typeof tempMarker.current.setMap === "function") {
-      tempMarker.current.setMap(null);
-    }
+    if (tempMarker.current?.map !== undefined) tempMarker.current.map = null;
     tempMarker.current = null;
     setNewVenueCoords(null);
   };
@@ -289,9 +287,7 @@ export default function MapPageClient() {
       setAddMode("idle");
       setAddSubmitted(false);
       setNewName(""); setNewDesc("");
-      if (tempMarker.current && typeof tempMarker.current.setMap === "function") {
-        tempMarker.current.setMap(null);
-      }
+      if (tempMarker.current?.map !== undefined) tempMarker.current.map = null;
       tempMarker.current = null;
       setNewVenueCoords(null);
     }, 2000);
@@ -603,19 +599,24 @@ export default function MapPageClient() {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function makePinIcon(color: string, gm: any) {
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
-      <path d="M16,0 C7.2,0 0,7.2 0,16 C0,24.8 16,40 16,40 C16,40 32,24.8 32,16 C32,7.2 24.8,0 16,0Z"
-            fill="${color}" stroke="white" stroke-width="2.5"/>
-      <circle cx="16" cy="16" r="7" fill="white" fill-opacity="0.35"/>
-      <text x="16" y="21" text-anchor="middle" font-size="13" font-family="sans-serif">🏓</text>
-    </svg>`;
-  return {
-    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
-    scaledSize: new gm.Size(32, 40),
-    anchor: new gm.Point(16, 40),
-  };
+/** Crée un pin en forme de goutte avec l'icône 🏓 rendue nativement par le navigateur */
+function makePinElement(color: string): HTMLElement {
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "width:40px;height:46px;position:relative;cursor:pointer;";
+  wrap.innerHTML = `
+    <div style="
+      position:absolute;bottom:0;left:50%;
+      width:36px;height:36px;
+      background:${color};
+      border-radius:50% 50% 50% 0;
+      border:2.5px solid white;
+      box-shadow:0 2px 8px rgba(0,0,0,.30);
+      transform:translateX(-50%) rotate(-45deg);
+      display:flex;align-items:center;justify-content:center;
+    ">
+      <span style="transform:rotate(45deg);font-size:17px;line-height:1;display:block;margin:2px 0 0 1px;">🏓</span>
+    </div>`;
+  return wrap;
 }
 
 function toggle<T>(set: Set<T>, value: T): Set<T> {

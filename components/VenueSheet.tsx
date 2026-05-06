@@ -51,23 +51,29 @@ export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin,
 
       {/* Sheet */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md overflow-y-auto rounded-t-2xl bg-white shadow-2xl transition-transform duration-300 ease-out dark:bg-zinc-950"
+        className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md overflow-y-auto shadow-2xl transition-transform duration-300 ease-out"
         style={{
           maxHeight: "88vh",
           transform: isOpen ? "translateY(0)" : "translateY(110%)",
           paddingBottom: "env(safe-area-inset-bottom)",
+          background: "var(--color-bg)",
+          borderTop: "var(--border-thin)",
         }}
       >
         {/* Drag handle */}
-        <div className="sticky top-0 z-10 flex justify-center bg-white pt-3 pb-1 dark:bg-zinc-950">
-          <div className="h-1 w-10 rounded-full bg-zinc-300 dark:bg-zinc-700" />
+        <div
+          className="sticky top-0 z-10 flex justify-center pt-3 pb-1"
+          style={{ background: "var(--color-bg)" }}
+        >
+          <div className="h-1 w-10 rounded-full" style={{ background: "var(--color-line)" }} />
         </div>
 
         {/* Close button */}
         <button
           type="button"
           onClick={onClose}
-          className="absolute right-4 top-4 z-20 grid h-8 w-8 place-items-center rounded-full bg-zinc-100 text-sm text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
+          className="absolute right-4 top-4 z-20 grid h-8 w-8 place-items-center text-sm"
+          style={{ border: "var(--border-thin)", color: "var(--color-muted)" }}
         >
           ✕
         </button>
@@ -133,8 +139,13 @@ export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin,
           {/* Name + badges */}
           <div className="flex items-start gap-2">
             <div className="flex-1">
-              <h2 className="text-lg font-bold">{venue.name}</h2>
-              <p className="text-xs text-zinc-500">📍 {venue.address}</p>
+              <h2
+                className="text-lg font-bold"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                {venue.name}
+              </h2>
+              <p className="text-xs" style={{ color: "var(--color-muted)" }}>📍 {venue.address}</p>
             </div>
             <div className="flex flex-col items-end gap-1">
               <TypeBadge type={venue.type} />
@@ -148,10 +159,10 @@ export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin,
               <StarDisplay rating={venue.rating} />
               <span className="text-sm font-bold tabular-nums">{venue.rating.toFixed(1)}</span>
             </div>
-            <span className="text-xs text-zinc-500">
+            <span className="text-xs" style={{ color: "var(--color-muted)" }}>
               {venue.reviewCount} avis
             </span>
-            <span className="ml-auto text-xs text-zinc-500">
+            <span className="ml-auto text-xs" style={{ color: "var(--color-muted)" }}>
               🏓 {venue.tables} table{venue.tables > 1 ? "s" : ""}
             </span>
           </div>
@@ -162,7 +173,8 @@ export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin,
             {venue.tags.map((t) => (
               <span
                 key={t}
-                className="rounded-full bg-zinc-100 px-2.5 py-0.5 text-[11px] text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
+                className="px-2.5 py-0.5 text-[11px]"
+                style={{ background: "var(--color-line)", color: "var(--color-ink)" }}
               >
                 {t}
               </span>
@@ -170,20 +182,26 @@ export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin,
           </div>
 
           {/* Description */}
-          <p className="mt-3 text-xs leading-relaxed text-zinc-600 dark:text-zinc-400">
+          <p className="mt-3 text-xs leading-relaxed" style={{ color: "var(--color-muted)" }}>
             {venue.description}
           </p>
 
           {/* Horaires */}
           <div className="mt-4">
-            <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-zinc-500">
+            <p
+              className="mb-1.5 text-xs font-semibold uppercase tracking-wide"
+              style={{ color: "var(--color-muted)", fontFamily: "var(--font-ui)" }}
+            >
               Horaires
             </p>
-            <div className="space-y-1 rounded-xl bg-zinc-50 px-3 py-2.5 dark:bg-zinc-900">
+            <div className="space-y-1 px-3 py-2.5" style={{ background: "var(--color-cream)", border: "var(--border-thin)" }}>
               {venue.hours.map((h) => (
                 <div key={h.days} className="flex justify-between text-xs">
-                  <span className="text-zinc-600 dark:text-zinc-400">{h.days}</span>
-                  <span className={`font-medium ${h.time === "Fermé" ? "text-rose-500" : ""}`}>
+                  <span style={{ color: "var(--color-muted)" }}>{h.days}</span>
+                  <span
+                    className="font-medium"
+                    style={{ color: h.time === "Fermé" ? "var(--color-red)" : "var(--color-ink)" }}
+                  >
                     {h.time}
                   </span>
                 </div>
@@ -197,34 +215,41 @@ export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin,
               href={directionUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-600 py-2.5 text-sm font-semibold text-white"
+              className="flex items-center justify-center gap-1.5 py-2.5 text-sm font-semibold text-white"
+              style={{ background: "var(--color-forest)", fontFamily: "var(--font-ui)" }}
             >
               🗺 Itinéraire
             </a>
             <button
               type="button"
               onClick={() => onCheckin(venue.id)}
-              className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition-colors ${
-                checkedIn
-                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
-                  : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200"
-              }`}
+              className="flex items-center justify-center gap-1.5 py-2.5 text-sm font-semibold transition-colors"
+              style={{
+                background: checkedIn ? "var(--color-cream)" : "var(--color-line)",
+                color: checkedIn ? "var(--color-forest)" : "var(--color-ink)",
+                border: checkedIn ? "1px solid var(--color-forest)" : "var(--border-thin)",
+                fontFamily: "var(--font-ui)",
+              }}
             >
               {checkedIn ? "✓ J'y suis !" : "📍 J'y suis"}
             </button>
           </div>
 
           {/* Reviews section */}
-          <div className="mt-5 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+          <div className="mt-5 pt-4" style={{ borderTop: "var(--border-thin)" }}>
             <div className="mb-3 flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+              <p
+                className="text-xs font-semibold uppercase tracking-wide"
+                style={{ color: "var(--color-muted)", fontFamily: "var(--font-ui)" }}
+              >
                 Avis ({reviews.length})
               </p>
               {!submittedReview && (
                 <button
                   type="button"
                   onClick={() => setShowReviewForm((v) => !v)}
-                  className="text-xs font-semibold text-emerald-600 dark:text-emerald-400"
+                  className="text-xs font-semibold"
+                  style={{ color: "var(--color-forest)" }}
                 >
                   {showReviewForm ? "Annuler" : "+ Laisser un avis"}
                 </button>
@@ -238,7 +263,7 @@ export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin,
 
             {/* Write review form */}
             {showReviewForm && (
-              <div className="mb-4 rounded-xl bg-zinc-50 p-3 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-700">
+              <div className="mb-4 p-3" style={{ background: "var(--color-cream)", border: "var(--border-thin)" }}>
                 <p className="mb-2 text-xs font-semibold">Note globale</p>
                 <StarInput value={reviewRating} onChange={setReviewRating} size="lg" />
 
@@ -250,7 +275,7 @@ export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin,
                     { label: "Accès", value: ratingAccess, set: setRatingAccess },
                   ].map(({ label, value, set }) => (
                     <div key={label}>
-                      <p className="mb-0.5 text-[10px] text-zinc-500">{label}</p>
+                      <p className="mb-0.5 text-[10px]" style={{ color: "var(--color-muted)" }}>{label}</p>
                       <StarInput value={value} onChange={set} size="sm" />
                     </div>
                   ))}
@@ -263,21 +288,27 @@ export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin,
                     maxLength={500}
                     rows={3}
                     placeholder="Décrivez votre expérience… (10–500 caractères)"
-                    className="w-full resize-none rounded-lg bg-white px-3 py-2 text-xs ring-1 ring-zinc-200 outline-none focus:ring-emerald-400 dark:bg-zinc-800 dark:ring-zinc-700"
+                    className="w-full resize-none px-3 py-2 text-xs outline-none"
+                    style={{
+                      background: "var(--color-bg)",
+                      border: "var(--border-thin)",
+                      fontFamily: "var(--font-ui)",
+                    }}
                   />
-                  <p className="mt-0.5 text-right text-[10px] text-zinc-400">
+                  <p className="mt-0.5 text-right text-[10px]" style={{ color: "var(--color-muted)" }}>
                     {reviewComment.length}/500
                   </p>
                 </div>
 
                 {reviewError && (
-                  <p className="mt-1 text-[11px] text-rose-600">{reviewError}</p>
+                  <p className="mt-1 text-[11px]" style={{ color: "var(--color-red)" }}>{reviewError}</p>
                 )}
 
                 <button
                   type="button"
                   onClick={submitReview}
-                  className="mt-2 w-full rounded-lg bg-emerald-600 py-2 text-xs font-semibold text-white"
+                  className="mt-2 w-full py-2 text-xs font-semibold text-white"
+                  style={{ background: "var(--color-forest)", fontFamily: "var(--font-ui)" }}
                 >
                   Publier l'avis
                 </button>
@@ -285,14 +316,17 @@ export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin,
             )}
 
             {submittedReview && (
-              <div className="mb-3 flex items-center gap-2 rounded-xl bg-emerald-50 px-3 py-2.5 text-xs text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">
+              <div
+                className="mb-3 flex items-center gap-2 px-3 py-2.5 text-xs"
+                style={{ background: "var(--color-cream)", border: "1px solid var(--color-forest)", color: "var(--color-forest)" }}
+              >
                 <span>✓</span> Avis soumis — merci ! Il apparaîtra après modération.
               </div>
             )}
 
             {/* Reviews list */}
             {reviews.length === 0 ? (
-              <p className="py-4 text-center text-xs text-zinc-400">
+              <p className="py-4 text-center text-xs" style={{ color: "var(--color-muted)" }}>
                 Aucun avis pour l'instant. Soyez le premier !
               </p>
             ) : (
@@ -300,19 +334,20 @@ export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin,
                 {reviews.slice(0, 3).map((r) => (
                   <li
                     key={r.id}
-                    className="rounded-xl bg-zinc-50 p-3 dark:bg-zinc-900"
+                    className="p-3"
+                    style={{ background: "var(--color-cream)", border: "var(--border-thin)" }}
                   >
                     <div className="flex items-center gap-2">
                       <span className="text-lg">{r.authorEmoji}</span>
                       <div className="flex-1">
                         <p className="text-[11px] font-semibold">{r.authorName}</p>
-                        <p className="text-[10px] text-zinc-400">
+                        <p className="text-[10px]" style={{ color: "var(--color-muted)" }}>
                           {timeAgo(r.createdAt)}
                         </p>
                       </div>
                       <StarDisplay rating={r.rating} />
                     </div>
-                    <p className="mt-1.5 text-xs leading-relaxed text-zinc-700 dark:text-zinc-300">
+                    <p className="mt-1.5 text-xs leading-relaxed" style={{ color: "var(--color-ink)" }}>
                       {r.comment}
                     </p>
                   </li>
@@ -332,7 +367,7 @@ function StarDisplay({ rating }: { rating: number }) {
   const full = Math.floor(rating);
   const half = rating - full >= 0.5;
   return (
-    <span className="text-xs leading-none">
+    <span className="text-xs leading-none" style={{ color: "var(--color-gold)" }}>
       {"★".repeat(full)}
       {half ? "½" : ""}
       {"☆".repeat(5 - full - (half ? 1 : 0))}
@@ -380,14 +415,14 @@ function CriteriaSummary({ reviews }: { reviews: VenueReview[] }) {
   ];
 
   return (
-    <div className="mb-3 grid grid-cols-2 gap-x-4 gap-y-1.5 rounded-xl bg-zinc-50 p-3 dark:bg-zinc-900">
+    <div className="mb-3 grid grid-cols-2 gap-x-4 gap-y-1.5 p-3" style={{ background: "var(--color-cream)", border: "var(--border-thin)" }}>
       {criteria.map(({ label, value }) => (
         <div key={label} className="flex items-center gap-2">
-          <span className="w-14 text-[10px] text-zinc-500">{label}</span>
-          <div className="flex-1 overflow-hidden rounded-full bg-zinc-200 dark:bg-zinc-700" style={{ height: 5 }}>
+          <span className="w-14 text-[10px]" style={{ color: "var(--color-muted)" }}>{label}</span>
+          <div className="flex-1 overflow-hidden" style={{ height: 5, background: "var(--color-line)" }}>
             <div
-              className="h-full rounded-full bg-emerald-500"
-              style={{ width: `${(value / 5) * 100}%` }}
+              className="h-full"
+              style={{ width: `${(value / 5) * 100}%`, background: "var(--color-forest)" }}
             />
           </div>
           <span className="w-5 text-right text-[10px] font-semibold tabular-nums">
@@ -401,17 +436,27 @@ function CriteriaSummary({ reviews }: { reviews: VenueReview[] }) {
 
 function TypeBadge({ type }: { type: Venue["type"] }) {
   const map = {
-    club:   { label: "Club", cls: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400" },
-    public: { label: "Public", cls: "bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400" },
-    bar:    { label: "Bar", cls: "bg-violet-100 text-violet-700 dark:bg-violet-950/40 dark:text-violet-400" },
+    club:   { label: "Club",   bg: "var(--color-forest)", color: "#fff" },
+    public: { label: "Public", bg: "var(--color-line)",   color: "var(--color-ink)" },
+    bar:    { label: "Bar",    bg: "var(--color-gold)",   color: "var(--color-ink)" },
   };
-  const { label, cls } = map[type];
-  return <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${cls}`}>{label}</span>;
+  const { label, bg, color } = map[type];
+  return (
+    <span
+      className="px-2 py-0.5 text-[10px] font-semibold"
+      style={{ background: bg, color }}
+    >
+      {label}
+    </span>
+  );
 }
 
 function SurfaceBadge({ surface }: { surface: Venue["surface"] }) {
   return (
-    <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-[10px] font-semibold text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300">
+    <span
+      className="px-2 py-0.5 text-[10px] font-semibold"
+      style={{ background: "var(--color-line)", color: "var(--color-ink)" }}
+    >
       {surface === "indoor" ? "🏢 Intérieur" : "🌳 Extérieur"}
     </span>
   );
@@ -419,10 +464,17 @@ function SurfaceBadge({ surface }: { surface: Venue["surface"] }) {
 
 function PricingBadge({ pricing, priceInfo }: { pricing: Venue["pricing"]; priceInfo?: string }) {
   const map = {
-    free:       { label: "Gratuit",   cls: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-400" },
-    paid:       { label: priceInfo ?? "Payant",  cls: "bg-amber-100 text-amber-700 dark:bg-amber-950/40 dark:text-amber-400" },
-    membership: { label: priceInfo ?? "Licence", cls: "bg-blue-100 text-blue-700 dark:bg-blue-950/40 dark:text-blue-400" },
+    free:       { label: "Gratuit",              bg: "var(--color-forest)", color: "#fff" },
+    paid:       { label: priceInfo ?? "Payant",  bg: "var(--color-line)",   color: "var(--color-ink)" },
+    membership: { label: priceInfo ?? "Licence", bg: "var(--color-line)",   color: "var(--color-ink)" },
   };
-  const { label, cls } = map[pricing];
-  return <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${cls}`}>{label}</span>;
+  const { label, bg, color } = map[pricing];
+  return (
+    <span
+      className="px-2.5 py-0.5 text-[11px] font-semibold"
+      style={{ background: bg, color }}
+    >
+      {label}
+    </span>
+  );
 }
