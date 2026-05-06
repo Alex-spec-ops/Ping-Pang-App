@@ -18,23 +18,24 @@ import VenueSheet from "./VenueSheet";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-declare global { interface Window { L: any } }
+declare global { interface Window { google: any; __gmCb?: () => void } }
 
 type VenueType = "club" | "public" | "bar";
 type Surface   = "indoor" | "outdoor";
 type Pricing   = "free" | "paid" | "membership";
 const RADII    = [500, 1000, 2000, 5000]; // metres
 
+const GMAP_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? "";
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function MapPageClient() {
-  const mapRef         = useRef<HTMLDivElement>(null);
-  const leafletMap     = useRef<any>(null);
-  const clusterGroup   = useRef<any>(null);
-  const markerMap      = useRef<Map<string, any>>(new Map());
-  const radiusCircle   = useRef<any>(null);
-  const tempMarker     = useRef<any>(null);
-  const addModeRef     = useRef<"idle" | "placing">("idle");
+  const mapRef       = useRef<HTMLDivElement>(null);
+  const googleMap    = useRef<any>(null);
+  const markerMap    = useRef<Map<string, any>>(new Map()); // venueId → Marker
+  const radiusCircle = useRef<any>(null);
+  const userMarker   = useRef<any>(null);
+  const tempMarker   = useRef<any>(null);
 
   const [mapReady, setMapReady] = useState(false);
 
@@ -46,23 +47,50 @@ export default function MapPageClient() {
   const [newVenueCoords, setNewVenueCoords] = useState<[number, number] | null>(null);
 
   // Geolocation
-  const [userPos, setUserPos] = useState<[number, number] | null>(null);
+  const [userPos, setUserPos]   = useState<[number, number] | null>(null);
   const [locating, setLocating] = useState(false);
 
   // Filters
-  const [types, setTypes]                 = useState<Set<VenueType>>(new Set());
-  const [surfaces, setSurfaces]           = useState<Set<Surface>>(new Set());
-  const [pricings, setPricings]           = useState<Set<Pricing>>(new Set());
-  const [arrondissements, setArr]         = useState<Set<number>>(new Set());
-  const [radius, setRadius]               = useState<number | null>(null);
+  const [types, setTypes]         = useState<Set<VenueType>>(new Set());
+  const [surfaces, setSurfaces]   = useState<Set<Surface>>(new Set());
+  const [pricings, setPricings]   = useState<Set<Pricing>>(new Set());
+  const [arrondissements, setArr] = useState<Set<number>>(new Set());
+  const [radius, setRadius]       = useState<number | null>(null);
 
   // Add venue form
-  const [newName, setNewName]         = useState("");
-  const [newType, setNewType]         = useState<VenueType>("public");
-  const [newSurface, setNewSurface]   = useState<Surface>("outdoor");
-  const [newPricing, setNewPricing]   = useState<Pricing>("free");
-  const [newDesc, setNewDesc]         = useState("");
+  const [newName, setNewName]           = useState("");
+  const [newType, setNewType]           = useState<VenueType>("public");
+  const [newSurface, setNewSurface]     = useState<Surface>("outdoor");
+  const [newPricing, setNewPricing]     = useState<Pricing>("free");
+  const [newDesc, setNewDesc]           = useState("");
   const [addSubmitted, setAddSubmitted] = useState(false);
+
+  // Search
+  const [searchQuery, setSearchQuery]         = useState("");
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const searchRef = useRef<HTMLInputElement>(null);
+
+  const searchResults = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return ALL_VENUES.filter(
+      (v) =>
+        v.name.toLowerCase().includes(q) ||
+        v.address.toLowerCase().includes(q) ||
+        v.tags.some((t) => t.toLowerCase().includes(q)),
+    ).slice(0, 6);
+  }, [searchQuery]);
+
+  const flyToVenue = useCallback((venue: Venue) => {
+    const map = googleMap.current;
+    if (map) {
+      map.panTo({ lat: venue.lat, lng: venue.lng });
+      map.setZoom(17);
+    }
+    setSelectedVenue(venue);
+    setSearchQuery("");
+    setShowSuggestions(false);
+  }, []);
 
   // Filtered venues
   const filtered = useMemo(() => {
@@ -79,162 +107,136 @@ export default function MapPageClient() {
     });
   }, [types, surfaces, pricings, arrondissements, radius, userPos]);
 
-  // ── Load Leaflet scripts then init map (single effect avoids race condition) ──
+  // ── Load Google Maps then init ────────────────────────────────────────────
   useEffect(() => {
-    // Guard: only run once even under React Strict Mode double-invocation
-    if (leafletMap.current) return;
+    if (googleMap.current) return;
+    let active = true;
 
-    function addStyle(href: string) {
-      if (document.querySelector(`link[href="${href}"]`)) return;
-      const l = document.createElement("link");
-      l.rel = "stylesheet"; l.href = href;
-      document.head.appendChild(l);
-    }
-
-    // loadScript waits for the real "load" event.
-    // It marks executed scripts with ._x so repeated calls resolve instantly.
-    type MarkedScript = HTMLScriptElement & { _x?: true };
-    function loadScript(src: string): Promise<void> {
+    function loadGoogleMaps(): Promise<void> {
+      // Already loaded
+      if (window.google?.maps) return Promise.resolve();
+      // Script already injected (Strict Mode 2nd call)
+      const existing = document.querySelector('script[data-gmap]');
+      if (existing) {
+        return new Promise((res) => {
+          existing.addEventListener("load", () => res(), { once: true });
+        });
+      }
       return new Promise((res) => {
-        const existing = document.querySelector(
-          `script[src="${src}"]`,
-        ) as MarkedScript | null;
-        if (existing) {
-          if (existing._x) { res(); return; }          // already executed
-          existing.addEventListener("load", res, { once: true }); // still loading
-          return;
-        }
-        const s = document.createElement("script") as MarkedScript;
-        s.src = src;
-        s.onload = () => { s._x = true; res(); };
+        window.__gmCb = res;
+        const s = document.createElement("script");
+        s.setAttribute("data-gmap", "1");
+        s.src = `https://maps.googleapis.com/maps/api/js?key=${GMAP_KEY}&callback=__gmCb&loading=async`;
+        s.async = true;
         document.head.appendChild(s);
       });
     }
 
-    addStyle("https://unpkg.com/leaflet@1.9.4/dist/leaflet.css");
-    addStyle("https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css");
-    addStyle("https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css");
+    loadGoogleMaps().then(() => {
+      if (!active || !mapRef.current || googleMap.current) return;
 
-    // Track whether this effect invocation is still active
-    let active = true;
+      const gm = window.google.maps;
 
-    loadScript("https://unpkg.com/leaflet@1.9.4/dist/leaflet.js")
-      .then(() =>
-        loadScript(
-          "https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js",
-        ),
-      )
-      .then(() => {
-        if (!active || !mapRef.current || leafletMap.current) return;
-
-        const L = window.L;
-        if (!L) return; // should never happen after awaiting load, but guard anyway
-
-        const map = L.map(mapRef.current, {
-          center: [48.8566, 2.3522],
-          zoom: 13,
-          zoomControl: false,
-        });
-
-        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-          attribution:
-            '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-          maxZoom: 19,
-        }).addTo(map);
-
-        const group = L.markerClusterGroup({ maxClusterRadius: 50 });
-        group.addTo(map);
-        clusterGroup.current = group;
-        leafletMap.current = map;
-
-        map.on("click", (e: any) => {
-          if (addModeRef.current === "placing") {
-            const coords: [number, number] = [e.latlng.lat, e.latlng.lng];
-            setNewVenueCoords(coords);
-            setAddMode("form");
-            if (tempMarker.current) tempMarker.current.remove();
-            tempMarker.current = L.marker(coords, { draggable: true }).addTo(map);
-            tempMarker.current.on("dragend", (ev: any) => {
-              const ll = ev.target.getLatLng();
-              setNewVenueCoords([ll.lat, ll.lng]);
-            });
-          }
-        });
-
-        setMapReady(true);
+      const map = new gm.Map(mapRef.current, {
+        center: { lat: 48.8566, lng: 2.3522 },
+        zoom: 13,
+        disableDefaultUI: true,          // on gère nos propres contrôles
+        gestureHandling: "greedy",       // scroll = zoom sur mobile
+        styles: GMAP_STYLES,
       });
+
+      // Clic sur la carte pour le mode "ajouter un lieu"
+      map.addListener("click", (e: any) => {
+        if (tempMarker.current?._placing) {
+          const coords: [number, number] = [e.latLng.lat(), e.latLng.lng()];
+          setNewVenueCoords(coords);
+          setAddMode("form");
+
+          if (tempMarker.current) tempMarker.current.setMap(null);
+          const t = new gm.Marker({
+            position: { lat: coords[0], lng: coords[1] },
+            map,
+            draggable: true,
+            icon: makePinIcon("#f97316", gm),
+            title: "Nouveau lieu",
+          });
+          t.addListener("dragend", (ev: any) => {
+            setNewVenueCoords([ev.latLng.lat(), ev.latLng.lng()]);
+          });
+          tempMarker.current = t;
+        }
+      });
+
+      googleMap.current = map;
+      setMapReady(true);
+    });
 
     return () => {
       active = false;
-      if (leafletMap.current) {
-        leafletMap.current.remove();
-        leafletMap.current = null;
-        clusterGroup.current = null;
+      if (googleMap.current) {
+        // Google Maps n'a pas de .destroy() — on nettoie juste les refs
+        googleMap.current = null;
       }
     };
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Sync addModeRef ─────────────────────────────────────────────────────────
+  // ── Sync addMode → tempMarker._placing ──────────────────────────────────
   useEffect(() => {
-    addModeRef.current = addMode === "placing" ? "placing" : "idle";
+    if (tempMarker.current) tempMarker.current._placing = addMode === "placing";
   }, [addMode]);
 
-  // ── Update markers when filtered venues change ──────────────────────────────
+  // On entre en mode "placing" : signaler au clic listener
   useEffect(() => {
-    const L = window.L;
-    const group = clusterGroup.current;
-    if (!L || !group) return;
+    if (addMode === "placing" && tempMarker.current === null) {
+      // Créer un marqueur fantôme pour porter le flag _placing
+      tempMarker.current = { _placing: true };
+    }
+  }, [addMode]);
 
-    group.clearLayers();
+  // ── Sync markers when filtered changes ──────────────────────────────────
+  useEffect(() => {
+    const gm = window.google?.maps;
+    const map = googleMap.current;
+    if (!gm || !map) return;
+
+    // Supprimer tous les markers existants
+    markerMap.current.forEach((m) => m.setMap(null));
     markerMap.current.clear();
 
     filtered.forEach((venue) => {
-      const color = pinColor(venue.rating);
-      const icon = L.divIcon({
-        html: `<div style="
-          width:38px;height:44px;position:relative;cursor:pointer;
-        "><div style="
-          position:absolute;bottom:0;left:50%;
-          transform:translateX(-50%) rotate(-45deg);
-          width:34px;height:34px;
-          background:${color};
-          border-radius:50% 50% 50% 0;
-          border:2.5px solid white;
-          box-shadow:0 2px 8px rgba(0,0,0,.35);
-          display:flex;align-items:center;justify-content:center;
-        "><span style="transform:rotate(45deg);font-size:17px;display:block;margin:2px 0 0 1px">🏓</span></div></div>`,
-        className: "",
-        iconSize: [38, 44],
-        iconAnchor: [19, 44],
-        popupAnchor: [0, -44],
+      const marker = new gm.Marker({
+        position: { lat: venue.lat, lng: venue.lng },
+        map,
+        icon: makePinIcon(pinColor(venue.rating), gm),
+        title: venue.name,
       });
-
-      const marker = L.marker([venue.lat, venue.lng], { icon });
-      marker.on("click", () => setSelectedVenue(venue));
-      group.addLayer(marker);
+      marker.addListener("click", () => setSelectedVenue(venue));
       markerMap.current.set(venue.id, marker);
     });
-  }, [filtered]);
+  }, [filtered, mapReady]);
 
-  // ── Radius circle ────────────────────────────────────────────────────────────
+  // ── Radius circle ────────────────────────────────────────────────────────
   useEffect(() => {
-    const L = window.L;
-    const map = leafletMap.current;
-    if (!L || !map) return;
-    if (radiusCircle.current) { radiusCircle.current.remove(); radiusCircle.current = null; }
+    const gm = window.google?.maps;
+    const map = googleMap.current;
+    if (!gm || !map) return;
+
+    if (radiusCircle.current) { radiusCircle.current.setMap(null); radiusCircle.current = null; }
     if (radius && userPos) {
-      radiusCircle.current = L.circle(userPos, {
+      radiusCircle.current = new gm.Circle({
+        map,
+        center: { lat: userPos[0], lng: userPos[1] },
         radius,
-        color: "#10b981",
+        strokeColor: "#10b981",
+        strokeOpacity: 0.8,
+        strokeWeight: 1.5,
         fillColor: "#10b981",
         fillOpacity: 0.08,
-        weight: 1.5,
-        dashArray: "6 4",
-      }).addTo(map);
+      });
     }
-  }, [radius, userPos]);
+  }, [radius, userPos, mapReady]);
 
-  // ── Geolocation ─────────────────────────────────────────────────────────────
+  // ── Geolocation ──────────────────────────────────────────────────────────
   const locateUser = useCallback(() => {
     if (!navigator.geolocation) return;
     setLocating(true);
@@ -243,18 +245,42 @@ export default function MapPageClient() {
         const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
         setUserPos(coords);
         setLocating(false);
-        const L = window.L;
-        const map = leafletMap.current;
-        if (!L || !map) return;
-        map.flyTo(coords, 15, { animate: true, duration: 1.2 });
-        L.circleMarker(coords, {
-          radius: 8, color: "#3b82f6", fillColor: "#3b82f6",
-          fillOpacity: 0.9, weight: 2.5,
-        }).addTo(map).bindPopup("Vous êtes ici").openPopup();
+        const gm  = window.google?.maps;
+        const map = googleMap.current;
+        if (!gm || !map) return;
+        map.panTo({ lat: coords[0], lng: coords[1] });
+        map.setZoom(15);
+        if (userMarker.current) userMarker.current.setMap(null);
+        userMarker.current = new gm.Marker({
+          position: { lat: coords[0], lng: coords[1] },
+          map,
+          icon: {
+            path: gm.SymbolPath.CIRCLE,
+            scale: 10,
+            fillColor: "#3b82f6",
+            fillOpacity: 0.9,
+            strokeColor: "white",
+            strokeWeight: 2.5,
+          },
+          title: "Vous êtes ici",
+          zIndex: 999,
+        });
       },
       () => setLocating(false),
     );
   }, []);
+
+  const zoomIn  = () => { const m = googleMap.current; if (m) m.setZoom((m.getZoom() ?? 13) + 1); };
+  const zoomOut = () => { const m = googleMap.current; if (m) m.setZoom((m.getZoom() ?? 13) - 1); };
+
+  const cancelAddMode = () => {
+    setAddMode("idle");
+    if (tempMarker.current && typeof tempMarker.current.setMap === "function") {
+      tempMarker.current.setMap(null);
+    }
+    tempMarker.current = null;
+    setNewVenueCoords(null);
+  };
 
   const submitAddVenue = () => {
     if (!newName.trim()) return;
@@ -263,7 +289,10 @@ export default function MapPageClient() {
       setAddMode("idle");
       setAddSubmitted(false);
       setNewName(""); setNewDesc("");
-      if (tempMarker.current) { tempMarker.current.remove(); tempMarker.current = null; }
+      if (tempMarker.current && typeof tempMarker.current.setMap === "function") {
+        tempMarker.current.setMap(null);
+      }
+      tempMarker.current = null;
       setNewVenueCoords(null);
     }, 2000);
   };
@@ -290,61 +319,104 @@ export default function MapPageClient() {
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div className="flex items-center gap-2 px-4 pt-3 pb-2">
-          <div className="flex flex-1 items-center gap-2 rounded-2xl bg-white/95 px-4 py-2.5 shadow-lg backdrop-blur dark:bg-zinc-950/95">
-            <span className="text-base">🏓</span>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold">Tables à Paris</p>
-              <p className="text-[10px] text-zinc-500">
-                {filtered.length} lieu{filtered.length !== 1 ? "x" : ""} trouvé{filtered.length !== 1 ? "s" : ""}
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setShowFilters(true)}
-              className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-                activeFiltersCount > 0
-                  ? "bg-emerald-600 text-white"
-                  : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
-              }`}
-            >
-              ⚙ Filtres
-              {activeFiltersCount > 0 && (
-                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[9px] font-bold">
-                  {activeFiltersCount}
-                </span>
+          <div className="flex flex-1 flex-col rounded-2xl bg-white/95 shadow-lg backdrop-blur dark:bg-zinc-950/95 overflow-hidden">
+            {/* Search row */}
+            <div className="flex items-center gap-2 px-3 py-2.5">
+              <span className="text-base shrink-0">🔍</span>
+              <input
+                ref={searchRef}
+                type="search"
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                placeholder="Club, terrain, adresse…"
+                className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
+              />
+              {searchQuery ? (
+                <button
+                  type="button"
+                  onMouseDown={(e) => { e.preventDefault(); setSearchQuery(""); setShowSuggestions(false); }}
+                  className="shrink-0 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-base leading-none"
+                >
+                  ✕
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowFilters(true)}
+                  className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    activeFiltersCount > 0
+                      ? "bg-emerald-600 text-white"
+                      : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
+                  }`}
+                >
+                  ⚙ Filtres
+                  {activeFiltersCount > 0 && (
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[9px] font-bold">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </button>
               )}
-            </button>
+            </div>
+
+            {/* Result count strip */}
+            {!showSuggestions && (
+              <div className="border-t border-zinc-100 px-4 py-1 dark:border-zinc-800">
+                <p className="text-[10px] text-zinc-500">
+                  {filtered.length} lieu{filtered.length !== 1 ? "x" : ""} trouvé{filtered.length !== 1 ? "s" : ""}
+                </p>
+              </div>
+            )}
+
+            {/* Suggestions dropdown */}
+            {showSuggestions && searchResults.length > 0 && (
+              <ul className="border-t border-zinc-100 dark:border-zinc-800">
+                {searchResults.map((v) => (
+                  <li key={v.id}>
+                    <button
+                      type="button"
+                      onMouseDown={(e) => { e.preventDefault(); flyToVenue(v); }}
+                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
+                    >
+                      <span className="text-lg shrink-0">
+                        {v.type === "club" ? "🏓" : v.type === "bar" ? "🍹" : "🌳"}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold">{v.name}</p>
+                        <p className="truncate text-[11px] text-zinc-500">{v.address}</p>
+                      </div>
+                      <span className="ml-auto shrink-0 text-[10px] font-medium text-amber-500">
+                        ★ {v.rating}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* No results */}
+            {showSuggestions && searchQuery.trim().length > 0 && searchResults.length === 0 && (
+              <div className="border-t border-zinc-100 px-4 py-3 text-center text-xs text-zinc-400 dark:border-zinc-800">
+                Aucun lieu trouvé pour « {searchQuery.trim()} »
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* ── Map controls (right side) ───────────────────────────────────────── */}
       <div className="absolute bottom-24 right-4 z-20 flex flex-col gap-2">
-        {/* Zoom in */}
-        <MapBtn label="+" title="Zoom avant" onClick={() => leafletMap.current?.zoomIn()} />
-        {/* Zoom out */}
-        <MapBtn label="−" title="Zoom arrière" onClick={() => leafletMap.current?.zoomOut()} />
-        {/* Locate */}
-        <MapBtn
-          label={locating ? "…" : "◎"}
-          title="Me localiser"
-          onClick={locateUser}
-          active={!!userPos}
-        />
+        <MapBtn label="+" title="Zoom avant"   onClick={zoomIn} />
+        <MapBtn label="−" title="Zoom arrière" onClick={zoomOut} />
+        <MapBtn label={locating ? "…" : "◎"} title="Me localiser" onClick={locateUser} active={!!userPos} />
       </div>
 
       {/* ── FAB: Add venue ──────────────────────────────────────────────────── */}
       <button
         type="button"
-        onClick={() => {
-          if (addMode !== "idle") {
-            setAddMode("idle");
-            if (tempMarker.current) { tempMarker.current.remove(); tempMarker.current = null; }
-            setNewVenueCoords(null);
-          } else {
-            setAddMode("placing");
-          }
-        }}
+        onClick={() => addMode !== "idle" ? cancelAddMode() : setAddMode("placing")}
         className={`absolute bottom-24 left-4 z-20 flex h-12 w-12 items-center justify-center rounded-full shadow-xl text-white text-xl transition-colors ${
           addMode !== "idle" ? "bg-rose-600" : "bg-emerald-600"
         }`}
@@ -363,19 +435,19 @@ export default function MapPageClient() {
       {/* ── Add venue form ──────────────────────────────────────────────────── */}
       {addMode === "form" && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/30" onClick={() => setAddMode("idle")} />
+          <div className="fixed inset-0 z-40 bg-black/30" onClick={cancelAddMode} />
           <div
             className="absolute bottom-0 left-0 right-0 z-50 mx-auto max-w-md rounded-t-2xl bg-white p-5 shadow-2xl dark:bg-zinc-950"
             style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
           >
             <div className="mb-4 flex items-center justify-between">
               <h3 className="text-base font-bold">Ajouter un lieu</h3>
-              <button type="button" onClick={() => { setAddMode("idle"); if (tempMarker.current) { tempMarker.current.remove(); tempMarker.current = null; } }}>✕</button>
+              <button type="button" onClick={cancelAddMode}>✕</button>
             </div>
 
             {newVenueCoords && (
               <p className="mb-3 text-[11px] text-emerald-600 dark:text-emerald-400">
-                📍 Position : {newVenueCoords[0].toFixed(5)}, {newVenueCoords[1].toFixed(5)}
+                📍 {newVenueCoords[0].toFixed(5)}, {newVenueCoords[1].toFixed(5)}
                 <span className="ml-2 text-zinc-400">(glissez le pin pour ajuster)</span>
               </p>
             )}
@@ -451,8 +523,7 @@ export default function MapPageClient() {
               <h3 className="text-base font-bold">Filtres</h3>
               <div className="flex gap-2">
                 {activeFiltersCount > 0 && (
-                  <button
-                    type="button"
+                  <button type="button"
                     onClick={() => { setTypes(new Set()); setSurfaces(new Set()); setPricings(new Set()); setArr(new Set()); setRadius(null); }}
                     className="text-xs font-semibold text-rose-500"
                   >
@@ -465,72 +536,50 @@ export default function MapPageClient() {
 
             <FilterSection label="Type de lieu">
               {(["club","public","bar"] as VenueType[]).map((t) => (
-                <FilterPill
-                  key={t}
+                <FilterPill key={t}
                   label={t === "club" ? "🏓 Club" : t === "public" ? "🌳 Public" : "🍹 Bar"}
-                  active={types.has(t)}
-                  onClick={() => setTypes((s) => toggle(s, t))}
-                />
+                  active={types.has(t)} onClick={() => setTypes((s) => toggle(s, t))} />
               ))}
             </FilterSection>
 
             <FilterSection label="Intérieur / Extérieur">
               {(["indoor","outdoor"] as Surface[]).map((s) => (
-                <FilterPill
-                  key={s}
+                <FilterPill key={s}
                   label={s === "indoor" ? "🏢 Intérieur" : "🌳 Extérieur"}
-                  active={surfaces.has(s)}
-                  onClick={() => setSurfaces((p) => toggle(p, s))}
-                />
+                  active={surfaces.has(s)} onClick={() => setSurfaces((p) => toggle(p, s))} />
               ))}
             </FilterSection>
 
             <FilterSection label="Tarification">
               {(["free","paid","membership"] as Pricing[]).map((p) => (
-                <FilterPill
-                  key={p}
+                <FilterPill key={p}
                   label={p === "free" ? "Gratuit" : p === "paid" ? "Payant" : "Licence"}
-                  active={pricings.has(p)}
-                  onClick={() => setPricings((s) => toggle(s, p))}
-                />
+                  active={pricings.has(p)} onClick={() => setPricings((s) => toggle(s, p))} />
               ))}
             </FilterSection>
 
             <FilterSection label="Arrondissement">
               <div className="grid grid-cols-5 gap-1.5">
                 {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map((n) => (
-                  <FilterPill
-                    key={n}
-                    label={`${n}e`}
-                    active={arrondissements.has(n)}
-                    onClick={() => setArr((s) => toggle(s, n))}
-                  />
+                  <FilterPill key={n} label={`${n}e`}
+                    active={arrondissements.has(n)} onClick={() => setArr((s) => toggle(s, n))} />
                 ))}
               </div>
             </FilterSection>
 
-            <FilterSection label={`Rayon de recherche${userPos ? "" : " (géoloc. requise)"}`}>
+            <FilterSection label={`Rayon${userPos ? "" : " (géoloc. requise)"}`}>
               <div className="flex gap-2 flex-wrap">
                 {RADII.map((r) => (
-                  <FilterPill
-                    key={r}
+                  <FilterPill key={r}
                     label={r < 1000 ? `${r} m` : `${r / 1000} km`}
                     active={radius === r}
-                    onClick={() => {
-                      if (radius === r) { setRadius(null); return; }
-                      if (!userPos) { locateUser(); }
-                      setRadius(r);
-                    }}
-                  />
+                    onClick={() => { if (radius === r) { setRadius(null); return; } if (!userPos) locateUser(); setRadius(r); }} />
                 ))}
               </div>
             </FilterSection>
 
-            <button
-              type="button"
-              onClick={() => setShowFilters(false)}
-              className="mt-3 w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white"
-            >
+            <button type="button" onClick={() => setShowFilters(false)}
+              className="mt-3 w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white">
               Appliquer ({filtered.length} résultat{filtered.length !== 1 ? "s" : ""})
             </button>
           </div>
@@ -552,7 +601,22 @@ export default function MapPageClient() {
   );
 }
 
-// ─── Small helpers ─────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function makePinIcon(color: string, gm: any) {
+  const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="40" viewBox="0 0 32 40">
+      <path d="M16,0 C7.2,0 0,7.2 0,16 C0,24.8 16,40 16,40 C16,40 32,24.8 32,16 C32,7.2 24.8,0 16,0Z"
+            fill="${color}" stroke="white" stroke-width="2.5"/>
+      <circle cx="16" cy="16" r="7" fill="white" fill-opacity="0.35"/>
+      <text x="16" y="21" text-anchor="middle" font-size="13" font-family="sans-serif">🏓</text>
+    </svg>`;
+  return {
+    url: `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`,
+    scaledSize: new gm.Size(32, 40),
+    anchor: new gm.Point(16, 40),
+  };
+}
 
 function toggle<T>(set: Set<T>, value: T): Set<T> {
   const next = new Set(set);
@@ -560,22 +624,14 @@ function toggle<T>(set: Set<T>, value: T): Set<T> {
   return next;
 }
 
-function MapBtn({
-  label, title, onClick, active = false,
-}: {
+function MapBtn({ label, title, onClick, active = false }: {
   label: string; title: string; onClick: () => void; active?: boolean;
 }) {
   return (
-    <button
-      type="button"
-      title={title}
-      onClick={onClick}
+    <button type="button" title={title} onClick={onClick}
       className={`grid h-10 w-10 place-items-center rounded-xl shadow-md text-sm font-bold transition-colors ${
-        active
-          ? "bg-emerald-600 text-white"
-          : "bg-white text-zinc-700 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-200"
-      }`}
-    >
+        active ? "bg-emerald-600 text-white" : "bg-white text-zinc-700 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-200"
+      }`}>
       {label}
     </button>
   );
@@ -584,9 +640,7 @@ function MapBtn({
 function FilterSection({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="mb-4">
-      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
-        {label}
-      </p>
+      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">{label}</p>
       <div className="flex flex-wrap gap-2">{children}</div>
     </div>
   );
@@ -594,16 +648,23 @@ function FilterSection({ label, children }: { label: string; children: React.Rea
 
 function FilterPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
+    <button type="button" onClick={onClick}
       className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-        active
-          ? "bg-emerald-600 text-white"
-          : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
-      }`}
-    >
+        active ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
+      }`}>
       {label}
     </button>
   );
 }
+
+// ─── Google Maps style (teinte neutre, similaire au style iOS Maps) ───────────
+const GMAP_STYLES = [
+  { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
+  { featureType: "transit", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
+  { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
+  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
+  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#e8e8e8" }] },
+  { featureType: "water", elementType: "geometry", stylers: [{ color: "#c9e8f5" }] },
+  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#e8f5e9" }] },
+  { featureType: "administrative", elementType: "labels.text.fill", stylers: [{ color: "#6b6b6b" }] },
+];
