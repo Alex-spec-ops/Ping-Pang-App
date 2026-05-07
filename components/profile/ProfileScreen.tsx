@@ -9,6 +9,7 @@ import ProfileStatsPanel from "./ProfileStats";
 import ProfileMatches from "./ProfileMatches";
 import ProfileBadges from "./ProfileBadges";
 import ProfileSubscription from "./ProfileSubscription";
+import EditProfileModal from "./EditProfileModal";
 
 type TabKey = "activites" | "badges" | "abonnement";
 
@@ -32,16 +33,28 @@ export default function ProfileScreen({
   player, stats, progression, badges, matches, subscription, isOwnProfile,
 }: Props) {
   const [tab, setTab] = useState<TabKey>("activites");
+  const [editedPlayer, setEditedPlayer] = useState(player);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   return (
     <div className="profile-screen">
       {/* ── Header (identity + gradient) ── */}
       <ProfileHeader
-        player={player}
+        player={editedPlayer}
         stats={stats}
         subscription={subscription}
         isOwnProfile={isOwnProfile}
+        onEditClick={isOwnProfile ? () => setShowEditModal(true) : undefined}
       />
+
+      {/* ── Edit Profile Modal ── */}
+      {showEditModal && (
+        <EditProfileModal
+          player={editedPlayer}
+          onSave={(patch) => setEditedPlayer((p) => ({ ...p, ...patch }))}
+          onClose={() => setShowEditModal(false)}
+        />
+      )}
 
       {/* ── Statistics cards + chart ── */}
       <ProfileStatsPanel stats={stats} progression={progression} />
@@ -65,7 +78,7 @@ export default function ProfileScreen({
       {/* ── Tab content ── */}
       <div className="profile-tab-content-wrap" key={tab}>
         {tab === "activites" && (
-          <ProfileMatches player={player} matches={matches} isPremium={subscription.plan === "premium"} />
+          <ProfileMatches player={editedPlayer} matches={matches} isPremium={subscription.plan === "premium"} />
         )}
         {tab === "badges" && <ProfileBadges badges={badges} />}
         {tab === "abonnement" && <ProfileSubscription info={subscription} />}

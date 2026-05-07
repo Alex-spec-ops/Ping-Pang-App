@@ -11,9 +11,10 @@ interface Props {
   stats: ProfileStats;
   subscription: SubscriptionInfo;
   isOwnProfile: boolean;
+  onEditClick?: () => void;
 }
 
-export default function ProfileHeader({ player, stats, subscription, isOwnProfile }: Props) {
+export default function ProfileHeader({ player, stats, subscription, isOwnProfile, onEditClick }: Props) {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -96,7 +97,7 @@ export default function ProfileHeader({ player, stats, subscription, isOwnProfil
 
           {/* Edit / Follow button */}
           {isOwnProfile ? (
-            <button type="button" className="btn-edit-profile">
+            <button type="button" className="btn-edit-profile" onClick={onEditClick}>
               ✏️ Modifier le profil
             </button>
           ) : (

@@ -452,3 +452,212 @@
   transition: background 0.15s;
 }
 .btn-manage-sub:hover { background: var(--color-cream); }
+
+/* ── Edit Profile Modal ───────────────────────────────────────── */
+.edit-modal-backdrop {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex; align-items: flex-end;
+  /* Empêche le scroll du fond de transpirer */
+  touch-action: none;
+  animation: backdrop-in 0.22s ease-out;
+}
+@keyframes backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Bottom sheet — occupe jusqu'à 88% de la hauteur viewport visible */
+.edit-modal {
+  width: 100%;
+  /* dvh = hauteur réelle sans l'UI du navigateur (barre d'adresse, etc.) */
+  max-height: 88dvh;
+  background: var(--color-bg);
+  border-top: 2px solid var(--color-ink);
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  /* Safe area bas iPhone (home bar) */
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  animation: sheet-up 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+}
+@keyframes sheet-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Poignée */
+.edit-modal-handle {
+  width: 36px; height: 4px;
+  background: var(--color-line);
+  border-radius: 9999px;
+  margin: 10px auto 0;
+  flex-shrink: 0;
+}
+
+.edit-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.875rem 1rem 0.75rem;
+  border-bottom: var(--border-thin);
+  flex-shrink: 0;
+}
+.edit-modal-title {
+  font-size: 1.0625rem; font-weight: 800;
+  font-family: var(--font-display);
+}
+
+/* Zone tactile ≥ 44 px pour le bouton fermer */
+.edit-modal-close {
+  width: 44px; height: 44px;
+  display: grid; place-items: center;
+  font-size: 0.875rem; color: var(--color-muted);
+  border: var(--border-thin);
+  background: var(--color-cream);
+  border-radius: 9999px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.edit-modal-close:active { background: var(--color-line); }
+
+/* Formulaire scrollable — laisse la place aux boutons en bas */
+.edit-modal-form {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* scroll inertiel iOS */
+  flex: 1;
+  padding: 1.125rem 1rem 0.5rem;
+  display: flex; flex-direction: column; gap: 1.375rem;
+}
+
+.edit-field { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.edit-label {
+  font-size: 0.6875rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.06em; color: var(--color-muted);
+  font-family: var(--font-ui);
+}
+
+/* ── Avatar picker ── */
+.avatar-picker-preview {
+  display: flex; justify-content: center; padding: 0.375rem 0;
+}
+.avatar-picker-current {
+  font-size: 3.25rem; line-height: 1;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.18));
+}
+
+/* 5 colonnes → touches ~52 px sur un écran 375 px */
+.avatar-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0.5rem;
+}
+
+.avatar-option {
+  /* Zone tactile minimum 44 × 44 px recommandée Apple/Google */
+  min-height: 52px;
+  display: grid; place-items: center;
+  font-size: 1.625rem; line-height: 1;
+  border: 2px solid transparent;
+  background: var(--color-cream);
+  border-radius: 10px;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.12s, background 0.12s;
+}
+.avatar-option:active { background: var(--color-line); }
+.avatar-option--selected {
+  border-color: var(--color-forest);
+  background: color-mix(in srgb, var(--color-forest) 8%, var(--color-cream));
+  box-shadow: 0 0 0 1px var(--color-forest);
+}
+
+/* ── Inputs texte ── */
+.edit-input-wrap {
+  display: flex; align-items: stretch;
+  border: var(--border-ink);
+  background: var(--color-bg);
+  overflow: hidden;
+  border-radius: 4px;
+}
+.edit-input-prefix {
+  padding: 0 0.75rem;
+  font-size: 1rem; color: var(--color-muted);
+  border-right: var(--border-thin);
+  background: var(--color-cream);
+  display: grid; place-items: center;
+  font-family: var(--font-ui);
+  flex-shrink: 0;
+}
+
+/* font-size: 16px obligatoire sur iOS → empêche le zoom automatique */
+.edit-input {
+  flex: 1;
+  padding: 0.75rem;
+  font-size: 16px;
+  font-family: var(--font-ui);
+  background: transparent;
+  outline: none; border: none;
+  color: var(--color-ink);
+  /* Supprime le style natif sur iOS */
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.edit-textarea {
+  border: var(--border-ink);
+  border-radius: 4px;
+  padding: 0.75rem;
+  font-size: 16px; /* idem, évite le zoom iOS */
+  font-family: var(--font-ui);
+  color: var(--color-ink);
+  background: var(--color-bg);
+  resize: none; outline: none;
+  line-height: 1.55;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.edit-textarea:focus,
+.edit-input:focus {
+  outline: 2px solid var(--color-forest);
+  outline-offset: -2px;
+}
+
+.edit-hint {
+  font-size: 0.625rem; color: var(--color-muted);
+  font-family: var(--font-ui); text-align: right;
+}
+
+/* Boutons d'action — collés en bas, toujours visibles même quand le clavier est ouvert */
+.edit-modal-actions {
+  display: flex; gap: 0.625rem;
+  padding: 0.75rem 1rem;
+  border-top: var(--border-thin);
+  background: var(--color-bg);
+  flex-shrink: 0;
+}
+
+.btn-edit-cancel {
+  flex: 1;
+  /* min 48 px de hauteur = zone tactile confortable */
+  min-height: 48px;
+  border: var(--border-ink);
+  font-size: 0.9375rem; font-weight: 600;
+  background: var(--color-bg);
+  font-family: var(--font-ui);
+  border-radius: 4px;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+.btn-edit-cancel:active { background: var(--color-cream); }
+
+.btn-edit-save {
+  flex: 2;
+  min-height: 48px;
+  background: var(--color-forest); color: #fff;
+  font-size: 0.9375rem; font-weight: 700;
+  font-family: var(--font-ui);
+  border-radius: 4px;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+.btn-edit-save:active { opacity: 0.82; }
