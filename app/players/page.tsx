@@ -2,13 +2,13 @@ import TopBar from "../../components/TopBar";
 import PlayersPageClient from "../../components/PlayersPageClient";
 
 export const metadata = {
-  title: "Joueurs & Clubs — PingPang",
+  title: "Communauté — PingPang",
 };
 
 export default function PlayersPage() {
   return (
     <>
-      <TopBar title="Classement" subtitle="Joueurs & Clubs" />
+      <TopBar title="Communauté" subtitle="Défis & Clubs" />
       <PlayersPageClient />
     </>
   );
