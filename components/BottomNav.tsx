@@ -24,6 +24,12 @@ const tabs: Tab[] = [
     match: (p) => p.startsWith("/play") || p.startsWith("/match"),
   },
   {
+    href: "/leaderboard",
+    label: "Classement",
+    icon: "📊",
+    match: (p) => p.startsWith("/leaderboard") || p.startsWith("/u/"),
+  },
+  {
     href: "/players",
     label: "Joueurs",
     icon: "🏆",
