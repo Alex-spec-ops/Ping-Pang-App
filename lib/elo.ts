@@ -1,6 +1,17 @@
-const K = 32;
+export type MatchType = "tournament" | "ranked" | "casual";
 
-export function calculateElo(winnerRating: number, loserRating: number) {
+const K_BY_TYPE: Record<MatchType, number> = {
+  tournament: 48,
+  ranked: 32,
+  casual: 16,
+};
+
+export function calculateElo(
+  winnerRating: number,
+  loserRating: number,
+  matchType: MatchType = "ranked",
+) {
+  const K = K_BY_TYPE[matchType];
   const expected = 1 / (1 + Math.pow(10, (loserRating - winnerRating) / 400));
   const delta = Math.round(K * (1 - expected));
   return {

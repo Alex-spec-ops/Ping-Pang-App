@@ -5,19 +5,20 @@ import { z } from "zod";
 import { createClient } from "../supabase/server";
 
 // ---------------------------------------------------------------------------
-// Schémas Zod
+// Schémas Zod (syntaxe v4 : error au lieu de message déprécié)
 // ---------------------------------------------------------------------------
 
 const submitMatchSchema = z.object({
-  player_b_id: z.string().uuid("Adversaire invalide"),
-  winner_id: z.string().uuid("Gagnant invalide"),
+  player_b_id: z.string().uuid(),
+  winner_id: z.string().uuid(),
+  match_type: z.enum(["tournament", "ranked", "casual"]).default("ranked"),
   score_a: z.number().int().min(0).max(3),
   score_b: z.number().int().min(0).max(3),
   set_scores: z
     .array(z.object({ a: z.number().int(), b: z.number().int() }))
     .nullable()
     .optional(),
-  played_at: z.string().datetime(),
+  played_at: z.iso.datetime(),
 });
 
 // ---------------------------------------------------------------------------
@@ -43,7 +44,6 @@ export async function submitMatch(
   const data = parse.data;
   const supabase = await createClient();
 
-  // Récupère le profil courant (submitted_by = player_a)
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -63,10 +63,11 @@ export async function submitMatch(
       player_a_id: submittedBy,
       player_b_id: data.player_b_id,
       winner_id: data.winner_id,
+      match_type: data.match_type,
       score_a: data.score_a,
       score_b: data.score_b,
       set_scores: data.set_scores ?? null,
-      status: "pending",
+      status: "pending" as const,
       submitted_by: submittedBy,
       played_at: data.played_at,
     })
@@ -107,7 +108,7 @@ export async function disputeMatch(matchId: string): Promise<ActionResult> {
 
   const { error } = await supabase
     .from("matches")
-    .update({ status: "disputed" })
+    .update({ status: "disputed" as const })
     .eq("id", matchId);
 
   if (error) return { ok: false, error: error.message };
