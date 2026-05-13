@@ -1,7 +1,9 @@
 /**
  * Seed : 20 joueurs fictifs + 30 matchs confirmés avec ELO calculé.
  * Usage : node --experimental-strip-types scripts/seed.ts
- * Prérequis : NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY dans .env.local
+ * Prérequis dans .env.local :
+ *   NEXT_PUBLIC_SUPABASE_URL
+ *   SUPABASE_SERVICE_ROLE_KEY  ← bypasse le RLS, nécessaire pour le seed
  */
 
 import { createClient } from "@supabase/supabase-js";
@@ -28,10 +30,11 @@ function loadEnv() {
 loadEnv();
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Le seed utilise la service role key pour bypasser le RLS
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
-  console.error("NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY requis.");
+  console.error("Requis dans .env.local : NEXT_PUBLIC_SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY");
   process.exit(1);
 }
 
@@ -189,7 +192,7 @@ async function seed() {
   console.log("\n→ Mise à jour des ratings en base…");
 
   // Sync ratings + stats vers profiles
-  for (const [username, data] of Object.entries(profileMap)) {
+  for (const [, data] of Object.entries(profileMap)) {
     const { data: stats } = await supabase
       .from("matches")
       .select("id, winner_id, player_a_id, player_b_id")
