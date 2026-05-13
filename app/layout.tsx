@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import BottomNav from "../components/BottomNav";
+import { headers } from "next/headers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,11 +34,17 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+const NO_NAV_PATHS = ["/login", "/signup"];
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+  const showNav = !NO_NAV_PATHS.some((p) => pathname.startsWith(p));
+
   return (
     <html
       lang="fr"
@@ -45,9 +52,9 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
         <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-white shadow-sm dark:bg-zinc-950">
-          <main className="flex-1 pb-20">{children}</main>
+          <main className={showNav ? "flex-1 pb-20" : "flex-1"}>{children}</main>
         </div>
-        <BottomNav />
+        {showNav && <BottomNav />}
       </body>
     </html>
   );

@@ -24,22 +24,22 @@ const tabs: Tab[] = [
     match: (p) => p.startsWith("/play") || p.startsWith("/match"),
   },
   {
+    href: "/clubs",
+    label: "Clubs",
+    icon: "🏛️",
+    match: (p) => p.startsWith("/clubs") || p.startsWith("/club"),
+  },
+  {
     href: "/leaderboard",
     label: "Classement",
     icon: "📊",
     match: (p) => p.startsWith("/leaderboard") || p.startsWith("/u/"),
   },
   {
-    href: "/players",
-    label: "Joueurs",
-    icon: "🏆",
-    match: (p) => p.startsWith("/players"),
-  },
-  {
     href: "/profile",
     label: "Profil",
     icon: "👤",
-    match: (p) => p.startsWith("/profile"),
+    match: (p) => p.startsWith("/profile") || p.startsWith("/players"),
   },
 ];
 

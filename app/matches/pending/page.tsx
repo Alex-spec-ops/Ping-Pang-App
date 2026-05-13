@@ -38,7 +38,7 @@ export default async function PendingMatchesPage() {
           Impossible de charger les matchs. Configure .env.local.
         </p>
       )}
-      {!error && <PendingMatchList matches={matches ?? []} currentUserId={user?.id} />}
+      {!error && <PendingMatchList matches={(matches ?? []) as never} currentUserId={user?.id} />}
     </main>
   );
 }

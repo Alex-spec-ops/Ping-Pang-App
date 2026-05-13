@@ -73,9 +73,9 @@ export default async function UserProfilePage({
 
       <ul className="divide-y divide-zinc-100 dark:divide-zinc-800">
         {(matches ?? []).map((m) => {
-          const isA = (m.player_a as { id: string } | null)?.id === profile.id;
+          const isA = (m.player_a as unknown as { id: string } | null)?.id === profile.id;
           const opponent = isA ? m.player_b : m.player_a;
-          const won = (m.winner as { id: string } | null)?.id === profile.id;
+          const won = (m.winner as unknown as { id: string } | null)?.id === profile.id;
           const scoreMe = isA ? m.score_a : m.score_b;
           const scoreOpp = isA ? m.score_b : m.score_a;
 
@@ -86,7 +86,7 @@ export default async function UserProfilePage({
               ? ratingAfter - ratingBefore
               : null;
 
-          const opp = opponent as { username: string; full_name: string | null; avatar: string | null } | null;
+          const opp = opponent as unknown as { username: string; full_name: string | null; avatar: string | null } | null;
 
           return (
             <li key={m.id} className="flex items-center gap-3 px-4 py-3">
