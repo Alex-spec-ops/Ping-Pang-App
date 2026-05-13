@@ -18,10 +18,11 @@ export default function LoginForm() {
   const [username, setUsername] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
 
   const supabase = createClient();
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
     setLoading(true);
@@ -41,6 +42,11 @@ export default function LoginForm() {
             matches_played: 0,
             matches_won: 0,
           });
+        }
+
+        if (!data.session) {
+          setEmailSent(true);
+          return;
         }
 
         if (mode === "club-login") {
@@ -99,6 +105,24 @@ export default function LoginForm() {
               Gère ton club, crée des tournois et des événements
             </p>
           </div>
+        </button>
+      </div>
+    );
+  }
+
+  if (emailSent) {
+    return (
+      <div className="flex flex-col items-center gap-4 p-8 text-center">
+        <span className="text-5xl">📧</span>
+        <p className="font-semibold text-zinc-800 dark:text-zinc-200">Vérifie ta boite mail</p>
+        <p className="text-sm text-zinc-500">
+          Un lien de confirmation a été envoyé à <strong>{email}</strong>. Clique dessus pour activer ton compte.
+        </p>
+        <button
+          onClick={() => setEmailSent(false)}
+          className="text-sm text-zinc-400 underline"
+        >
+          ← Retour
         </button>
       </div>
     );

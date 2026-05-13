@@ -1,7 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import TopBar from "@/components/TopBar";
 import Link from "next/link";
-import type { DbClubLeaderboard } from "@/lib/db-types";
 
 export const metadata = {
   title: "Clubs — PingPang",
@@ -12,8 +11,7 @@ export default async function ClubsPage() {
 
   const { data: clubs, error } = await supabase
     .from("club_leaderboard")
-    .select("*")
-    .returns<DbClubLeaderboard[]>();
+    .select("*");
 
   return (
     <main className="mx-auto max-w-md pb-24">
@@ -55,7 +53,9 @@ export default async function ClubsPage() {
 
       {error && (
         <p className="p-6 text-center text-sm text-red-500">
-          Impossible de charger les clubs. Configure .env.local.
+          {error.message?.includes("relation") || error.message?.includes("does not exist")
+            ? "Les tables clubs n'existent pas encore. Lance les migrations SQL dans ton projet Supabase."
+            : `Impossible de charger les clubs : ${error.message}`}
         </p>
       )}
 
