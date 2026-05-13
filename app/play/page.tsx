@@ -2,85 +2,20 @@ import TopBar from "../../components/TopBar";
 import Avatar from "../../components/Avatar";
 import { getPlayer, liveMatches } from "../../lib/data";
 import { setScoreLine, setsWon } from "../../lib/format";
+import RegisterMatchClient from "../../components/RegisterMatchClient";
 
 export const metadata = {
-  title: "Jouer — PingPang",
+  title: "Enregistrer — PingPang",
 };
-
-type Mode = {
-  id: string;
-  title: string;
-  desc: string;
-  cta: string;
-  icon: string;
-};
-
-const competitive: Mode[] = [
-  {
-    id: "ranked",
-    title: "Partie classée",
-    desc: "ELO en jeu. Affronte un joueur d'un niveau proche.",
-    cta: "Trouver un adversaire",
-    icon: "🎯",
-  },
-  {
-    id: "blitz",
-    title: "Blitz BO3 classé",
-    desc: "Format court, 3 manches gagnantes. ELO en jeu.",
-    cta: "Lancer un blitz",
-    icon: "⚡",
-  },
-  {
-    id: "tournament",
-    title: "Tournoi du jour",
-    desc: "Bracket de 8 ou 16 joueurs, points et gains à la clé.",
-    cta: "Voir les tournois",
-    icon: "🏆",
-  },
-];
-
-const casual: Mode[] = [
-  {
-    id: "friend",
-    title: "Défier un ami",
-    desc: "Match amical, sans ELO. Génère un code et invite un pongiste.",
-    cta: "Créer un défi",
-    icon: "🤝",
-  },
-  {
-    id: "training",
-    title: "Entraînement libre",
-    desc: "Joue pour t'amuser ou t'échauffer. Aucun impact sur le classement.",
-    cta: "Démarrer une session",
-    icon: "🏓",
-  },
-  {
-    id: "club",
-    title: "Soirée club",
-    desc: "Enregistre un match en club hors compétition officielle.",
-    cta: "Saisir un score",
-    icon: "🍻",
-  },
-];
 
 export default function PlayPage() {
   return (
     <>
-      <TopBar title="Jouer" subtitle="Compétitif ou amical, à toi de choisir" />
+      <TopBar title="Enregistrer" subtitle="Matchs en cours" />
 
-      <Section
-        title="🏆 Compétitif"
-        subtitle="ELO en jeu, comptabilisé au classement"
-        modes={competitive}
-      />
+      <RegisterMatchClient />
 
-      <Section
-        title="🤝 Amical"
-        subtitle="Hors classement, juste pour le plaisir"
-        modes={casual}
-      />
-
-      <section className="px-4 pb-4">
+      <section className="px-4 pb-4 pt-4">
         <h2
           className="mb-2 text-xs font-semibold uppercase tracking-wider"
           style={{ color: "var(--color-muted)", fontFamily: "var(--font-ui)" }}
@@ -110,9 +45,7 @@ export default function PlayPage() {
                   <div className="flex items-center gap-2 min-w-0">
                     <Avatar emoji={p1.avatar} size="sm" />
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium">
-                        {p1.fullName}
-                      </p>
+                      <p className="truncate text-sm font-medium">{p1.fullName}</p>
                       <p className="text-[10px]" style={{ color: "var(--color-muted)" }}>
                         {p1.countryFlag} {p1.rating}
                       </p>
@@ -132,9 +65,7 @@ export default function PlayPage() {
                   </div>
                   <div className="flex items-center justify-end gap-2 min-w-0">
                     <div className="min-w-0 text-right">
-                      <p className="truncate text-sm font-medium">
-                        {p2.fullName}
-                      </p>
+                      <p className="truncate text-sm font-medium">{p2.fullName}</p>
                       <p className="text-[10px]" style={{ color: "var(--color-muted)" }}>
                         {p2.countryFlag} {p2.rating}
                       </p>
@@ -148,64 +79,5 @@ export default function PlayPage() {
         </ul>
       </section>
     </>
-  );
-}
-
-function Section({
-  title,
-  subtitle,
-  modes,
-}: {
-  title: string;
-  subtitle: string;
-  modes: Mode[];
-}) {
-  return (
-    <section className="px-4 py-4">
-      <div className="mb-2">
-        <h2
-          className="text-xs font-semibold uppercase tracking-wider"
-          style={{ color: "var(--color-muted)", fontFamily: "var(--font-ui)" }}
-        >
-          {title}
-        </h2>
-        <p className="text-[11px]" style={{ color: "var(--color-muted)" }}>{subtitle}</p>
-      </div>
-      <ul className="space-y-3">
-        {modes.map((q) => (
-          <li
-            key={q.id}
-            className="overflow-hidden"
-            style={{ border: "var(--border-thin)", background: "var(--color-bg)" }}
-          >
-            <div className="flex items-start gap-3 p-4">
-              <span
-                className="grid h-12 w-12 shrink-0 place-items-center text-2xl text-white"
-                style={{ background: "var(--color-forest)" }}
-                aria-hidden
-              >
-                {q.icon}
-              </span>
-              <div className="flex-1">
-                <h3
-                  className="font-semibold"
-                  style={{ fontFamily: "var(--font-display)" }}
-                >
-                  {q.title}
-                </h3>
-                <p className="mt-0.5 text-sm" style={{ color: "var(--color-muted)" }}>{q.desc}</p>
-                <button
-                  type="button"
-                  className="mt-3 px-4 py-1.5 text-sm font-semibold text-white"
-                  style={{ background: "var(--color-forest)", fontFamily: "var(--font-ui)" }}
-                >
-                  {q.cta}
-                </button>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }

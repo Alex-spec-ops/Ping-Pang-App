@@ -94,7 +94,7 @@ export default function FeedList({ items }: { items: Activity[] }) {
     >
       {/* ── Filter bar ─────────────────────────────────── */}
       <div
-        className="sticky top-[--feed-offset] z-20 flex items-center gap-2 overflow-x-auto px-4 py-2 backdrop-blur"
+        className="sticky top-[--feed-offset] z-20 flex items-center gap-1 px-2 py-1.5 backdrop-blur"
         style={{ borderBottom: "var(--border-thin)", background: "rgba(250,250,247,0.97)" }}
       >
         {FILTERS.map((f) => (
@@ -102,9 +102,13 @@ export default function FeedList({ items }: { items: Activity[] }) {
             key={f.id}
             type="button"
             onClick={() => setFilter(f.id)}
-            className="shrink-0 px-3 py-1.5 text-xs font-medium transition-colors"
+            className="flex-1 py-1 transition-colors"
             style={{
               fontFamily: "var(--font-ui)",
+              fontSize: "9px",
+              fontWeight: 600,
+              letterSpacing: "0.03em",
+              whiteSpace: "nowrap",
               background: filter === f.id ? "var(--color-forest)" : "var(--color-line)",
               color: filter === f.id ? "#fff" : "var(--color-muted)",
             }}
@@ -119,7 +123,7 @@ export default function FeedList({ items }: { items: Activity[] }) {
           onClick={doRefresh}
           disabled={refreshing}
           aria-label="Actualiser"
-          className="ml-auto shrink-0 grid h-7 w-7 place-items-center text-sm transition-all disabled:opacity-50"
+          className="shrink-0 grid h-6 w-6 place-items-center text-xs transition-all disabled:opacity-50 ml-1"
           style={{
             border: "var(--border-thin)",
             color: "var(--color-muted)",
