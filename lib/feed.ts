@@ -10,7 +10,7 @@ export function feedScore(a: Activity): number {
   return new Date(a.createdAt).getTime() + a.likes * LIKE_BOOST_MS;
 }
 
-export type FeedFilter = "all" | "friends" | "club" | "events";
+export type FeedFilter = "all" | "friends" | "club" | "events" | "défis";
 
 export function applyFilter(activities: Activity[], filter: FeedFilter): Activity[] {
   if (filter === "all") return activities;
