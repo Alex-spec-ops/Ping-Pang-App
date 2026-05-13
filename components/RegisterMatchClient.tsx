@@ -105,11 +105,32 @@ export default function RegisterMatchClient() {
   const [step, setStep] = useState<Step>({ kind: "idle" });
 
   return (
-    <div className="px-4 pb-4 pt-4" style={{ borderBottom: "var(--border-thin)" }}>
+    <div className="px-8 py-4" style={{ borderBottom: "var(--border-thin)" }}>
       {step.kind === "idle" && (
-        <Btn fullWidth onClick={() => setStep({ kind: "mode" })}>
-          ⚡ Enregistrer ma partie
-        </Btn>
+        <button
+          type="button"
+          onClick={() => setStep({ kind: "mode" })}
+          style={{
+            ...UI,
+            width: "100%",
+            height: "15vh",
+            borderRadius: "4px",
+            background: "var(--color-forest)",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "15px",
+            fontWeight: 800,
+            letterSpacing: "0.04em",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+          }}
+        >
+          Enregistrer ma partie
+        </button>
       )}
 
       {step.kind === "mode" && (
