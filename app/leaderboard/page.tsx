@@ -26,7 +26,7 @@ export default async function LeaderboardPage({
 
   return (
     <main className="mx-auto max-w-md pb-24">
-      <TopBar title="Classement" subtitle="ELO · K=32" />
+      <TopBar title="Classement" subtitle="ELO · K variable" />
 
       {error && (
         <p className="p-6 text-center text-sm text-red-500">
