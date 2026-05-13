@@ -182,7 +182,7 @@ export type Database = {
       };
       tournament_participants: {
         Row: DbTournamentParticipant;
-        Insert: Omit<DbTournamentParticipant, "id"> & { id?: string };
+        Insert: Omit<DbTournamentParticipant, "id" | "seed"> & { id?: string; seed?: number | null };
         Update: Partial<Omit<DbTournamentParticipant, "id">>;
         Relationships: [];
       };
