@@ -23,7 +23,6 @@ const tabs: Tab[] = [
   { href: "/feed",    label: "Feed",        icon: "🏓", match: (p) => p === "/" || p.startsWith("/feed") },
   { href: "/map",     label: "Carte",       icon: "🗺",  match: (p) => p.startsWith("/map") },
   { href: "/play",    label: "Enregistrer", icon: null,  match: (p) => p.startsWith("/play") || p.startsWith("/match") },
-  { href: "/players", label: "Joueurs",     icon: "🏆", match: (p) => p.startsWith("/players") },
   { href: "/profile", label: "Profil",      icon: "👤", match: (p) => p.startsWith("/profile") },
 ];
 

@@ -126,7 +126,7 @@ export default function MapPageClient() {
         window.__gmCb = res;
         const s = document.createElement("script");
         s.setAttribute("data-gmap", "1");
-        s.src = `https://maps.googleapis.com/maps/api/js?key=${GMAP_KEY}&libraries=marker&callback=__gmCb&loading=async`;
+        s.src = `https://maps.googleapis.com/maps/api/js?key=${GMAP_KEY}&libraries=marker&callback=__gmCb`;
         s.async = true;
         document.head.appendChild(s);
       });
