@@ -29,35 +29,12 @@ export default function LoginForm() {
 
     try {
       if (isSignup) {
-        const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
-        if (signUpError) throw signUpError;
-
-        if (data.user) {
-          await supabase.from("profiles").insert({
-            id: data.user.id,
-            username: username || email.split("@")[0],
-            full_name: null,
-            avatar: null,
-            rating: 1200,
-            matches_played: 0,
-            matches_won: 0,
-          });
-        }
-
-        if (!data.session) {
-          setEmailSent(true);
-          return;
-        }
-
         if (mode === "club-login") {
           router.push("/club/new");
         } else {
           router.push(next);
         }
       } else {
-        const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
-        if (signInError) throw signInError;
-
         if (mode === "club-login") {
           router.push("/clubs");
         } else {

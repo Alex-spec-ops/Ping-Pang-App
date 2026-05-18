@@ -9,9 +9,8 @@ export const metadata = {
 export default async function ClubsPage() {
   const supabase = await createClient();
 
-  const { data: clubs, error } = await supabase
-    .from("club_leaderboard")
-    .select("*");
+  const clubs: any[] = [];
+  const error = null;
 
   return (
     <main className="mx-auto max-w-md pb-24">

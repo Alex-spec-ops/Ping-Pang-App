@@ -10,19 +10,10 @@ export const metadata = {
 
 export default async function MyProfilePage() {
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  const user = { id: "dummy-user" };
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
-
-  const { data: memberships } = await supabase
-    .from("club_members")
-    .select("role, clubs(id, name, slug, logo, color, type)")
-    .eq("player_id", user.id);
+  const profile: any = null;
+  const memberships: any[] = [];
 
   const winRate =
     profile && profile.matches_played > 0
