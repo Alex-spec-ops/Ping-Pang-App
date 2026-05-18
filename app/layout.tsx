@@ -4,6 +4,7 @@ import "./globals.css";
 import "./profile.css";
 import "./clubs.css";
 import BottomNav from "../components/BottomNav";
+import { headers } from "next/headers";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -47,27 +48,27 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({
+const NO_NAV_PATHS = ["/login", "/signup"];
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") ?? "";
+  const showNav = !NO_NAV_PATHS.some((p) => pathname.startsWith(p));
+
   return (
     <html
       lang="fr"
       className={`${playfair.variable} ${interTight.variable} ${caveat.variable} h-full`}
     >
-      <body
-        className="min-h-full"
-        style={{ background: "var(--color-bg)", color: "var(--color-ink)" }}
-      >
-        <div
-          className="mx-auto flex min-h-dvh max-w-md flex-col shadow-sm"
-          style={{ background: "var(--color-bg)" }}
-        >
-          <main className="flex-1 pb-20">{children}</main>
+      <body className="min-h-full bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
+        <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-white shadow-sm dark:bg-zinc-950">
+          <main className={showNav ? "flex-1 pb-20" : "flex-1"}>{children}</main>
         </div>
-        <BottomNav />
+        {showNav && <BottomNav />}
       </body>
     </html>
   );

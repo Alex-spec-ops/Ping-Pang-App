@@ -22,8 +22,30 @@ function RecordIcon({ color }: { color: string }) {
 const tabs: Tab[] = [
   { href: "/feed",    label: "Feed",        icon: "🏓", match: (p) => p === "/" || p.startsWith("/feed") },
   { href: "/map",     label: "Carte",       icon: "🗺",  match: (p) => p.startsWith("/map") },
-  { href: "/play",    label: "Enregistrer", icon: null,  match: (p) => p.startsWith("/play") || p.startsWith("/match") },
-  { href: "/profile", label: "Profil",      icon: "👤", match: (p) => p.startsWith("/profile") },
+  {
+    href: "/play",
+    label: "Jouer",
+    icon: "⚔️",
+    match: (p) => p.startsWith("/play") || p.startsWith("/match"),
+  },
+  {
+    href: "/clubs",
+    label: "Clubs",
+    icon: "🏛️",
+    match: (p) => p.startsWith("/clubs") || p.startsWith("/club"),
+  },
+  {
+    href: "/leaderboard",
+    label: "Classement",
+    icon: "📊",
+    match: (p) => p.startsWith("/leaderboard") || p.startsWith("/u/"),
+  },
+  {
+    href: "/profile",
+    label: "Profil",
+    icon: "👤",
+    match: (p) => p.startsWith("/profile") || p.startsWith("/players"),
+  },
 ];
 
 export default function BottomNav() {
