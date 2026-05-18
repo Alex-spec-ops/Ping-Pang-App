@@ -14,6 +14,7 @@ import {
   distanceKm,
   pinColor,
 } from "../lib/venues";
+import { getAllTerritories } from "../lib/territory";
 import VenueSheet from "./VenueSheet";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -208,11 +209,16 @@ export default function MapPageClient() {
     markerMap.current.forEach((m) => { m.map = null; });
     markerMap.current.clear();
 
+    const territories = getAllTerritories();
+
     filtered.forEach((venue) => {
+      const owner = territories.get(venue.id);
+      const color = owner ? owner.color : pinColor(venue.rating);
+      const badge = owner ? owner.logo : null;
       const marker = new gm.marker.AdvancedMarkerElement({
         position: { lat: venue.lat, lng: venue.lng },
         map,
-        content: makePinElement(pinColor(venue.rating)),
+        content: makePinElement(color, badge),
         title: venue.name,
       });
       marker.addListener("click", () => setSelectedVenue(venue));
@@ -599,10 +605,13 @@ export default function MapPageClient() {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-/** Crée un pin en forme de goutte avec l'icône 🏓 rendue nativement par le navigateur */
-function makePinElement(color: string): HTMLElement {
+/** Crée un pin en forme de goutte. badge = emoji du club propriétaire, sinon 🏓 */
+function makePinElement(color: string, badge?: string | null): HTMLElement {
+  const icon = badge ?? "🏓";
   const wrap = document.createElement("div");
   wrap.style.cssText = "width:40px;height:46px;position:relative;cursor:pointer;";
+  // Ring around the pin when it has a territory owner
+  const ring = badge ? `box-shadow:0 0 0 2.5px ${color},0 2px 10px rgba(0,0,0,.35);` : "box-shadow:0 2px 8px rgba(0,0,0,.30);";
   wrap.innerHTML = `
     <div style="
       position:absolute;bottom:0;left:50%;
@@ -610,11 +619,11 @@ function makePinElement(color: string): HTMLElement {
       background:${color};
       border-radius:50% 50% 50% 0;
       border:2.5px solid white;
-      box-shadow:0 2px 8px rgba(0,0,0,.30);
+      ${ring}
       transform:translateX(-50%) rotate(-45deg);
       display:flex;align-items:center;justify-content:center;
     ">
-      <span style="transform:rotate(45deg);font-size:17px;line-height:1;display:block;margin:2px 0 0 1px;">🏓</span>
+      <span style="transform:rotate(45deg);font-size:17px;line-height:1;display:block;margin:2px 0 0 1px;">${icon}</span>
     </div>`;
   return wrap;
 }

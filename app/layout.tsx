@@ -3,8 +3,7 @@ import { Playfair_Display, Inter_Tight, Caveat } from "next/font/google";
 import "./globals.css";
 import "./profile.css";
 import "./clubs.css";
-import BottomNav from "../components/BottomNav";
-import { headers } from "next/headers";
+import AppShell from "../components/AppShell";
 
 const playfair = Playfair_Display({
   variable: "--font-playfair",
@@ -48,27 +47,18 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-const NO_NAV_PATHS = ["/login", "/signup"];
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const headersList = await headers();
-  const pathname = headersList.get("x-pathname") ?? "";
-  const showNav = !NO_NAV_PATHS.some((p) => pathname.startsWith(p));
-
   return (
     <html
       lang="fr"
       className={`${playfair.variable} ${interTight.variable} ${caveat.variable} h-full`}
     >
-      <body className="min-h-full bg-zinc-50 text-zinc-900 dark:bg-black dark:text-zinc-50">
-        <div className="mx-auto flex min-h-dvh max-w-md flex-col bg-white shadow-sm dark:bg-zinc-950">
-          <main className={showNav ? "flex-1 pb-20" : "flex-1"}>{children}</main>
-        </div>
-        {showNav && <BottomNav />}
+      <body className="min-h-full">
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );

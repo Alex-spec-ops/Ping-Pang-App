@@ -7,12 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node --experimental-strip-types --test lib/elo.test.ts",
-    "seed": "node --experimental-strip-types scripts/seed.ts"
+    "test": "node --experimental-strip-types --test lib/elo.test.ts"
   },
   "dependencies": {
-    "@supabase/ssr": "^0.10.3",
-    "@supabase/supabase-js": "^2.105.4",
     "next": "16.2.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",

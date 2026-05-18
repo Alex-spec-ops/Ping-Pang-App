@@ -6,39 +6,34 @@ import { usePathname } from "next/navigation";
 type Tab = {
   href: string;
   label: string;
-  icon: React.ReactNode;
+  icon: string;
   match: (path: string) => boolean;
 };
 
-function RecordIcon({ color }: { color: string }) {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="11" cy="11" r="10" stroke={color} strokeWidth="2" />
-      <circle cx="11" cy="11" r="5" fill={color} />
-    </svg>
-  );
-}
-
 const tabs: Tab[] = [
-  { href: "/feed",    label: "Feed",        icon: "🏓", match: (p) => p === "/" || p.startsWith("/feed") },
-  { href: "/map",     label: "Carte",       icon: "🗺",  match: (p) => p.startsWith("/map") },
+  {
+    href: "/feed",
+    label: "Accueil",
+    icon: "🏠",
+    match: (p) => p === "/" || p.startsWith("/feed"),
+  },
   {
     href: "/play",
-    label: "Jouer",
-    icon: "⚔️",
-    match: (p) => p.startsWith("/play") || p.startsWith("/match"),
+    label: "Enregistrer",
+    icon: "⊕",
+    match: (p) => p.startsWith("/play") || p.startsWith("/map") || p.startsWith("/match"),
+  },
+  {
+    href: "/stats",
+    label: "Stats",
+    icon: "📊",
+    match: (p) => p.startsWith("/stats") || p.startsWith("/leaderboard") || p.startsWith("/u/"),
   },
   {
     href: "/clubs",
     label: "Clubs",
     icon: "🏛️",
     match: (p) => p.startsWith("/clubs") || p.startsWith("/club"),
-  },
-  {
-    href: "/leaderboard",
-    label: "Classement",
-    icon: "📊",
-    match: (p) => p.startsWith("/leaderboard") || p.startsWith("/u/"),
   },
   {
     href: "/profile",
@@ -65,26 +60,38 @@ export default function BottomNav() {
         {tabs.map((t) => {
           const active = t.match(pathname);
           const color = active ? "var(--color-forest)" : "var(--color-muted)";
+          const isCenter = t.href === "/play";
           return (
             <li key={t.href} className="flex-1">
               <Link
                 href={t.href}
-                className="flex h-16 flex-col items-center justify-center gap-1 transition-colors"
+                className="relative flex h-16 flex-col items-center justify-center gap-1 transition-colors"
                 style={{
                   fontFamily: "var(--font-ui)",
                   fontSize: "10px",
                   fontWeight: 600,
-                  letterSpacing: "0.08em",
+                  letterSpacing: "0.05em",
                   textTransform: "uppercase",
                   color,
                 }}
               >
-                {t.href === "/play"
-                  ? <RecordIcon color={color} />
-                  : <span className="text-xl leading-none">{t.icon}</span>
-                }
+                {isCenter ? (
+                  <span
+                    className="grid h-9 w-9 place-items-center text-lg leading-none"
+                    style={{
+                      background: active
+                        ? "var(--color-forest)"
+                        : "var(--color-ink)",
+                      color: "#fff",
+                    }}
+                  >
+                    {t.icon}
+                  </span>
+                ) : (
+                  <span className="text-xl leading-none">{t.icon}</span>
+                )}
                 <span>{t.label}</span>
-                {active && (
+                {active && !isCenter && (
                   <span
                     className="absolute bottom-0 h-0.5 w-8"
                     style={{ background: "var(--color-forest)" }}

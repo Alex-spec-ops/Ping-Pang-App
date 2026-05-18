@@ -55,6 +55,13 @@ export type ClubChatMessage = {
   sentAt: string;
 };
 
+export type ClubType = "physical" | "digital";
+
+export type ClubMembership = {
+  free: boolean;
+  price?: number; // € / an, undefined if free
+};
+
 export type Club = {
   id: string;
   name: string;
@@ -63,6 +70,8 @@ export type Club = {
   logo: string; // emoji
   color: string; // hex
   visibility: ClubVisibility;
+  type: ClubType;
+  membership: ClubMembership;
   createdAt: string;
   creatorId: string;
   members: ClubMember[];
@@ -86,6 +95,8 @@ export const clubs: Club[] = [
     logo: "🏓",
     color: "#2563eb",
     visibility: "public",
+    type: "physical",
+    membership: { free: false, price: 220 },
     createdAt: "2024-09-01T00:00:00Z",
     creatorId: "p5",
     city: "Paris",
@@ -148,6 +159,8 @@ export const clubs: Club[] = [
     logo: "🦁",
     color: "#dc2626",
     visibility: "public",
+    type: "physical",
+    membership: { free: false, price: 180 },
     createdAt: "2023-01-10T00:00:00Z",
     creatorId: "p6",
     city: "Lyon",
@@ -199,6 +212,8 @@ export const clubs: Club[] = [
     logo: "🦊",
     color: "#7c3aed",
     visibility: "private",
+    type: "physical",
+    membership: { free: false, price: 350 },
     createdAt: "2020-06-01T00:00:00Z",
     creatorId: "p1",
     city: "Montpellier",
@@ -239,6 +254,8 @@ export const clubs: Club[] = [
     logo: "🦅",
     color: "#059669",
     visibility: "public",
+    type: "digital",
+    membership: { free: true },
     createdAt: "2022-03-01T00:00:00Z",
     creatorId: "p8",
     city: "Berlin",

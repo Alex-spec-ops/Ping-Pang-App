@@ -1,24 +1,36 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { SESSION_STORAGE_KEY } from "../../lib/session";
 
 export default function LogoutButton() {
   const router = useRouter();
-  const supabase = createClient();
 
-  async function handleLogout() {
-    await supabase.auth.signOut();
+  function handleLogout() {
+    if (typeof window !== "undefined") {
+      try {
+        window.localStorage.removeItem(SESSION_STORAGE_KEY);
+      } catch {
+        // ignore
+      }
+    }
     router.push("/login");
     router.refresh();
   }
 
   return (
     <button
+      type="button"
       onClick={handleLogout}
-      className="w-full rounded-xl border border-red-200 py-3 text-sm font-semibold text-red-500 transition hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950"
+      className="w-full py-3 text-sm font-bold uppercase tracking-wider"
+      style={{
+        background: "transparent",
+        color: "#c4423a",
+        border: "1px solid #c4423a",
+        fontFamily: "var(--font-ui)",
+      }}
     >
-      Se déconnecter
+      🚪 Se déconnecter
     </button>
   );
 }

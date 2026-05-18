@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { Venue, VenueReview } from "../lib/venues";
 import { moderateReview } from "../lib/venues";
+import { getVenueLeaderboard } from "../lib/territory";
 import { timeAgo } from "../lib/format";
 
 interface Props {
@@ -15,6 +16,8 @@ interface Props {
 }
 
 export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin, checkedIn }: Props) {
+  const territory = getVenueLeaderboard(venue.id);
+  const owner = territory[0] ?? null;
   const [photoIdx, setPhotoIdx] = useState(0);
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [submittedReview, setSubmittedReview] = useState(false);
@@ -234,6 +237,94 @@ export default function VenueSheet({ venue, reviews, isOpen, onClose, onCheckin,
               {checkedIn ? "✓ J'y suis !" : "📍 J'y suis"}
             </button>
           </div>
+
+          {/* Territory section */}
+          {territory.length > 0 && (
+            <div className="mt-5 pt-4" style={{ borderTop: "var(--border-thin)" }}>
+              <div className="mb-2 flex items-center gap-2">
+                <p
+                  className="text-xs font-semibold uppercase tracking-wide"
+                  style={{ color: "var(--color-muted)", fontFamily: "var(--font-ui)" }}
+                >
+                  Territoire
+                </p>
+                {owner && (
+                  <span
+                    className="px-2 py-0.5 text-[10px] font-bold"
+                    style={{ background: owner.club.color, color: "#fff" }}
+                  >
+                    {owner.club.logo} {owner.club.shortName}
+                  </span>
+                )}
+              </div>
+
+              {owner && (
+                <div
+                  className="mb-3 flex items-center gap-3 p-3"
+                  style={{ background: owner.club.color + "18", border: `1.5px solid ${owner.club.color}55` }}
+                >
+                  <span className="text-2xl">{owner.club.logo}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold truncate" style={{ fontFamily: "var(--font-display)", color: owner.club.color }}>
+                      {owner.club.name}
+                    </p>
+                    <p className="text-[11px]" style={{ color: "var(--color-muted)" }}>
+                      {owner.wins} victoire{owner.wins > 1 ? "s" : ""} · {owner.club.city}
+                    </p>
+                  </div>
+                  <div
+                    className="flex h-8 w-8 items-center justify-center text-xs font-bold"
+                    style={{ background: owner.club.color, color: "#fff" }}
+                  >
+                    👑
+                  </div>
+                </div>
+              )}
+
+              {territory.length > 1 && (
+                <ul className="space-y-1.5">
+                  {territory.map((entry, i) => {
+                    const total = territory[0].wins;
+                    const pct = Math.round((entry.wins / total) * 100);
+                    return (
+                      <li key={entry.clubId} className="flex items-center gap-2">
+                        <span
+                          className="w-4 text-center text-[10px] font-bold tabular-nums"
+                          style={{ color: "var(--color-muted)" }}
+                        >
+                          {i + 1}
+                        </span>
+                        <span className="text-base leading-none">{entry.club.logo}</span>
+                        <span className="w-16 truncate text-[11px] font-medium">{entry.club.shortName}</span>
+                        <div
+                          className="flex-1 overflow-hidden"
+                          style={{ height: 4, background: "var(--color-line)" }}
+                        >
+                          <div
+                            className="h-full transition-all"
+                            style={{ width: `${pct}%`, background: entry.club.color }}
+                          />
+                        </div>
+                        <span
+                          className="w-8 text-right text-[10px] font-semibold tabular-nums"
+                          style={{ color: "var(--color-muted)" }}
+                        >
+                          {entry.wins}V
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+
+              <p
+                className="mt-2 text-[10px] leading-tight"
+                style={{ color: "var(--color-muted)" }}
+              >
+                Le club qui cumule le plus de victoires sur cette table en devient propriétaire. Les victoires s'additionnent chaque jour pour tous les membres du club.
+              </p>
+            </div>
+          )}
 
           {/* Reviews section */}
           <div className="mt-5 pt-4" style={{ borderTop: "var(--border-thin)" }}>
