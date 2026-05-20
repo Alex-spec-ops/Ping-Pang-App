@@ -1,32 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&family=Caveat:wght@400;700&display=swap');
 @import "tailwindcss";
 
-/* ── Design tokens — Ping Pang Paris ────────────────────────────────────── */
+/* ── Design tokens — Ping Pang & Co. Elite ────────────────────────────────────── */
 :root {
-  /* Couleurs */
-  --color-bg:           #ffffff;
-  --color-ink:          #0e0e0e;
-  --color-forest:       #0e3d2e;
-  --color-forest-deep:  #0a2d22;
-  --color-cream:        #fafaf7;
-  --color-line:         #e5e5e0;
-  --color-muted:        #6b6b6b;
+  /* Colors from design.md */
+  --surface: #F9F9FF;
+  --surface-dim: #D3DAEA;
+  --surface-bright: #F9F9FF;
+  --surface-container-lowest: #FFFFFF;
+  --surface-container-low: #F0F3FF;
+  --surface-container: #E7EEFE;
+  --surface-container-high: #E2E8F8;
+  --surface-container-highest: #DCE2F3;
+  --on-surface: #151C27;
+  --on-surface-variant: #424846;
+  --inverse-surface: #2A313D;
+  --inverse-on-surface: #EBF1FF;
+  --outline: #727976;
+  --outline-variant: #C1C8C4;
+  --surface-tint: #4A645C;
+  --primary: #000A07;
+  --on-primary: #FFFFFF;
+  --primary-container: #0A241E;
+  --on-primary-container: #728D84;
+  --inverse-primary: #B1CDC3;
+  --secondary: #5D5F5F;
+  --on-secondary: #FFFFFF;
+  --secondary-container: #DFE0E0;
+  --on-secondary-container: #616363;
+  --tertiary: #050808;
+  --on-tertiary: #FFFFFF;
+  --tertiary-container: #1D2020;
+  --on-tertiary-container: #858887;
+  --error: #BA1A1A;
+  --on-error: #FFFFFF;
+  --error-container: #FFDAD6;
+  --on-error-container: #93000A;
+  --primary-fixed: #CCE9DF;
+  --primary-fixed-dim: #B1CDC3;
+  --on-primary-fixed: #06201A;
+  --on-primary-fixed-variant: #334C45;
+  --secondary-fixed: #E2E2E2;
+  --secondary-fixed-dim: #C6C6C7;
+  --on-secondary-fixed: #1A1C1C;
+  --on-secondary-fixed-variant: #454747;
+  --tertiary-fixed: #E1E3E2;
+  --tertiary-fixed-dim: #C4C7C6;
+  --on-tertiary-fixed: #191C1C;
+  --on-tertiary-fixed-variant: #444747;
+  --background: #F9F9FF;
+  --on-background: #151C27;
+  --surface-variant: #DCE2F3;
+
+  /* Typography mapping */
+  --font-display: 'Lexend', sans-serif;
+  --font-ui:      'Manrope', sans-serif;
+  --font-script:  'Caveat', cursive;
+
+  /* Legacy variables mapping for seamless backwards compatibility */
+  --color-bg:           var(--background);
+  --color-ink:          var(--on-background);
+  --color-forest:       var(--primary-container); /* Deep Forest Green */
+  --color-forest-deep:  var(--primary); /* Deepest dark green/black */
+  --color-cream:        var(--surface-container-lowest); /* Crisp White */
+  --color-line:         var(--outline-variant); /* Outline variant */
+  --color-muted:        var(--on-surface-variant);
   --color-gold:         #c9a86a;
   --color-silver:       #9a9a93;
-  --color-red:          #d7222a;
+  --color-red:          var(--error);
 
-  /* Typographie */
-  --font-display: var(--font-playfair), Georgia, serif;
-  --font-ui:      var(--font-inter-tight), 'Inter', 'Helvetica Neue', sans-serif;
-  --font-script:  var(--font-caveat), cursive;
+  /* Spacing */
+  --space-unit: 4px;
+  --space-gutter: 24px;
+  --space-margin-mobile: 16px;
+  --space-margin-desktop: 48px;
+  --space-stack-sm: 8px;
+  --space-stack-md: 16px;
+  --space-stack-lg: 32px;
 
-  /* Espacements */
-  --space-1: 4px;  --space-2: 8px;  --space-3: 16px;
-  --space-4: 24px; --space-5: 32px; --space-6: 48px;
-  --space-7: 64px; --space-8: 96px; --space-9: 128px;
+  /* Map spacing to legacy variables */
+  --space-1: var(--space-unit);
+  --space-2: var(--space-stack-sm);
+  --space-3: var(--space-stack-md);
+  --space-4: var(--space-gutter);
+  --space-5: var(--space-stack-lg);
+  --space-6: var(--space-margin-desktop);
 
-  /* Rayons */
+  /* Radii */
+  --radius-sm: 0.25rem;
+  --radius-default: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-pill: 9999px;
+
+  /* Legacy radii mapping */
   --radius-none: 0;
-  --radius-pill: 999px;
 
   /* Bordures */
   --border-thin: 1px solid var(--color-line);
@@ -34,7 +103,7 @@
 
   /* Conteneur */
   --container: 1280px;
-  --gutter:    32px;
+  --gutter:    24px;
 
   /* Motion */
   --ease-out:       cubic-bezier(0.22, 1, 0.36, 1);
@@ -50,8 +119,48 @@
   --color-background: var(--color-bg);
   --color-foreground: var(--color-ink);
   --color-brand:      var(--color-forest);
-  --font-sans:        var(--font-display);
+  --font-sans:        var(--font-ui);
+  --font-display:     var(--font-display);
   --font-ui:          var(--font-ui);
+  
+  --color-surface: var(--surface);
+  --color-surface-dim: var(--surface-dim);
+  --color-surface-bright: var(--surface-bright);
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-on-surface: var(--on-surface);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+  
+  --radius-sm: var(--radius-sm);
+  --radius-DEFAULT: var(--radius-default);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  --radius-full: var(--radius-pill);
+
+  /* Map standard tailwind colors to design system to override utility styling */
+  --color-emerald-50: var(--surface-container-low);
+  --color-emerald-100: var(--surface-container);
+  --color-emerald-200: var(--surface-container-high);
+  --color-emerald-300: var(--on-primary-container);
+  --color-emerald-400: var(--on-primary-container);
+  --color-emerald-500: var(--color-forest);
+  --color-emerald-600: var(--color-forest);
+  --color-emerald-700: var(--color-forest);
+  --color-emerald-800: var(--color-forest-deep);
+  --color-emerald-900: var(--color-forest-deep);
+  --color-emerald-950: var(--color-forest-deep);
+
+  --color-rose-50: var(--error-container);
+  --color-rose-100: var(--error-container);
+  --color-rose-600: var(--color-red);
+  --color-rose-700: var(--color-red);
+  --color-rose-900: var(--on-error-container);
 }
 
 html, body {
@@ -61,9 +170,9 @@ html, body {
 }
 
 body {
-  font-family: var(--font-display);
+  font-family: var(--font-ui), system-ui, -apple-system, sans-serif;
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -120,6 +229,113 @@ body {
   --feed-offset: 57px;
 }
 
-body {
-  font-family: var(--font-sans), system-ui, -apple-system, sans-serif;
+/* ── Design System Overrides ─────────────────────────────────────────────── */
+
+/* Cards & Containers: standard 0.5rem (8px) radius */
+.stat-card,
+.chart-card,
+.mcal,
+.club-card,
+.club-card-mini,
+.ch-card,
+.ch-club-card,
+.club-member-row,
+.club-event-card,
+.club-challenge-card,
+.badge-card,
+.sub-free-card,
+.sub-premium-card,
+.club-logo-wrap,
+.club-achievement-card,
+.create-preview,
+.emoji-option,
+.vis-option,
+.avatar-option,
+.ch-toggle-btn,
+.ch-format-btn,
+.ch-form-input,
+.ch-form-textarea,
+.create-input,
+.edit-input-wrap,
+.edit-textarea {
+  border-radius: var(--radius-DEFAULT) !important;
+}
+
+/* Interactive Elements: Buttons utilize the rounded-lg (1rem) or pill-shapes */
+.btn-club-join,
+.btn-club-leave,
+.btn-club-manage,
+.btn-club-share,
+.btn-ch-create,
+.btn-ch-join,
+.btn-ch-joined,
+.btn-ch-cancel,
+.btn-ch-decline,
+.btn-ch-accept,
+.btn-club-join-inline,
+.btn-ch-sheet-cancel,
+.btn-ch-sheet-submit,
+.btn-upgrade,
+.btn-manage-sub,
+.btn-edit-profile,
+.btn-follow,
+.btn-challenge,
+.btn-edit-cancel,
+.btn-edit-save {
+  border-radius: var(--radius-lg) !important;
+}
+
+/* Cards fine borders & shadows */
+.stat-card,
+.chart-card,
+.mcal,
+.club-card,
+.club-card-mini,
+.ch-card,
+.ch-club-card,
+.club-member-row,
+.club-event-card,
+.club-challenge-card,
+.badge-card,
+.sub-free-card,
+.sub-premium-card {
+  border: 1px solid var(--color-line) !important;
+  background: var(--color-cream) !important;
+  box-shadow: none !important;
+  transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out) !important;
+}
+
+/* Hover/active lift shadow */
+.stat-card:hover,
+.club-card:hover,
+.club-card-mini:hover,
+.ch-card:hover,
+.ch-club-card:hover,
+.badge-card:hover {
+  box-shadow: 0px 4px 20px rgba(10, 36, 30, 0.05) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Search and input fields */
+.clubs-search-input,
+.club-chat-input,
+.create-input,
+.ch-form-input,
+.ch-form-textarea,
+.edit-input,
+.edit-textarea {
+  background: #F9FAFB !important;
+  border: none !important;
+  outline: none !important;
+  transition: box-shadow var(--duration-fast) var(--ease-out) !important;
+}
+.clubs-search-input:focus,
+.club-chat-input:focus,
+.create-input:focus,
+.ch-form-input:focus,
+.ch-form-textarea:focus,
+.edit-input:focus,
+.edit-textarea:focus {
+  box-shadow: 0 0 0 2px var(--color-forest) !important;
+  background: #FFFFFF !important;
 }

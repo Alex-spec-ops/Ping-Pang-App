@@ -3,5 +3,8 @@
     "allow": [
       "Bash(node --experimental-strip-types --test lib/elo.test.ts)"
     ]
+  },
+  "worktree": {
+    "bgIsolation": "none"
   }
 }

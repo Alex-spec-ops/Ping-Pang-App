@@ -2,49 +2,63 @@
 
 import { useState } from "react";
 
-export default function StatsTabs({
-  stats,
-  ranking,
-}: {
-  stats: React.ReactNode;
-  ranking: React.ReactNode;
-}) {
-  const [tab, setTab] = useState<"stats" | "ranking">("stats");
+type Tab = {
+  id: string;
+  label: string;
+  icon: string;
+  content: React.ReactNode;
+};
+
+export default function StatsTabs({ tabs }: { tabs: Tab[] }) {
+  const [activeId, setActiveId] = useState(tabs[0]?.id);
 
   return (
     <>
-      <div
-        className="sticky z-20 grid grid-cols-2 backdrop-blur"
+      <nav
+        className="sticky top-0 z-30 border-b border-[#E5E7EB]"
         style={{
-          top: "calc(env(safe-area-inset-top) + 56px)",
-          background: "rgba(250,250,247,0.97)",
-          borderBottom: "var(--border-thin)",
+          background: "rgba(255,255,255,0.97)",
+          backdropFilter: "blur(12px)",
         }}
       >
-        {[
-          { id: "stats", label: "📊 Mes stats" },
-          { id: "ranking", label: "🏆 Classement" },
-        ].map((t) => {
-          const active = tab === t.id;
-          return (
-            <button
-              key={t.id}
-              type="button"
-              onClick={() => setTab(t.id as "stats" | "ranking")}
-              className="py-3 text-[11px] font-bold uppercase tracking-widest transition-colors"
-              style={{
-                fontFamily: "var(--font-ui)",
-                background: active ? "var(--color-forest)" : "transparent",
-                color: active ? "#fff" : "var(--color-muted)",
-              }}
-            >
-              {t.label}
-            </button>
-          );
-        })}
-      </div>
+        <ul className="mx-auto flex max-w-md items-stretch">
+          {tabs.map((tab) => {
+            const active = activeId === tab.id;
+            return (
+              <li key={tab.id} className="relative flex-1">
+                <button
+                  type="button"
+                  onClick={() => setActiveId(tab.id)}
+                  className="flex w-full h-12 items-center justify-center gap-1.5 transition-all"
+                  style={{
+                    fontFamily: "var(--font-ui)",
+                    fontSize: "11px",
+                    fontWeight: 700,
+                    letterSpacing: "0.05em",
+                    textTransform: "uppercase",
+                    color: active ? "var(--color-forest)" : "var(--color-muted)",
+                  }}
+                >
+                  <span className="text-sm leading-none">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                  {active && (
+                    <span
+                      className="absolute bottom-0 h-0.5 w-8"
+                      style={{ background: "var(--color-forest)" }}
+                    />
+                  )}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
 
-      {tab === "stats" ? stats : ranking}
+      {tabs.map((tab) => (
+        <div key={tab.id} hidden={activeId !== tab.id}>
+          {tab.content}
+        </div>
+      ))}
     </>
   );
 }

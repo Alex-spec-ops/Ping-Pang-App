@@ -18,16 +18,16 @@ const tabs: Tab[] = [
     match: (p) => p === "/" || p.startsWith("/feed"),
   },
   {
-    href: "/play",
-    label: "Enregistrer",
-    icon: "⊕",
-    match: (p) => p.startsWith("/play") || p.startsWith("/map") || p.startsWith("/match"),
-  },
-  {
     href: "/stats",
     label: "Stats",
     icon: "📊",
     match: (p) => p.startsWith("/stats") || p.startsWith("/leaderboard") || p.startsWith("/u/"),
+  },
+  {
+    href: "/map",
+    label: "Carte",
+    icon: "🗺️",
+    match: (p) => p.startsWith("/map") || p.startsWith("/play") || p.startsWith("/match"),
   },
   {
     href: "/clubs",
@@ -60,7 +60,7 @@ export default function BottomNav() {
         {tabs.map((t) => {
           const active = t.match(pathname);
           const color = active ? "var(--color-forest)" : "var(--color-muted)";
-          const isCenter = t.href === "/play";
+          const isCenter = t.href === "/map";
           return (
             <li key={t.href} className="flex-1">
               <Link

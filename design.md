@@ -1,378 +1,161 @@
-# Design System — Ping Pang Paris
-
-> Club de ping-pong premium parisien. Identité éditoriale, sportive et raffinée. Tension entre minimalisme épuré (fond blanc, typographie serif imposante) et profondeur sportive (vert sapin contrasté, photographies en noir et blanc).
-
+---
+name: Ping Pang & Co. Elite
+colors:
+  surface: '#F9F9FF'
+  surface-dim: '#D3DAEA'
+  surface-bright: '#F9F9FF'
+  surface-container-lowest: '#FFFFFF'
+  surface-container-low: '#F0F3FF'
+  surface-container: '#E7EEFE'
+  surface-container-high: '#E2E8F8'
+  surface-container-highest: '#DCE2F3'
+  on-surface: '#151C27'
+  on-surface-variant: '#424846'
+  inverse-surface: '#2A313D'
+  inverse-on-surface: '#EBF1FF'
+  outline: '#727976'
+  outline-variant: '#C1C8C4'
+  surface-tint: '#4A645C'
+  primary: '#000A07'
+  on-primary: '#FFFFFF'
+  primary-container: '#0A241E'
+  on-primary-container: '#728D84'
+  inverse-primary: '#B1CDC3'
+  secondary: '#5D5F5F'
+  on-secondary: '#FFFFFF'
+  secondary-container: '#DFE0E0'
+  on-secondary-container: '#616363'
+  tertiary: '#050808'
+  on-tertiary: '#FFFFFF'
+  tertiary-container: '#1D2020'
+  on-tertiary-container: '#858887'
+  error: '#BA1A1A'
+  on-error: '#FFFFFF'
+  error-container: '#FFDAD6'
+  on-error-container: '#93000A'
+  primary-fixed: '#CCE9DF'
+  primary-fixed-dim: '#B1CDC3'
+  on-primary-fixed: '#06201A'
+  on-primary-fixed-variant: '#334C45'
+  secondary-fixed: '#E2E2E2'
+  secondary-fixed-dim: '#C6C6C7'
+  on-secondary-fixed: '#1A1C1C'
+  on-secondary-fixed-variant: '#454747'
+  tertiary-fixed: '#E1E3E2'
+  tertiary-fixed-dim: '#C4C7C6'
+  on-tertiary-fixed: '#191C1C'
+  on-tertiary-fixed-variant: '#444747'
+  background: '#F9F9FF'
+  on-background: '#151C27'
+  surface-variant: '#DCE2F3'
+typography:
+  headline-xl:
+    fontFamily: Lexend
+    fontSize: 64px
+    fontWeight: '800'
+    lineHeight: '1.1'
+    letterSpacing: -0.04em
+  headline-lg:
+    fontFamily: Lexend
+    fontSize: 32px
+    fontWeight: '700'
+    lineHeight: '1.2'
+    letterSpacing: -0.02em
+  headline-md:
+    fontFamily: Lexend
+    fontSize: 24px
+    fontWeight: '700'
+    lineHeight: '1.2'
+  body-lg:
+    fontFamily: Manrope
+    fontSize: 18px
+    fontWeight: '400'
+    lineHeight: '1.6'
+  body-md:
+    fontFamily: Manrope
+    fontSize: 16px
+    fontWeight: '400'
+    lineHeight: '1.5'
+  label-sm:
+    fontFamily: Manrope
+    fontSize: 12px
+    fontWeight: '600'
+    lineHeight: '1'
+    letterSpacing: 0.05em
+rounded:
+  sm: 0.25rem
+  DEFAULT: 0.5rem
+  md: 0.75rem
+  lg: 1rem
+  xl: 1.5rem
+  full: 9999px
+spacing:
+  unit: 4px
+  gutter: 24px
+  margin-mobile: 16px
+  margin-desktop: 48px
+  stack-sm: 8px
+  stack-md: 16px
+  stack-lg: 32px
 ---
 
-## 1. Direction artistique
+## Brand & Style
 
-**Concept** : *FOR ATHLETES, by athletes* — un club premium qui revendique son sérieux sportif tout en cultivant une esthétique magazine/lifestyle.
+The brand personality of this design system is authoritative, rhythmic, and high-performance. It is built for the dedicated table tennis athlete—from basement enthusiasts to professional circuit players—who view the sport through a lens of precision and data. The UI must evoke the "flow state" of a high-speed rally: fast, responsive, and focused.
 
-**Tonalité** :
-- **Éditoriale** : grandes typographies serif, hiérarchie forte, mise en page aérée façon magazine.
-- **Sportive et brute** : photographies noir & blanc à fort contraste, énergie, mouvement.
-- **Premium discret** : vert sapin profond utilisé avec parcimonie comme signature, blanc dominant, accents dorés réservés aux statuts (Gold Membership).
-- **Bilingue / international** : sélecteur EN, copy mêlant français et anglais (« PLAY BETTER », « FOR ATHLETES by athletes »).
+The design style is **Minimalist-Athletic**. It leverages expansive white space and a restricted, high-contrast palette to ensure performance data remains the focal point. Key characteristics include:
+- **Kinetic Typography:** Using massive, tightly-tracked headings to convey power.
+- **Data Density:** A structured, grid-based approach to statistics, mimicking the analytical depth of professional chess or cycling apps.
+- **Premium Restraint:** Avoiding unnecessary flourishes to focus on functional clarity and high-quality "equipment-like" UI elements.
 
-**Mots-clés esthétiques** : éditorial · sportif · monochrome · serif · contraste · bilingue · authentique.
+## Colors
 
----
+The color palette is anchored by **Deep Forest Green**, a sophisticated alternative to traditional black that provides a premium, "clubhouse" feel.
 
-## 2. Palette de couleurs
+- **Primary (#0A241E):** Used for heavy headings, primary buttons, and dark-mode section backgrounds. It represents the "rubber" and "table" essence of the sport.
+- **Surface & Backgrounds:** We utilize a "Crisp White" for main content areas to maintain high readability. A "Subtle Light Grey" (#F2F4F3) is used to differentiate between card layers and background canvases.
+- **Semantic Accents:** While not in the primary variables, a "Performance Green" (brighter) should be used for positive trends/ELO gains, and a muted "Warning Red" for losses or critical fatigue alerts.
 
-### Couleurs principales
+## Typography
 
-| Token | Hex (estimé) | Usage |
-|---|---|---|
-| `--color-bg` | `#FFFFFF` | Fond dominant (95% des écrans) |
-| `--color-ink` | `#0E0E0E` | Texte principal, logo, titres |
-| `--color-forest` | `#0E3D2E` | **Couleur signature** — footer, sections sombres, CTA primaire, prix, accent graphique (créneaux pleins) |
-| `--color-forest-deep` | `#0A2D22` | Hover du vert, profondeur |
-| `--color-cream` | `#FAFAF7` | Fond alternatif très subtil pour cartes |
-| `--color-line` | `#E5E5E0` | Séparateurs, bordures fines des cartes tarifs |
-| `--color-muted` | `#6B6B6B` | Texte secondaire, libellés (« À partir de ») |
+This design system uses a dual-font strategy to balance athletic aggression with functional data reading.
 
-### Couleurs accents (statut & ponctuation)
+- **Headlines (Lexend):** Chosen for its geometric clarity and athletic weight. Heavy weights (700-800) should be used for large displays, often in all-caps or with tight letter-spacing to create a "blocky," impactful visual signature.
+- **Body & Data (Manrope):** A refined, modern sans-serif that excels in numerical displays and technical stats. It provides the "professional" counterbalance to the loud headlines.
+- **Visual Treatment:** Headlines in the Forest Green color should occasionally overlap section boundaries to create a sense of depth and movement.
 
-| Token | Hex (estimé) | Usage |
-|---|---|---|
-| `--color-gold` | `#C9A86A` | Badge « Le Club » Gold Membership |
-| `--color-silver` | `#9A9A93` | Badge « Le Club » Platinium Membership |
-| `--color-red` | `#D7222A` | Pastille raquette rouge (Play Half), cœur Carte Cadeau |
-| `--color-paddle-wood` | `#D8B98A` | Manche des raquettes décoratives |
+## Layout & Spacing
 
-### Règles d'usage
+This design system utilizes a **Fixed Grid** for desktop (12 columns) and a **Fluid Grid** for mobile (4 columns).
 
-- **Le blanc domine massivement** ; le vert sapin est utilisé comme signature ponctuelle, jamais comme fond plein de page entière sauf footer et bandeaux dédiés.
-- Le vert apparaît dans : footer, CTA actif (`Deviens membre` Gold), mots-clés en italique des titres (« *by athletes* »), créneaux « heures pleines » du planning, éléments graphiques.
-- Les accents or/argent sont **strictement** réservés aux badges d'abonnement.
-- Pas de gradients, pas de couleurs vives — sobriété éditoriale.
+- **The Rhythm:** We follow a 4px baseline grid. Spacing between cards and primary sections is generous (32px+) to prevent the data from feeling cluttered.
+- **Information Architecture:** Content is organized into "Clusters." A cluster consists of a label (uppercase, small), a large headline/metric, and a supporting visualization (graph or list).
+- **Horizontal Flow:** In stats-heavy views, use a horizontal scroll for "Quick Stats" chips to keep the vertical height of the primary cards manageable.
 
----
+## Elevation & Depth
 
-## 3. Typographie
+Hierarchy is established through **Tonal Layering** and **Low-Contrast Outlines** rather than heavy shadows.
 
-Le site repose sur **deux familles** très contrastées : un serif éditorial pour l'expression et la hiérarchie, et un sans-serif géométrique très étroit pour la navigation et les libellés.
+- **Layer 0 (Canvas):** Subtle Light Grey (#F2F4F3).
+- **Layer 1 (Cards):** Crisp White (#FFFFFF). These cards should have a very fine, 1px border in a slightly darker grey (#E5E7EB) to define edges without adding visual weight.
+- **Layer 2 (Interactions):** Active states or hovered cards use a soft, ambient shadow (0px 4px 20px rgba(10, 36, 30, 0.05)) to suggest "lift."
+- **Inversion:** Significant call-to-action sections (like "Start Match") should use the Forest Green as a background to create a "recessed" or "anchor" effect within the light layout.
 
-### Familles
+## Shapes
 
-```css
---font-display: 'Playfair Display', 'GT Sectra', 'Tiempos Headline', Georgia, serif;
---font-body: 'Playfair Display', Georgia, serif; /* le serif est aussi utilisé en body */
---font-ui: 'Neue Haas Grotesk Display', 'Inter Tight', 'Helvetica Neue', sans-serif;
---font-script: 'Caveat', 'Reenie Beanie', cursive; /* "Let's play better together!" */
-```
+The shape language reflects the precision of the sport.
 
-> **Note** : le logo `PING PANG effect` est un lettrage custom (graffiti/marker) — à conserver en SVG, pas reproduit en webfont.
+- **Cards & Containers:** We use a standard 0.5rem (8px) radius. This provides a modern, friendly feel while remaining structured enough for dense data.
+- **Interactive Elements:** Buttons utilize the `rounded-lg` (1rem) or pill-shapes to distinguish them clearly from information-only cards.
+- **Iconography:** Icons should be "Linear" with a 2px stroke weight, mirroring the clean lines of a table tennis court. Avoid filled icons unless indicating an active state in the navigation bar.
 
-### Échelle typographique
+## Components
 
-| Rôle | Police | Taille | Poids | Tracking | Casse |
-|---|---|---|---|---|---|
-| Display H1 (« PRIX & ABONNEMENTS », « HEURES CREUSES/PLEINES ») | `--font-display` | clamp(48px, 6vw, 96px) | 600 | -0.01em | UPPERCASE |
-| Hero H1 (« PLAY BETTER? ») | `--font-display` | clamp(56px, 8vw, 120px) | 600 | -0.02em | UPPERCASE |
-| Italique éditorial (« *by athletes* », « *Let's play better together!* ») | `--font-display` *italic* | clamp(40px, 5vw, 80px) | 400 *italic* | 0 | Sentence |
-| H2 section (« Nos offres », « ANMTT x PPP ») | `--font-display` | 28–36px | 500 | 0 | Sentence |
-| H3 carte (« Play Half », « Gold Membership ») | `--font-display` | 22–24px | 500 | 0 | Sentence |
-| Prix (« 70€/mois », « 30min ») | `--font-display` | 36–44px | 600 | -0.01em | — |
-| Body | `--font-display` | 15–16px | 400 | 0 | Sentence |
-| Nav / Logo wordmark (« PING PANG PARIS ») | `--font-ui` | 13–14px | 600 | 0.18em | UPPERCASE |
-| Libellés (« À partir de », « Heures creuses ») | `--font-ui` | 12–13px | 400 | 0.04em | Sentence |
-| Footer titres (« NOUS SUIVRE », « PING PANG PARIS ») | `--font-ui` | 14px | 700 | 0.12em | UPPERCASE |
-| Microcopy / footer liens | `--font-ui` | 12–13px | 400 | 0.06em | Sentence |
-
-### Règles typographiques
-
-- **Les grands titres sont systématiquement en serif UPPERCASE** avec un mot ou deux en italique pour créer la respiration éditoriale (« FOR ATHLETES *by athletes* »).
-- La navigation, le logo wordmark, les boutons et les badges sont en **sans-serif tracké** (espacement inter-lettres marqué).
-- Pas de mélange chaotique : 2 familles maximum + le script manuscrit pour 1 ou 2 occurrences seulement.
-- Le serif est utilisé même pour le body — c'est une signature, pas une erreur d'accessibilité tant que la taille reste ≥ 15px et l'interligne ≥ 1.5.
-
----
-
-## 4. Logo & marque
-
-Deux verrouillages à connaître :
-
-1. **`PING PANG PARIS`** — wordmark sans-serif, tracking large, casse haute. Utilisé en header centré et comme signature institutionnelle.
-2. **`PING PANG effect`** — logo lettering manuscrit/graffiti noir sur blanc. Utilisé pour les **collections capsules / collabs** (ex : ANMTT × PPP) et les contextes lifestyle/produit.
-
-**Règles** :
-- Toujours en noir pur sur fond clair, ou en blanc sur fond `--color-forest`.
-- Espace de respiration minimum : équivalent à la hauteur d'un caractère du wordmark.
-- Ne jamais étirer, recolorer (sauf inversion), ni placer sur photo non contrôlée.
-
----
-
-## 5. Layout & grille
-
-### Structure de page
-
-- **Largeur max conteneur** : 1280px (gouttières 32px desktop, 16px mobile).
-- **Grille** : 12 colonnes desktop, 6 tablette, 4 mobile.
-- **Header** : fixe haut, fond blanc, deux niveaux : (1) nav primaire + logo centré + panier/login/langue ; (2) sous-nav contextuelle (`ACCUEIL · TARIFS · OFFRES · HORAIRES & LIEU`) avec souligné actif.
-- **Sections** : alternance fond blanc / image pleine largeur / fond `--color-forest` pour le footer et les bandeaux contact.
-- **Espacement vertical entre sections** : 96–128px desktop, 64px mobile.
-
-### Patterns de composition
-
-- **Section hero photographique** : image N&B pleine largeur, titre serif en overlay avec ombre douce ou sans ombre selon contraste de l'image, CTA blanc fin centré.
-- **Grille de cartes tarifs** : 4 colonnes desktop pour les offres ponctuelles, 2 colonnes pour les memberships, alignées sur la même grille.
-- **Section éditoriale image + texte** : 50/50 en desktop, image à gauche ou en bloc composé (mosaïque de 3 photos avec disque blanc « PING PANG PARIS » qui se superpose).
-- **Composition « cercle »** : section *Rejoins le club* — disque blanc avec wordmark au centre, photos disposées autour reliées par un trait fin = signature visuelle identitaire.
-- **Asymétrie volontaire** : titres alignés à gauche, italique légèrement décalé sous le mot droit (« FOR ATHLETES » à gauche, *« by athletes »* indenté en dessous).
-
----
-
-## 6. Composants
-
-### 6.1 Boutons
-
-```
-┌──────────────────────────┐
-│       Réserver           │   → bouton outline (défaut)
-└──────────────────────────┘   bordure 1px noir, fond blanc, label serif
-```
-
-```
-┌──────────────────────────┐
-│      Deviens membre      │   → bouton primaire (Gold)
-└──────────────────────────┘   fond --color-forest, texte blanc, label serif
-```
-
-| Variante | Fond | Bordure | Texte | Hauteur | Padding |
-|---|---|---|---|---|---|
-| Primary | `--color-forest` | none | `#fff` serif 16px | 48px | 28px |
-| Outline | transparent | 1px `--color-ink` | `--color-ink` serif 16px | 48px | 28px |
-| Outline-light (sur photo) | transparent | 1px `#fff` | `#fff` serif 16px | 48px | 28px |
-| Lien fléché | transparent | none | serif italique + `→` | inline | 0 |
-
-- **Radius** : 0 (boutons strictement rectangulaires — c'est un parti pris esthétique).
-- **Hover** : inversion fond/texte sur outline ; passage `--color-forest-deep` sur primary.
-- **Le label est toujours en serif**, jamais en sans-serif. Pas d'icônes dans les boutons sauf la flèche `→`.
-
-### 6.2 Cartes tarifs
-
-Anatomie verticale d'une carte :
-
-```
-┌────────────────────────────────┐
-│ 🏓 (icône raquette colorée)    │  ← 32px, top-left
-│                                │
-│ Play Half                      │  ← serif 22px
-│ À partir de                    │  ← ui 12px tracké, --color-muted
-│ 30min                          │  ← serif 40px bold
-│                                │
-│ Heures creuses: 10€            │  ← serif 14px
-│ Heures pleines: 15€            │
-│                                │
-│ ┌──────────────────────────┐   │
-│ │   Réserver une table     │   │  ← bouton outline plein largeur
-│ └──────────────────────────┘   │
-│ ────────────────────────────   │  ← séparateur
-│ ✓ Raquettes et balles incluses │  ← serif 13px + check fin
-└────────────────────────────────┘
-   bordure 1px --color-line
-   padding 28px
-   pas de radius (corners nets)
-```
-
-**Variantes** :
-- **Carte standard** (Play Half / Play One / Play Ten / Carte Cadeau) — bouton outline.
-- **Carte Cadeau** — icône cœur rouge, bouton « Nous contacter » sur fond vert avec mention « Available for 3 months period of time ».
-- **Membership card** — badge `Le Club` (or pour Gold, argent pour Platinum) en haut, prix mensuel mis en valeur, bouton primaire `Deviens membre`, liste de bénéfices avec checkmarks.
-
-### 6.3 Badges
-
-```
-┌─────────┐
-│ Le Club │   → background pill --color-gold ou --color-silver
-└─────────┘   serif italique, 11px, padding 4px 10px, radius full
-```
-
-### 6.4 Toggle (Tarif normal / Tarif réduit)
-
-Switch horizontal classique avec deux libellés de part et d'autre, pastille vert sapin sur rail blanc bordé. Utilisé pour basculer la grille tarifaire entière.
-
-### 6.5 Formulaire de contact
-
-Style **épuré au trait** sur fond `--color-forest` :
-- Champs sans box, juste une **ligne fine blanche en bas** (1px, opacity 0.4).
-- Label au-dessus en sans-serif blanc 12px tracké.
-- Texte saisi en serif blanc 16px.
-- Sticker manuscrit décoratif « *Let's play better together!* » dans une bulle blanche en haut à gauche.
-- Bouton `Envoyer` outline blanc, aligné à droite.
-
-### 6.6 Bouton flèche (lien voir plus)
-
-Texte serif italique + flèche `→` soulignée seulement au survol. Utilisé pour « Voir plus », « Voir nos heures creuses & pleines », « Voir la collection ».
-
-### 6.7 Carrousel d'offres
-
-Cartes images pleines (« JOUER AVEC UN PRO », « TEAM BUILDING ») avec titre superposé en serif blanc 32px UPPERCASE en bas-gauche. Navigation par flèches circulaires `←` `→` en haut à droite de la section.
-
-### 6.8 Planning créneaux (Heures creuses/pleines)
-
-Représentation en **barres horizontales pilule** (radius full) :
-- **Heures creuses** : barre outline 1px `--color-line`, fond transparent.
-- **Heures pleines** : barre pleine `--color-forest`.
-- Légende avec deux pilules d'exemple + flèche `→` libellé.
-- Axe Y : heures (10h → 00h) en sans-serif 11px à gauche.
-- Axe X : jours de la semaine en serif 14px en haut.
-- Hauteur de barre ~6px, gap vertical 8px.
-
-### 6.9 Footer
-
-- Fond `--color-forest`, texte blanc.
-- 4 colonnes desktop : (1) `NOUS SUIVRE` + champ email outline blanc + flèche d'envoi + icônes Facebook/Instagram cerclées blanches ; (2) `PING PANG PARIS` (liens icons/essential/effect/all) ; (3) `PING PANG LE CLUB` (accueil/pricing/packages/horaires) ; (4) `LEGAL POLICY` (CGV/Confidentialité/Décharge).
-- Copyright centré en bas : `© Ping Pang Paris 2026`.
-- Au-dessus du footer principal : un **mini-bandeau Ping Pang Café** beige/cream avec illustration silhouette joueur, hours de café (« Lun-Ven : 10h–22h ») = touche lifestyle.
-
----
-
-## 7. Iconographie
-
-- **Style** : ligne fine 1.5px, rounded caps, taille 16–24px, couleur `--color-ink` ou `--color-forest`.
-- **Set** : panier, login, globe (langue), check (✓), flèche fine (`→`), réseaux sociaux (cerclés sur fond vert).
-- **Pictos métier** : raquettes de ping-pong stylisées avec pastille colorée (rouge ou noire) selon l'offre, manche bois — c'est l'illustration signature des cartes tarifs.
-- **Cœur rouge** plein pour Carte Cadeau.
-- Pas d'icônes 3D, pas de duotone, pas d'emoji.
-
----
-
-## 8. Imagerie & photographie
-
-**Style éditorial impératif** :
-- **Noir & blanc dominant**, contraste élevé, grain léger acceptable.
-- Sujets : joueurs, ambiance club, mains sur raquette, regards, action, posters de marque.
-- Cadrages : plans serrés, portraits, photo de groupe documentaire.
-- Aucune photo banque d'image colorée façon « lifestyle stock ». Préférer un photographe identifié, esthétique cohérente.
-- Couleur autorisée : photos produit (collection) sur fond neutre, photos café.
-- Les images vivent **pleine largeur** ou **dans une grille 2/3 colonnes** sans border-radius.
-
----
-
-## 9. Motion & interactions
-
-Discret, jamais clinquant.
-
-- **Fade-up** sur les sections au scroll (translate Y 16px → 0, opacity 0 → 1, durée 600ms, easing `cubic-bezier(0.22, 1, 0.36, 1)`).
-- **Hover boutons** : transition 200ms sur background et color.
-- **Hover cartes tarifs** : élévation très subtile (translateY -2px) + bordure qui passe de `--color-line` à `--color-ink`, 200ms.
-- **Hover liens flèche** : la flèche `→` se décale de 4px vers la droite, transition 250ms.
-- **Carrousel offres** : transition 500ms ease-in-out entre slides.
-- **Toggle tarifs** : pastille glisse 250ms.
-
-Pas de parallax lourd, pas d'animations infinies, pas de marquees.
-
----
-
-## 10. Accessibilité
-
-- **Contraste** : `--color-ink` sur `--color-bg` AAA ; `#fff` sur `--color-forest` AAA. Vérifier `--color-muted` sur blanc (AA seulement — réserver aux libellés secondaires).
-- **Tailles texte** : minimum 14px pour le body, 12px pour les microcopy uniquement.
-- **Focus visibles** : outline 2px `--color-forest` + offset 2px sur tous les éléments interactifs.
-- **Toggle tarif réduit** : étiqueté ARIA, état lisible.
-- **Formulaire** : labels associés, messages d'erreur en serif rouge sous le champ.
-- **Multilingue** : `lang="fr"` racine, sélecteur EN bascule vers `lang="en"`.
-
----
-
-## 11. Responsive
-
-| Breakpoint | Largeur | Comportement clé |
-|---|---|---|
-| Mobile | ≤ 640px | Nav burger, logo centré, sections empilées, cartes tarifs en 1 colonne, hero hauteur réduite, footer 1 colonne |
-| Tablet | 641–1024px | Cartes tarifs en 2 colonnes, footer 2 colonnes |
-| Desktop | 1025–1440px | Layout cible décrit ci-dessus, 4 cartes tarifs sur une ligne |
-| Wide | > 1440px | Conteneur reste à 1280px, marges automatiques |
-
-Le serif imposant des grands titres est **fluide** via `clamp()` pour ne jamais déborder ni paraître ridicule sur mobile.
-
----
-
-## 12. Tone of voice (copy)
-
-- **Bilingue assumé** : titres anglais (« PLAY BETTER », « FOR ATHLETES »), corps en français.
-- **Direct, sportif, sans superlatif marketing creux**. « Co-fondé par des athlètes qui ont eu à cœur la fierté de la France ».
-- Italiques pour les respirations émotionnelles (« *by athletes* », « *Let's play better together!* »).
-- Hashtags / mentions × pour les collabs : `ANMTT x PPP`.
-- CTAs courts et impératifs : `Joue maintenant`, `Deviens membre`, `Réserver une table`, `Nous contacter`, `Voir plus`.
-
----
-
-## 13. Tokens CSS (extrait)
-
-```css
-:root {
-  /* Couleurs */
-  --color-bg: #ffffff;
-  --color-ink: #0e0e0e;
-  --color-forest: #0e3d2e;
-  --color-forest-deep: #0a2d22;
-  --color-cream: #fafaf7;
-  --color-line: #e5e5e0;
-  --color-muted: #6b6b6b;
-  --color-gold: #c9a86a;
-  --color-silver: #9a9a93;
-  --color-red: #d7222a;
-
-  /* Typographie */
-  --font-display: 'Playfair Display', Georgia, serif;
-  --font-ui: 'Neue Haas Grotesk Display', 'Inter Tight', sans-serif;
-  --font-script: 'Caveat', cursive;
-
-  /* Espacements */
-  --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 16px;
-  --space-4: 24px;
-  --space-5: 32px;
-  --space-6: 48px;
-  --space-7: 64px;
-  --space-8: 96px;
-  --space-9: 128px;
-
-  /* Rayons */
-  --radius-none: 0;
-  --radius-pill: 999px;
-
-  /* Bordures */
-  --border-thin: 1px solid var(--color-line);
-  --border-ink: 1px solid var(--color-ink);
-
-  /* Conteneur */
-  --container: 1280px;
-  --gutter: 32px;
-
-  /* Motion */
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --duration-fast: 200ms;
-  --duration-base: 400ms;
-  --duration-slow: 600ms;
-}
-```
-
----
-
-## 14. Do / Don't
-
-✅ **Do**
-- Garder le blanc dominant et utiliser le vert sapin comme une signature ponctuelle.
-- Mélanger UPPERCASE serif + un mot italique pour les titres clés.
-- Photographies noir & blanc, expressives, authentiques.
-- Boutons et cartes strictement rectangulaires (radius 0).
-- Espace blanc généreux entre les sections.
-- Asymétries éditoriales subtiles (italique décalé sous un mot UPPERCASE).
-
-❌ **Don't**
-- Pas de gradients, pas d'ombres marquées, pas de glassmorphisme.
-- Pas de couleurs vives en aplat (orange, violet, bleu vif…).
-- Pas de polices génériques (Inter, Roboto) en titre.
-- Pas de border-radius arrondis partout (sauf pilules planning et badges).
-- Pas de photos stock colorées style « business handshake ».
-- Pas de surcharge d'icônes — la marque parle par la typographie et la photo.
-
----
-
-*Source : analyse du site live `pingpang.paris` (homepage, page Tarifs) et du logo `PING PANG effect` — mai 2026.*
+- **Metric Cards:** The hero of this design system. A white background, a small uppercase label at the top-left, a large bold Forest Green value in the center, and a small sparkline or percentage change at the bottom.
+- **Action Buttons:**
+    - *Primary:* Solid Forest Green with White Lexend text (Bold).
+    - *Secondary:* Ghost style with 1.5px Forest Green border.
+- **Status Chips:** Small, pill-shaped indicators for "Match Type" (e.g., Ranked, Casual). Use a light tint of the primary color with dark text.
+- **Lists:** Clean, border-bottom only separation. Use the "Arrow-Right" icon on the far right to indicate drill-down capability for match history.
+- **The "Rally" Input:** Search and input fields should have a light grey fill (#F9FAFB) and no border, becoming Forest Green only when focused.
+- **Athlete Avatars:** Circular with a 2px Forest Green border for "Verified" or "Pro" players.

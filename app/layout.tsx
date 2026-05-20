@@ -1,46 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, Inter_Tight, Caveat } from "next/font/google";
 import "./globals.css";
 import "./profile.css";
 import "./clubs.css";
 import AppShell from "../components/AppShell";
 
-const playfair = Playfair_Display({
-  variable: "--font-playfair",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
-  display: "swap",
-});
-
-const interTight = Inter_Tight({
-  variable: "--font-inter-tight",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const caveat = Caveat({
-  variable: "--font-caveat",
-  subsets: ["latin"],
-  weight: ["400", "700"],
-  display: "swap",
-});
-
 export const metadata: Metadata = {
-  title: "Ping Pang Paris — FOR ATHLETES, by athletes",
+  title: "Ping Pang & Co. Elite — FOR ATHLETES, by athletes",
   description:
     "Club de tennis de table nouvelle génération, entièrement digitalisé. Réservez votre table, suivez vos matchs, défiez le monde.",
-  applicationName: "Ping Pang Paris",
+  applicationName: "Ping Pang & Co. Elite",
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
-    title: "Ping Pang",
+    title: "Ping Pang Elite",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0e3d2e",
+  themeColor: "#0A241E",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -53,10 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html
-      lang="fr"
-      className={`${playfair.variable} ${interTight.variable} ${caveat.variable} h-full`}
-    >
+    <html lang="fr" className="h-full">
       <body className="min-h-full">
         <AppShell>{children}</AppShell>
       </body>

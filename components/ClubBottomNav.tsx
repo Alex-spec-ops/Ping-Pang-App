@@ -57,7 +57,7 @@ export default function ClubBottomNav() {
       className="fixed bottom-0 left-0 right-0 z-40"
       style={{
         borderTop: "1px solid rgba(255,255,255,0.08)",
-        background: "rgba(14,61,46,0.97)",
+        background: "rgba(10,36,30,0.97)",
         backdropFilter: "blur(12px)",
         paddingBottom: "env(safe-area-inset-bottom)",
       }}

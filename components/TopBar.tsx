@@ -10,7 +10,7 @@ export default function TopBar({ title, subtitle, right }: Props) {
       className="sticky top-0 z-30 backdrop-blur"
       style={{
         borderBottom: "var(--border-thin)",
-        background: "rgba(250,250,247,0.95)",
+        background: "rgba(249,249,255,0.95)",
         paddingTop: "env(safe-area-inset-top)",
       }}
     >

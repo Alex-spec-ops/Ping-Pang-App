@@ -1,680 +1,574 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import type { Venue } from "../lib/venues";
-import {
-  venues as ALL_VENUES,
-  getVenueReviews,
-  distanceKm,
-  pinColor,
-} from "../lib/venues";
-import { getAllTerritories } from "../lib/territory";
-import VenueSheet from "./VenueSheet";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-declare global { interface Window { google: any; __gmCb?: () => void } }
-
-type VenueType = "club" | "public" | "bar";
-type Surface   = "indoor" | "outdoor";
-type Pricing   = "free" | "paid" | "membership";
-const RADII    = [500, 1000, 2000, 5000]; // metres
-
-const GMAP_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? "";
-
-// ─── Component ────────────────────────────────────────────────────────────────
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import Avatar from "./Avatar";
+import { CURRENT_USER_ID, getPlayer } from "../lib/data";
 
 export default function MapPageClient() {
-  const mapRef       = useRef<HTMLDivElement>(null);
-  const googleMap    = useRef<any>(null);
-  const markerMap    = useRef<Map<string, any>>(new Map()); // venueId → Marker
-  const radiusCircle = useRef<any>(null);
-  const userMarker   = useRef<any>(null);
-  const tempMarker   = useRef<any>(null);
+  const me = getPlayer(CURRENT_USER_ID);
 
-  const [mapReady, setMapReady] = useState(false);
+  // States
+  const [pan, setPan] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1.1);
+  const [isDragging, setIsDragging] = useState(false);
+  const [activeTab, setActiveTab] = useState<"tout" | "segments">("tout");
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [challengeTarget, setChallengeTarget] = useState<string | null>(null);
 
-  // UI state
-  const [selectedVenue, setSelectedVenue]   = useState<Venue | null>(null);
-  const [checkedIn, setCheckedIn]           = useState<Set<string>>(new Set());
-  const [showFilters, setShowFilters]       = useState(false);
-  const [addMode, setAddMode]               = useState<"idle" | "placing" | "form">("idle");
-  const [newVenueCoords, setNewVenueCoords] = useState<[number, number] | null>(null);
+  // Refs for dragging
+  const dragStart = useRef({ x: 0, y: 0 });
+  const panStart = useRef({ x: 0, y: 0 });
 
-  // Geolocation
-  const [userPos, setUserPos]   = useState<[number, number] | null>(null);
-  const [locating, setLocating] = useState(false);
-
-  // Filters
-  const [types, setTypes]         = useState<Set<VenueType>>(new Set());
-  const [surfaces, setSurfaces]   = useState<Set<Surface>>(new Set());
-  const [pricings, setPricings]   = useState<Set<Pricing>>(new Set());
-  const [arrondissements, setArr] = useState<Set<number>>(new Set());
-  const [radius, setRadius]       = useState<number | null>(null);
-
-  // Add venue form
-  const [newName, setNewName]           = useState("");
-  const [newType, setNewType]           = useState<VenueType>("public");
-  const [newSurface, setNewSurface]     = useState<Surface>("outdoor");
-  const [newPricing, setNewPricing]     = useState<Pricing>("free");
-  const [newDesc, setNewDesc]           = useState("");
-  const [addSubmitted, setAddSubmitted] = useState(false);
-
-  // Search
-  const [searchQuery, setSearchQuery]         = useState("");
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const searchRef = useRef<HTMLInputElement>(null);
-
-  const searchResults = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return [];
-    return ALL_VENUES.filter(
-      (v) =>
-        v.name.toLowerCase().includes(q) ||
-        v.address.toLowerCase().includes(q) ||
-        v.tags.some((t) => t.toLowerCase().includes(q)),
-    ).slice(0, 6);
-  }, [searchQuery]);
-
-  const flyToVenue = useCallback((venue: Venue) => {
-    const map = googleMap.current;
-    if (map) {
-      map.panTo({ lat: venue.lat, lng: venue.lng });
-      map.setZoom(17);
-    }
-    setSelectedVenue(venue);
-    setSearchQuery("");
-    setShowSuggestions(false);
-  }, []);
-
-  // Filtered venues
-  const filtered = useMemo(() => {
-    return ALL_VENUES.filter((v) => {
-      if (types.size > 0 && !types.has(v.type)) return false;
-      if (surfaces.size > 0 && !surfaces.has(v.surface)) return false;
-      if (pricings.size > 0 && !pricings.has(v.pricing)) return false;
-      if (arrondissements.size > 0 && !arrondissements.has(v.arrondissement)) return false;
-      if (radius !== null && userPos) {
-        const d = distanceKm(userPos[0], userPos[1], v.lat, v.lng) * 1000;
-        if (d > radius) return false;
-      }
-      return true;
-    });
-  }, [types, surfaces, pricings, arrondissements, radius, userPos]);
-
-  // ── Load Google Maps then init ────────────────────────────────────────────
-  useEffect(() => {
-    if (googleMap.current) return;
-    let active = true;
-
-    function loadGoogleMaps(): Promise<void> {
-      // Already loaded
-      if (window.google?.maps) return Promise.resolve();
-      // Script already injected (Strict Mode 2nd call)
-      const existing = document.querySelector('script[data-gmap]');
-      if (existing) {
-        return new Promise((res) => {
-          existing.addEventListener("load", () => res(), { once: true });
-        });
-      }
-      return new Promise((res) => {
-        window.__gmCb = res;
-        const s = document.createElement("script");
-        s.setAttribute("data-gmap", "1");
-        s.src = `https://maps.googleapis.com/maps/api/js?key=${GMAP_KEY}&libraries=marker&callback=__gmCb`;
-        s.async = true;
-        document.head.appendChild(s);
-      });
-    }
-
-    loadGoogleMaps().then(() => {
-      if (!active || !mapRef.current || googleMap.current) return;
-
-      const gm = window.google.maps;
-
-      const map = new gm.Map(mapRef.current, {
-        center: { lat: 48.8566, lng: 2.3522 },
-        zoom: 13,
-        mapId: "DEMO_MAP_ID",            // requis pour AdvancedMarkerElement
-        disableDefaultUI: true,
-        gestureHandling: "greedy",
-        styles: GMAP_STYLES,
-      });
-
-      // Clic sur la carte pour le mode "ajouter un lieu"
-      map.addListener("click", (e: any) => {
-        if (tempMarker.current?._placing) {
-          const coords: [number, number] = [e.latLng.lat(), e.latLng.lng()];
-          setNewVenueCoords(coords);
-          setAddMode("form");
-
-          if (tempMarker.current?.map !== undefined) tempMarker.current.map = null;
-          const t = new gm.marker.AdvancedMarkerElement({
-            position: { lat: coords[0], lng: coords[1] },
-            map,
-            content: makePinElement("#f97316"),
-            title: "Nouveau lieu",
-            gmpDraggable: true,
-          });
-          t.addListener("dragend", () => {
-            const pos = t.position as any;
-            if (!pos) return;
-            const lat = typeof pos.lat === "function" ? pos.lat() : pos.lat;
-            const lng = typeof pos.lng === "function" ? pos.lng() : pos.lng;
-            setNewVenueCoords([lat, lng]);
-          });
-          tempMarker.current = t;
-        }
-      });
-
-      googleMap.current = map;
-      setMapReady(true);
-    });
-
-    return () => {
-      active = false;
-      if (googleMap.current) {
-        // Google Maps n'a pas de .destroy() — on nettoie juste les refs
-        googleMap.current = null;
-      }
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ── Sync addMode → tempMarker._placing ──────────────────────────────────
-  useEffect(() => {
-    if (tempMarker.current) tempMarker.current._placing = addMode === "placing";
-  }, [addMode]);
-
-  // On entre en mode "placing" : signaler au clic listener
-  useEffect(() => {
-    if (addMode === "placing" && tempMarker.current === null) {
-      // Créer un marqueur fantôme pour porter le flag _placing
-      tempMarker.current = { _placing: true };
-    }
-  }, [addMode]);
-
-  // ── Sync markers when filtered changes ──────────────────────────────────
-  useEffect(() => {
-    const gm = window.google?.maps;
-    const map = googleMap.current;
-    if (!gm || !map) return;
-
-    // Supprimer tous les markers existants
-    markerMap.current.forEach((m) => { m.map = null; });
-    markerMap.current.clear();
-
-    const territories = getAllTerritories();
-
-    filtered.forEach((venue) => {
-      const owner = territories.get(venue.id);
-      const color = owner ? owner.color : pinColor(venue.rating);
-      const badge = owner ? owner.logo : null;
-      const marker = new gm.marker.AdvancedMarkerElement({
-        position: { lat: venue.lat, lng: venue.lng },
-        map,
-        content: makePinElement(color, badge),
-        title: venue.name,
-      });
-      marker.addListener("click", () => setSelectedVenue(venue));
-      markerMap.current.set(venue.id, marker);
-    });
-  }, [filtered, mapReady]);
-
-  // ── Radius circle ────────────────────────────────────────────────────────
-  useEffect(() => {
-    const gm = window.google?.maps;
-    const map = googleMap.current;
-    if (!gm || !map) return;
-
-    if (radiusCircle.current) { radiusCircle.current.setMap(null); radiusCircle.current = null; }
-    if (radius && userPos) {
-      radiusCircle.current = new gm.Circle({
-        map,
-        center: { lat: userPos[0], lng: userPos[1] },
-        radius,
-        strokeColor: "#10b981",
-        strokeOpacity: 0.8,
-        strokeWeight: 1.5,
-        fillColor: "#10b981",
-        fillOpacity: 0.08,
-      });
-    }
-  }, [radius, userPos, mapReady]);
-
-  // ── Geolocation ──────────────────────────────────────────────────────────
-  const locateUser = useCallback(() => {
-    if (!navigator.geolocation) return;
-    setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-        setUserPos(coords);
-        setLocating(false);
-        const gm  = window.google?.maps;
-        const map = googleMap.current;
-        if (!gm || !map) return;
-        map.panTo({ lat: coords[0], lng: coords[1] });
-        map.setZoom(15);
-        if (userMarker.current) userMarker.current.map = null;
-        const dot = document.createElement("div");
-        dot.style.cssText = "width:18px;height:18px;border-radius:50%;background:#3b82f6;border:3px solid white;box-shadow:0 0 0 3px rgba(59,130,246,0.35)";
-        userMarker.current = new gm.marker.AdvancedMarkerElement({
-          position: { lat: coords[0], lng: coords[1] },
-          map,
-          content: dot,
-          title: "Vous êtes ici",
-          zIndex: 999,
-        });
-      },
-      () => setLocating(false),
-    );
-  }, []);
-
-  const zoomIn  = () => { const m = googleMap.current; if (m) m.setZoom((m.getZoom() ?? 13) + 1); };
-  const zoomOut = () => { const m = googleMap.current; if (m) m.setZoom((m.getZoom() ?? 13) - 1); };
-
-  const cancelAddMode = () => {
-    setAddMode("idle");
-    if (tempMarker.current?.map !== undefined) tempMarker.current.map = null;
-    tempMarker.current = null;
-    setNewVenueCoords(null);
+  // Mouse / Touch handlers for panning
+  const handleStart = (clientX: number, clientY: number) => {
+    setIsDragging(true);
+    dragStart.current = { x: clientX, y: clientY };
+    panStart.current = { ...pan };
   };
 
-  const submitAddVenue = () => {
-    if (!newName.trim()) return;
-    setAddSubmitted(true);
-    setTimeout(() => {
-      setAddMode("idle");
-      setAddSubmitted(false);
-      setNewName(""); setNewDesc("");
-      if (tempMarker.current?.map !== undefined) tempMarker.current.map = null;
-      tempMarker.current = null;
-      setNewVenueCoords(null);
-    }, 2000);
+  const handleMove = (clientX: number, clientY: number) => {
+    if (!isDragging) return;
+    const dx = clientX - dragStart.current.x;
+    const dy = clientY - dragStart.current.y;
+    setPan({
+      x: panStart.current.x + dx,
+      y: panStart.current.y + dy,
+    });
   };
 
-  const activeFiltersCount =
-    types.size + surfaces.size + pricings.size + arrondissements.size + (radius ? 1 : 0);
+  const handleEnd = () => {
+    setIsDragging(false);
+  };
+
+  const handleZoom = (direction: "in" | "out") => {
+    setZoom((prev) => {
+      const next = direction === "in" ? prev + 0.15 : prev - 0.15;
+      return Math.max(0.7, Math.min(2.5, next));
+    });
+  };
+
+  const handleRecenter = () => {
+    setPan({ x: 0, y: 0 });
+    setZoom(1.1);
+  };
 
   return (
-    <div className="relative" style={{ height: "calc(100dvh - 80px)" }}>
-      {/* ── Map container ──────────────────────────────────────────────────── */}
-      <div ref={mapRef} className="h-full w-full" />
-
-      {/* Loading overlay */}
-      {!mapReady && (
-        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-zinc-100 dark:bg-zinc-900">
-          <span className="text-4xl" style={{ animation: "spin 1s linear infinite" }}>⟳</span>
-          <p className="mt-3 text-sm text-zinc-500">Chargement de la carte…</p>
-        </div>
-      )}
-
-      {/* ── Top bar overlay ─────────────────────────────────────────────────── */}
+    <div className="relative h-dvh w-full overflow-hidden bg-[#c9e8f5] select-none">
+      {/* 1. Interactive Stylized Vector Map */}
       <div
-        className="absolute left-0 right-0 top-0 z-20 mx-auto max-w-md"
+        className="absolute inset-0 cursor-grab active:cursor-grabbing transition-transform duration-75"
+        style={{
+          transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+          transformOrigin: "center center",
+        }}
+        onMouseDown={(e) => handleStart(e.clientX, e.clientY)}
+        onMouseMove={(e) => handleMove(e.clientX, e.clientY)}
+        onMouseUp={handleEnd}
+        onMouseLeave={handleEnd}
+        onTouchStart={(e) => {
+          if (e.touches.length === 1) {
+            handleStart(e.touches[0].clientX, e.touches[0].clientY);
+          }
+        }}
+        onTouchMove={(e) => {
+          if (e.touches.length === 1) {
+            handleMove(e.touches[0].clientX, e.touches[0].clientY);
+          }
+        }}
+        onTouchEnd={handleEnd}
+      >
+        {/* SVG background representing coastline, water, land, roads */}
+        <svg
+          viewBox="0 0 800 800"
+          className="w-[1200px] h-[1200px] absolute top-[-200px] left-[-200px] pointer-events-none"
+        >
+          {/* Water background */}
+          <rect width="800" height="800" fill="#56B1E6" />
+
+          {/* Land mass (Green Peninsula) */}
+          <path
+            d="M 0,300 
+               C 200,280 320,180 380,0 
+               L 800,0 
+               L 800,800 
+               C 600,800 480,720 420,500
+               C 380,380 250,320 0,300 Z"
+            fill="#A3E47A"
+          />
+
+          {/* Forest details (darker green circles) */}
+          <circle cx="550" cy="120" r="45" fill="#8AC261" />
+          <circle cx="680" cy="220" r="60" fill="#8AC261" />
+          <circle cx="610" cy="380" r="50" fill="#8AC261" />
+          <circle cx="490" cy="280" r="35" fill="#8AC261" />
+          <circle cx="580" cy="550" r="55" fill="#8AC261" />
+
+          {/* Roads (White curved lines) */}
+          <path
+            d="M 380,0 C 440,250 200,300 0,300"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="8"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 450,220 C 580,240 620,450 420,500"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="6"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 520,0 C 520,200 800,280 800,320"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="5"
+            strokeLinecap="round"
+          />
+          <path
+            d="M 420,500 L 800,750"
+            fill="none"
+            stroke="#FFFFFF"
+            strokeWidth="7"
+            strokeLinecap="round"
+          />
+        </svg>
+
+        {/* Map pins layered on top (with relative offset positions) */}
+        {/* 1. Flag Pin (Métro Souterrain) */}
+        <div
+          className="absolute left-[45%] top-[25%] -translate-x-1/2 -translate-y-1/2 cursor-pointer flex items-center justify-center h-10 w-10 rounded-full bg-[#000A07] border-2 border-white shadow-lg transition-transform hover:scale-110 active:scale-95"
+          onClick={(e) => {
+            e.stopPropagation();
+            alert("Segment chaud : Métro Souterrain");
+          }}
+        >
+          <span className="text-base">🏴</span>
+        </div>
+
+        {/* 2. User/Player Avatar Pin */}
+        <div
+          className="absolute left-[24%] top-[21%] -translate-x-1/2 -translate-y-1/2 cursor-pointer flex items-center justify-center h-8 w-8 rounded-full bg-[#8E9090] border-2 border-white shadow-lg transition-transform hover:scale-110 active:scale-95"
+          onClick={(e) => {
+            e.stopPropagation();
+            alert("Sarah Miller est à proximité");
+          }}
+        >
+          <span className="text-xs">👤</span>
+        </div>
+      </div>
+
+      {/* 2. Floating action buttons on map */}
+      <div className="absolute right-4 top-[20%] z-20 flex flex-col gap-3">
+        <button
+          type="button"
+          onClick={handleRecenter}
+          className="grid h-12 w-12 place-items-center rounded-full bg-white text-[#0A241E] shadow-xl border border-[#E5E7EB] hover:scale-105 active:scale-95 transition-all"
+          title="Recentre la carte"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          onClick={() => handleZoom("in")}
+          className="grid h-12 w-12 place-items-center rounded-full bg-white text-[#0A241E] shadow-xl border border-[#E5E7EB] hover:scale-105 active:scale-95 transition-all"
+          title="Zoomer"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+          </svg>
+        </button>
+      </div>
+
+      {/* 3. Top Header Overlay */}
+      <div
+        className="absolute left-0 right-0 top-0 z-30 mx-auto max-w-md"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
-        <div className="flex items-center gap-2 px-4 pt-3 pb-2">
-          <div className="flex flex-1 flex-col rounded-2xl bg-white/95 shadow-lg backdrop-blur dark:bg-zinc-950/95 overflow-hidden">
-            {/* Search row */}
-            <div className="flex items-center gap-2 px-3 py-2.5">
-              <span className="text-base shrink-0">🔍</span>
-              <input
-                ref={searchRef}
-                type="search"
-                value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setShowSuggestions(true); }}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                placeholder="Club, terrain, adresse…"
-                className="min-w-0 flex-1 bg-transparent text-sm font-medium outline-none placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
-              />
-              {searchQuery ? (
-                <button
-                  type="button"
-                  onMouseDown={(e) => { e.preventDefault(); setSearchQuery(""); setShowSuggestions(false); }}
-                  className="shrink-0 text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 text-base leading-none"
-                >
-                  ✕
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowFilters(true)}
-                  className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
-                    activeFiltersCount > 0
-                      ? "bg-emerald-600 text-white"
-                      : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-200"
-                  }`}
-                >
-                  ⚙ Filtres
-                  {activeFiltersCount > 0 && (
-                    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-white/25 text-[9px] font-bold">
-                      {activeFiltersCount}
-                    </span>
-                  )}
-                </button>
-              )}
-            </div>
+        <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-b from-black/20 to-transparent">
+          <div className="flex items-center gap-2">
+            <Avatar emoji={me?.avatar ?? "🐧"} size="sm" />
+            <span
+              className="text-base font-extrabold uppercase tracking-tight text-white drop-shadow-[0_1.2px_1.2px_rgba(0,0,0,0.5)]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              PING PANG & CO.
+            </span>
+          </div>
 
-            {/* Result count strip */}
-            {!showSuggestions && (
-              <div className="border-t border-zinc-100 px-4 py-1 dark:border-zinc-800">
-                <p className="text-[10px] text-zinc-500">
-                  {filtered.length} lieu{filtered.length !== 1 ? "x" : ""} trouvé{filtered.length !== 1 ? "s" : ""}
-                </p>
-              </div>
-            )}
+          <div className="flex items-center gap-2">
+            {/* SCANNER pill button */}
+            <button
+              type="button"
+              onClick={() => setIsScannerOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#000A07]/90 text-white text-[9px] font-black uppercase tracking-wider shadow-lg hover:scale-105 transition-all"
+              style={{ fontFamily: "var(--font-ui)" }}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3.5 h-3.5">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.625 13.5h.75m-.75 3h.75m-.75 3h.75M13.5 13.5h.75m-.75 3h.75m-.75 3h.75m3.75-6v-3h-3" />
+              </svg>
+              <span>Scanner</span>
+            </button>
 
-            {/* Suggestions dropdown */}
-            {showSuggestions && searchResults.length > 0 && (
-              <ul className="border-t border-zinc-100 dark:border-zinc-800">
-                {searchResults.map((v) => (
-                  <li key={v.id}>
-                    <button
-                      type="button"
-                      onMouseDown={(e) => { e.preventDefault(); flyToVenue(v); }}
-                      className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors"
-                    >
-                      <span className="text-lg shrink-0">
-                        {v.type === "club" ? "🏓" : v.type === "bar" ? "🍹" : "🌳"}
-                      </span>
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold">{v.name}</p>
-                        <p className="truncate text-[11px] text-zinc-500">{v.address}</p>
-                      </div>
-                      <span className="ml-auto shrink-0 text-[10px] font-medium text-amber-500">
-                        ★ {v.rating}
-                      </span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-
-            {/* No results */}
-            {showSuggestions && searchQuery.trim().length > 0 && searchResults.length === 0 && (
-              <div className="border-t border-zinc-100 px-4 py-3 text-center text-xs text-zinc-400 dark:border-zinc-800">
-                Aucun lieu trouvé pour « {searchQuery.trim()} »
-              </div>
-            )}
+            {/* Settings gear */}
+            <Link
+              href="/profile"
+              className="grid h-8 w-8 place-items-center rounded-full bg-white/90 border border-white/20 shadow-md transition-all hover:scale-105"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-[#0A241E]">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.43l-1.003.828c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.43l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z" />
+              </svg>
+            </Link>
           </div>
         </div>
       </div>
 
-      {/* ── Map controls (right side) ───────────────────────────────────────── */}
-      <div className="absolute bottom-24 right-4 z-20 flex flex-col gap-2">
-        <MapBtn label="+" title="Zoom avant"   onClick={zoomIn} />
-        <MapBtn label="−" title="Zoom arrière" onClick={zoomOut} />
-        <MapBtn label={locating ? "…" : "◎"} title="Me localiser" onClick={locateUser} active={!!userPos} />
-      </div>
-
-      {/* ── FAB: Add venue ──────────────────────────────────────────────────── */}
-      <button
-        type="button"
-        onClick={() => addMode !== "idle" ? cancelAddMode() : setAddMode("placing")}
-        className={`absolute bottom-24 left-4 z-20 flex h-12 w-12 items-center justify-center rounded-full shadow-xl text-white text-xl transition-colors ${
-          addMode !== "idle" ? "bg-rose-600" : "bg-emerald-600"
-        }`}
-        title={addMode !== "idle" ? "Annuler" : "Ajouter un lieu"}
-      >
-        {addMode !== "idle" ? "✕" : "+"}
-      </button>
-
-      {/* ── Add venue instructions ──────────────────────────────────────────── */}
-      {addMode === "placing" && (
-        <div className="absolute bottom-40 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap rounded-2xl bg-zinc-900/90 px-4 py-2.5 text-sm font-medium text-white backdrop-blur shadow-xl">
-          📍 Appuyez sur la carte pour placer le lieu
+      {/* 4. Bottom Drawer Sheet */}
+      <div className="absolute bottom-16 left-0 right-0 z-30 mx-auto max-w-md max-h-[55dvh] overflow-y-auto bg-white rounded-t-3xl shadow-[0px_-8px_30px_rgba(10,36,30,0.12)] pb-6 flex flex-col border border-[#E5E7EB]">
+        {/* Drag Handle */}
+        <div className="flex justify-center py-2.5 shrink-0 bg-white sticky top-0 z-10">
+          <div className="w-12 h-1 bg-[#DFE0E0] rounded-full" />
         </div>
-      )}
 
-      {/* ── Add venue form ──────────────────────────────────────────────────── */}
-      {addMode === "form" && (
-        <>
-          <div className="fixed inset-0 z-40 bg-black/30" onClick={cancelAddMode} />
-          <div
-            className="absolute bottom-0 left-0 right-0 z-50 mx-auto max-w-md rounded-t-2xl bg-white p-5 shadow-2xl dark:bg-zinc-950"
-            style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-base font-bold">Ajouter un lieu</h3>
-              <button type="button" onClick={cancelAddMode}>✕</button>
-            </div>
-
-            {newVenueCoords && (
-              <p className="mb-3 text-[11px] text-emerald-600 dark:text-emerald-400">
-                📍 {newVenueCoords[0].toFixed(5)}, {newVenueCoords[1].toFixed(5)}
-                <span className="ml-2 text-zinc-400">(glissez le pin pour ajuster)</span>
+        {/* Content Inside Drawer */}
+        <div className="px-4 space-y-5">
+          {/* VOTRE CLASSEMENT */}
+          <div className="flex items-center justify-between">
+            <div>
+              <p
+                className="text-[9px] font-bold text-[#616363] uppercase tracking-wider"
+                style={{ fontFamily: "var(--font-ui)" }}
+              >
+                Votre classement
               </p>
-            )}
+              <h2
+                className="text-2xl font-black uppercase text-[#0A241E] leading-tight"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                RANK #1,240
+              </h2>
+              <p className="text-xs font-semibold text-[#616363] mt-0.5">
+                1,540 ELO
+              </p>
+            </div>
+            {/* Prochain palier bubble */}
+            <div
+              className="px-4 py-2.5 rounded-full bg-[#D1EAE2] flex flex-col items-center justify-center min-w-[100px]"
+              style={{ fontFamily: "var(--font-ui)" }}
+            >
+              <span className="text-[7.5px] font-black uppercase tracking-widest text-[#0A241E] leading-none">
+                Prochain Palier:
+              </span>
+              <span className="text-sm font-black text-[#0A241E] mt-0.5 leading-none">
+                +20
+              </span>
+            </div>
+          </div>
 
-            <div className="space-y-3">
-              <input
-                type="text"
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                placeholder="Nom du lieu *"
-                className="w-full rounded-xl bg-zinc-50 px-3 py-2.5 text-sm ring-1 ring-zinc-200 outline-none focus:ring-emerald-400 dark:bg-zinc-900 dark:ring-zinc-700"
-              />
-              <div className="grid grid-cols-3 gap-2">
-                {(["public","club","bar"] as VenueType[]).map((t) => (
-                  <button key={t} type="button" onClick={() => setNewType(t)}
-                    className={`rounded-xl py-2 text-xs font-semibold capitalize transition-colors ${newType === t ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800"}`}>
-                    {t === "club" ? "🏓 Club" : t === "public" ? "🌳 Public" : "🍹 Bar"}
-                  </button>
-                ))}
+          <hr className="border-[#E5E7EB]" />
+
+          {/* ACTION LOCALE */}
+          <div className="space-y-3">
+            <div className="flex justify-between items-center">
+              <span
+                className="text-[10px] font-black uppercase tracking-wider text-[#0A241E]"
+                style={{ fontFamily: "var(--font-ui)" }}
+              >
+                Action locale
+              </span>
+              {/* Filter pills */}
+              <div className="flex bg-[#F0F3FF] p-0.5 rounded-lg border border-[#E5E7EB]">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("tout")}
+                  className={`px-3 py-1 rounded-md text-[8.5px] font-black uppercase tracking-wider transition-colors ${
+                    activeTab === "tout" ? "bg-[#0A241E] text-white" : "text-[#616363]"
+                  }`}
+                  style={{ fontFamily: "var(--font-ui)" }}
+                >
+                  Tout
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("segments")}
+                  className={`px-3 py-1 rounded-md text-[8.5px] font-black uppercase tracking-wider transition-colors ${
+                    activeTab === "segments" ? "bg-[#0A241E] text-white" : "text-[#616363]"
+                  }`}
+                  style={{ fontFamily: "var(--font-ui)" }}
+                >
+                  Segments
+                </button>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                {(["indoor","outdoor"] as Surface[]).map((s) => (
-                  <button key={s} type="button" onClick={() => setNewSurface(s)}
-                    className={`rounded-xl py-2 text-xs font-semibold transition-colors ${newSurface === s ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800"}`}>
-                    {s === "indoor" ? "🏢 Intérieur" : "🌳 Extérieur"}
-                  </button>
-                ))}
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {(["free","paid","membership"] as Pricing[]).map((p) => (
-                  <button key={p} type="button" onClick={() => setNewPricing(p)}
-                    className={`rounded-xl py-2 text-xs font-semibold transition-colors ${newPricing === p ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600 dark:bg-zinc-800"}`}>
-                    {p === "free" ? "Gratuit" : p === "paid" ? "Payant" : "Licence"}
-                  </button>
-                ))}
-              </div>
-              <textarea
-                value={newDesc}
-                onChange={(e) => setNewDesc(e.target.value)}
-                placeholder="Description (optionnel)"
-                rows={2}
-                className="w-full resize-none rounded-xl bg-zinc-50 px-3 py-2.5 text-sm ring-1 ring-zinc-200 outline-none focus:ring-emerald-400 dark:bg-zinc-900 dark:ring-zinc-700"
-              />
             </div>
 
-            {addSubmitted ? (
-              <div className="mt-4 rounded-xl bg-emerald-50 px-3 py-3 text-center text-sm font-semibold text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300">
-                ✓ Lieu soumis — en attente de validation manuelle.
+            {/* Segment chaud card */}
+            <div className="p-4 bg-white border border-[#E5E7EB] rounded-3xl space-y-3 shadow-[0px_4px_12px_rgba(0,0,0,0.01)]">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-1">
+                  <span className="text-xs">🏠</span>
+                  <span
+                    className="text-[9px] font-black uppercase tracking-widest text-[#0A241E]"
+                    style={{ fontFamily: "var(--font-ui)" }}
+                  >
+                    Segment Chaud
+                  </span>
+                </div>
+                <span
+                  className="px-2 py-0.5 rounded bg-[#F0F3FF] border border-[#E5E7EB] text-[8.5px] font-black text-[#0A241E]"
+                  style={{ fontFamily: "var(--font-ui)" }}
+                >
+                  0.4 km
+                </span>
               </div>
-            ) : (
+
+              <h3 className="text-lg font-black uppercase text-[#0A241E]" style={{ fontFamily: "var(--font-display)" }}>
+                MÉTRO SOUTERRAIN
+              </h3>
+
+              <div className="flex items-center justify-between gap-4">
+                {/* Boss card */}
+                <div className="flex-1 p-2 bg-[#F0F3FF] border border-[#E5E7EB] rounded-xl flex items-center gap-2">
+                  <div className="shrink-0 scale-90">
+                    <Avatar emoji="🐺" size="sm" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-[7.5px] font-black uppercase text-[#616363]" style={{ fontFamily: "var(--font-ui)" }}>
+                      Boss Actuel
+                    </p>
+                    <p className="text-xs font-bold text-[#0A241E] truncate" style={{ fontFamily: "var(--font-ui)" }}>
+                      Alex C.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Rétention bar chart */}
+                <div className="flex-1 flex flex-col justify-center">
+                  <div className="flex justify-between items-center text-[7.5px] font-black uppercase text-[#616363]" style={{ fontFamily: "var(--font-ui)" }}>
+                    <span>Rétention</span>
+                    <span className="tabular-nums font-extrabold text-[#0A241E]">7/10</span>
+                  </div>
+                  <div className="h-1.5 w-full bg-[#E5E7EB] rounded-full overflow-hidden mt-1">
+                    <div className="h-full bg-[#0A241E] rounded-full" style={{ width: "70%" }} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Challenge Button */}
               <button
                 type="button"
-                onClick={submitAddVenue}
-                disabled={!newName.trim() || !newVenueCoords}
-                className="mt-4 w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white disabled:opacity-40"
+                onClick={() => setChallengeTarget("Alex C.")}
+                className="w-full py-2.5 rounded-xl border border-[#0A241E] text-xs font-black uppercase text-[#0A241E] tracking-wider transition-all hover:bg-[#F9F9FF] active:scale-98"
+                style={{ fontFamily: "var(--font-ui)" }}
               >
-                Soumettre pour validation
+                Défier le boss
               </button>
-            )}
+            </div>
           </div>
-        </>
-      )}
 
-      {/* ── Filter panel ────────────────────────────────────────────────────── */}
-      {showFilters && (
-        <>
-          <div className="fixed inset-0 z-40 bg-black/30" onClick={() => setShowFilters(false)} />
-          <div
-            className="absolute bottom-0 left-0 right-0 z-50 mx-auto max-w-md overflow-y-auto rounded-t-2xl bg-white p-5 shadow-2xl dark:bg-zinc-950"
-            style={{ maxHeight: "80vh", paddingBottom: "env(safe-area-inset-bottom)" }}
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <h3 className="text-base font-bold">Filtres</h3>
-              <div className="flex gap-2">
-                {activeFiltersCount > 0 && (
-                  <button type="button"
-                    onClick={() => { setTypes(new Set()); setSurfaces(new Set()); setPricings(new Set()); setArr(new Set()); setRadius(null); }}
-                    className="text-xs font-semibold text-rose-500"
-                  >
-                    Réinitialiser
-                  </button>
-                )}
-                <button type="button" onClick={() => setShowFilters(false)}>✕</button>
+          {/* JOUEURS À PROXIMITÉ */}
+          <div className="space-y-2">
+            <h3
+              className="text-[10px] font-black uppercase tracking-wider text-[#0A241E] mb-3"
+              style={{ fontFamily: "var(--font-ui)" }}
+            >
+              Joueurs à proximité
+            </h3>
+
+            {/* List */}
+            <div className="space-y-2">
+              {/* Player 1: Sarah Miller */}
+              <div className="p-3 bg-white border border-[#E5E7EB] rounded-2xl flex items-center justify-between shadow-[0px_4px_12px_rgba(0,0,0,0.01)]">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Avatar emoji="🦊" size="sm" />
+                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-emerald-500 border-2 border-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#0A241E]" style={{ fontFamily: "var(--font-ui)" }}>
+                      Sarah Miller
+                    </h4>
+                    <p className="text-[9px] font-bold text-[#616363] uppercase mt-0.5">
+                      1,890 ELO · Proche
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setChallengeTarget("Sarah Miller")}
+                  className="px-4 py-2 rounded-lg bg-[#0A241E] text-white text-[9px] font-black uppercase tracking-wider hover:opacity-90 transition-all active:scale-95"
+                  style={{ fontFamily: "var(--font-ui)" }}
+                >
+                  Défier
+                </button>
+              </div>
+
+              {/* Player 2: Marc L. */}
+              <div className="p-3 bg-white border border-[#E5E7EB] rounded-2xl flex items-center justify-between shadow-[0px_4px_12px_rgba(0,0,0,0.01)]">
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Avatar emoji="🐉" size="sm" />
+                    <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full bg-[#BAE0D4] border-2 border-white" />
+                  </div>
+                  <div>
+                    <h4 className="text-xs font-bold text-[#0A241E]" style={{ fontFamily: "var(--font-ui)" }}>
+                      Marc L.
+                    </h4>
+                    <p className="text-[9px] font-bold text-[#616363] uppercase mt-0.5">
+                      1,420 ELO · 2 KM
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  disabled
+                  className="px-4 py-2 rounded-lg border border-[#E5E7EB] text-[#616363] text-[9px] font-black uppercase tracking-wider opacity-60 cursor-not-allowed"
+                  style={{ fontFamily: "var(--font-ui)" }}
+                >
+                  Défier
+                </button>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
 
-            <FilterSection label="Type de lieu">
-              {(["club","public","bar"] as VenueType[]).map((t) => (
-                <FilterPill key={t}
-                  label={t === "club" ? "🏓 Club" : t === "public" ? "🌳 Public" : "🍹 Bar"}
-                  active={types.has(t)} onClick={() => setTypes((s) => toggle(s, t))} />
-              ))}
-            </FilterSection>
+      {/* 5. Custom 4-Tab Bottom Nav Footer */}
+      <nav
+        className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#E5E7EB]"
+        style={{
+          background: "rgba(255,255,255,0.97)",
+          backdropFilter: "blur(12px)",
+          paddingBottom: "env(safe-area-inset-bottom)",
+        }}
+      >
+        <ul className="mx-auto flex max-w-md items-stretch justify-around">
+          {[
+            { id: "suivi", label: "Suivi", icon: "📊", href: "/stats" },
+            { id: "classement", label: "Classement", icon: "🏆", href: "/stats" },
+            { id: "matchs", label: "Matchs", icon: "🏁", href: "/map" },
+            { id: "club", label: "Club", icon: "👥", href: "/clubs" },
+          ].map((tab) => {
+            const active = tab.id === "matchs";
+            return (
+              <li key={tab.id} className="relative flex-1">
+                <Link
+                  href={tab.href}
+                  className="flex w-full h-16 flex-col items-center justify-center gap-1 transition-all"
+                  style={{
+                    fontFamily: "var(--font-ui)",
+                    fontSize: "9px",
+                    fontWeight: 700,
+                    letterSpacing: "0.05em",
+                    textTransform: "uppercase",
+                    color: active ? "var(--color-forest)" : "var(--color-muted)",
+                  }}
+                >
+                  <span className="text-xl leading-none">{tab.icon}</span>
+                  <span>{tab.label}</span>
+                  {active && (
+                    <span
+                      className="absolute bottom-0 h-0.5 w-8"
+                      style={{ background: "var(--color-forest)" }}
+                    />
+                  )}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
 
-            <FilterSection label="Intérieur / Extérieur">
-              {(["indoor","outdoor"] as Surface[]).map((s) => (
-                <FilterPill key={s}
-                  label={s === "indoor" ? "🏢 Intérieur" : "🌳 Extérieur"}
-                  active={surfaces.has(s)} onClick={() => setSurfaces((p) => toggle(p, s))} />
-              ))}
-            </FilterSection>
-
-            <FilterSection label="Tarification">
-              {(["free","paid","membership"] as Pricing[]).map((p) => (
-                <FilterPill key={p}
-                  label={p === "free" ? "Gratuit" : p === "paid" ? "Payant" : "Licence"}
-                  active={pricings.has(p)} onClick={() => setPricings((s) => toggle(s, p))} />
-              ))}
-            </FilterSection>
-
-            <FilterSection label="Arrondissement">
-              <div className="grid grid-cols-5 gap-1.5">
-                {[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20].map((n) => (
-                  <FilterPill key={n} label={`${n}e`}
-                    active={arrondissements.has(n)} onClick={() => setArr((s) => toggle(s, n))} />
-                ))}
-              </div>
-            </FilterSection>
-
-            <FilterSection label={`Rayon${userPos ? "" : " (géoloc. requise)"}`}>
-              <div className="flex gap-2 flex-wrap">
-                {RADII.map((r) => (
-                  <FilterPill key={r}
-                    label={r < 1000 ? `${r} m` : `${r / 1000} km`}
-                    active={radius === r}
-                    onClick={() => { if (radius === r) { setRadius(null); return; } if (!userPos) locateUser(); setRadius(r); }} />
-                ))}
-              </div>
-            </FilterSection>
-
-            <button type="button" onClick={() => setShowFilters(false)}
-              className="mt-3 w-full rounded-xl bg-emerald-600 py-3 text-sm font-semibold text-white">
-              Appliquer ({filtered.length} résultat{filtered.length !== 1 ? "s" : ""})
+      {/* 6. Scanner Overlay camera simulation */}
+      {isScannerOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex flex-col justify-between p-6">
+          <div className="flex justify-between items-center pt-8">
+            <span className="text-white font-extrabold uppercase text-xs" style={{ fontFamily: "var(--font-ui)" }}>
+              Ping Pang QR Scan
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsScannerOpen(false)}
+              className="px-3 py-1 bg-white/20 text-white rounded-lg text-xs hover:bg-white/30"
+            >
+              ✕ Fermer
             </button>
           </div>
-        </>
+
+          {/* Cutout and scanning line */}
+          <div className="flex-1 flex flex-col items-center justify-center">
+            <div className="relative w-64 h-64 border-2 border-white/60 rounded-3xl overflow-hidden shadow-2xl">
+              {/* Scan Line Laser */}
+              <div
+                className="absolute left-0 right-0 h-1.5 bg-green-400 opacity-80"
+                style={{
+                  animation: "laserScan 2.5s ease-in-out infinite",
+                }}
+              />
+              {/* Corner markers */}
+              <div className="absolute top-2 left-2 w-6 h-6 border-t-4 border-l-4 border-white" />
+              <div className="absolute top-2 right-2 w-6 h-6 border-t-4 border-r-4 border-white" />
+              <div className="absolute bottom-2 left-2 w-6 h-6 border-b-4 border-l-4 border-white" />
+              <div className="absolute bottom-2 right-2 w-6 h-6 border-b-4 border-r-4 border-white" />
+            </div>
+            <p className="text-white/70 text-xs font-semibold text-center mt-6 px-4">
+              Pointez l&apos;appareil photo vers un QR code Ping Pang.
+            </p>
+          </div>
+
+          <div className="pb-12 text-center text-[10px] text-white/40">
+            PING PANG & CO. ELITE SCANNER 1.0
+          </div>
+        </div>
       )}
 
-      {/* ── Venue bottom sheet ──────────────────────────────────────────────── */}
-      {selectedVenue && (
-        <VenueSheet
-          venue={selectedVenue}
-          reviews={getVenueReviews(selectedVenue.id)}
-          isOpen={!!selectedVenue}
-          onClose={() => setSelectedVenue(null)}
-          onCheckin={(id) => setCheckedIn((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; })}
-          checkedIn={checkedIn.has(selectedVenue.id)}
-        />
+      {/* 7. Challenge Action Registration Modal */}
+      {challengeTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full space-y-4 shadow-2xl">
+            <h3 className="text-lg font-black text-[#0A241E]" style={{ fontFamily: "var(--font-display)" }}>
+              Défier le joueur ?
+            </h3>
+            <p className="text-xs text-[#616363] leading-relaxed">
+              Voulez-vous enregistrer un nouveau match contre <span className="font-bold text-[#0A241E]">{challengeTarget}</span> ?
+            </p>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setChallengeTarget(null)}
+                className="flex-1 py-3 bg-[#F0F3FF] text-[#616363] font-bold rounded-xl text-xs"
+              >
+                Annuler
+              </button>
+              <Link
+                href="/play"
+                className="flex-1 py-3 bg-[#0A241E] text-white text-center font-bold rounded-xl text-xs block"
+              >
+                Enregistrer match
+              </Link>
+            </div>
+          </div>
+        </div>
       )}
+
+      {/* Styles for scan-line laser animation */}
+      <style jsx global>{`
+        @keyframes laserScan {
+          0% {
+            top: 0%;
+          }
+          50% {
+            top: 100%;
+          }
+          100% {
+            top: 0%;
+          }
+        }
+      `}</style>
     </div>
   );
 }
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-/** Crée un pin en forme de goutte. badge = emoji du club propriétaire, sinon 🏓 */
-function makePinElement(color: string, badge?: string | null): HTMLElement {
-  const icon = badge ?? "🏓";
-  const wrap = document.createElement("div");
-  wrap.style.cssText = "width:40px;height:46px;position:relative;cursor:pointer;";
-  // Ring around the pin when it has a territory owner
-  const ring = badge ? `box-shadow:0 0 0 2.5px ${color},0 2px 10px rgba(0,0,0,.35);` : "box-shadow:0 2px 8px rgba(0,0,0,.30);";
-  wrap.innerHTML = `
-    <div style="
-      position:absolute;bottom:0;left:50%;
-      width:36px;height:36px;
-      background:${color};
-      border-radius:50% 50% 50% 0;
-      border:2.5px solid white;
-      ${ring}
-      transform:translateX(-50%) rotate(-45deg);
-      display:flex;align-items:center;justify-content:center;
-    ">
-      <span style="transform:rotate(45deg);font-size:17px;line-height:1;display:block;margin:2px 0 0 1px;">${icon}</span>
-    </div>`;
-  return wrap;
-}
-
-function toggle<T>(set: Set<T>, value: T): Set<T> {
-  const next = new Set(set);
-  next.has(value) ? next.delete(value) : next.add(value);
-  return next;
-}
-
-function MapBtn({ label, title, onClick, active = false }: {
-  label: string; title: string; onClick: () => void; active?: boolean;
-}) {
-  return (
-    <button type="button" title={title} onClick={onClick}
-      className={`grid h-10 w-10 place-items-center rounded-xl shadow-md text-sm font-bold transition-colors ${
-        active ? "bg-emerald-600 text-white" : "bg-white text-zinc-700 hover:bg-zinc-50 dark:bg-zinc-900 dark:text-zinc-200"
-      }`}>
-      {label}
-    </button>
-  );
-}
-
-function FilterSection({ label, children }: { label: string; children: React.ReactNode }) {
-  return (
-    <div className="mb-4">
-      <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">{label}</p>
-      <div className="flex flex-wrap gap-2">{children}</div>
-    </div>
-  );
-}
-
-function FilterPill({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick}
-      className={`rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
-        active ? "bg-emerald-600 text-white" : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-300"
-      }`}>
-      {label}
-    </button>
-  );
-}
-
-// ─── Google Maps style (teinte neutre, similaire au style iOS Maps) ───────────
-const GMAP_STYLES = [
-  { featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] },
-  { featureType: "transit", elementType: "labels.icon", stylers: [{ visibility: "off" }] },
-  { featureType: "road", elementType: "geometry", stylers: [{ color: "#ffffff" }] },
-  { featureType: "road.arterial", elementType: "geometry", stylers: [{ color: "#f5f5f5" }] },
-  { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#e8e8e8" }] },
-  { featureType: "water", elementType: "geometry", stylers: [{ color: "#c9e8f5" }] },
-  { featureType: "landscape.natural", elementType: "geometry", stylers: [{ color: "#e8f5e9" }] },
-  { featureType: "administrative", elementType: "labels.text.fill", stylers: [{ color: "#6b6b6b" }] },
-];
