@@ -11,12 +11,12 @@ export default async function MatchPage(props: PageProps<"/match/[id]">) {
 
   if (!match) {
     return (
-      <>
+      <div className="min-h-dvh bg-[#F9F9FF]">
         <TopBar title="Match" />
         <p className="px-4 py-10 text-center text-sm text-zinc-500">
           Match introuvable.
         </p>
-      </>
+      </div>
     );
   }
 
@@ -26,7 +26,7 @@ export default async function MatchPage(props: PageProps<"/match/[id]">) {
   const won = setsWon(match.sets);
 
   return (
-    <>
+    <div className="min-h-dvh bg-[#F9F9FF] text-[#151C27]">
       <TopBar
         title={`${p1.fullName} vs ${p2.fullName}`}
         subtitle={`${match.format} · ${getMatchModeLabel(match.mode)} · ${timeAgo(match.playedAt)}`}
@@ -34,8 +34,9 @@ export default async function MatchPage(props: PageProps<"/match/[id]">) {
 
       <div
         className={`px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-wider text-white ${
-          isCompetitive(match.mode) ? "bg-emerald-600" : "bg-zinc-500"
+          isCompetitive(match.mode) ? "bg-[#0A241E]" : "bg-[#616363]"
         }`}
+        style={{ fontFamily: "var(--font-ui)" }}
       >
         {isCompetitive(match.mode)
           ? `${getMatchModeLabel(match.mode)} · ELO en jeu`
@@ -49,7 +50,10 @@ export default async function MatchPage(props: PageProps<"/match/[id]">) {
             className="flex flex-col items-center gap-2"
           >
             <Avatar emoji={p1.avatar} size="lg" />
-            <p className="text-center text-sm font-semibold leading-tight">
+            <p
+              className="text-center text-sm font-semibold leading-tight text-[#0A241E]"
+              style={{ fontFamily: "var(--font-ui)" }}
+            >
               {p1.fullName}
             </p>
             <p className="text-[11px] text-zinc-500">
@@ -57,12 +61,18 @@ export default async function MatchPage(props: PageProps<"/match/[id]">) {
             </p>
           </Link>
           <div className="text-center">
-            <p className="text-4xl font-extrabold tabular-nums">
+            <p
+              className="text-4xl font-extrabold tabular-nums text-[#0A241E]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
               {won.p1}
-              <span className="text-zinc-300"> · </span>
+              <span className="text-[#DFE0E0]"> · </span>
               {won.p2}
             </p>
-            <p className="mt-1 text-[11px] uppercase tracking-wide text-zinc-500">
+            <p
+              className="mt-1 text-[11px] uppercase tracking-wide text-zinc-500"
+              style={{ fontFamily: "var(--font-ui)" }}
+            >
               {match.winnerId === p1.id
                 ? "Victoire " + p1.fullName.split(" ")[0]
                 : "Victoire " + p2.fullName.split(" ")[0]}
@@ -73,7 +83,10 @@ export default async function MatchPage(props: PageProps<"/match/[id]">) {
             className="flex flex-col items-center gap-2"
           >
             <Avatar emoji={p2.avatar} size="lg" />
-            <p className="text-center text-sm font-semibold leading-tight">
+            <p
+              className="text-center text-sm font-semibold leading-tight text-[#0A241E]"
+              style={{ fontFamily: "var(--font-ui)" }}
+            >
               {p2.fullName}
             </p>
             <p className="text-[11px] text-zinc-500">
@@ -83,8 +96,11 @@ export default async function MatchPage(props: PageProps<"/match/[id]">) {
         </div>
       </section>
 
-      <section className="border-t border-zinc-100 px-4 py-4 dark:border-zinc-800">
-        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+      <section className="border-t border-[#E5E7EB] px-4 py-4">
+        <h3
+          className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500"
+          style={{ fontFamily: "var(--font-ui)" }}
+        >
           Détail des manches
         </h3>
         <ul className="space-y-2">
@@ -93,28 +109,39 @@ export default async function MatchPage(props: PageProps<"/match/[id]">) {
             return (
               <li
                 key={i}
-                className="grid grid-cols-[auto_1fr_auto_auto_1fr] items-center gap-3 rounded-xl bg-zinc-50 p-3 dark:bg-zinc-900"
+                className="grid grid-cols-[auto_1fr_auto_auto_1fr] items-center gap-3 rounded-xl bg-white border border-[#E5E7EB] p-3"
               >
-                <span className="text-[11px] font-semibold text-zinc-500">
+                <span
+                  className="text-[11px] font-semibold text-zinc-500"
+                  style={{ fontFamily: "var(--font-ui)" }}
+                >
                   Set {i + 1}
                 </span>
                 <span
                   className={`text-right text-sm ${
-                    p1Won ? "font-bold" : "text-zinc-500"
+                    p1Won ? "font-bold text-[#0A241E]" : "text-zinc-400"
                   }`}
+                  style={{ fontFamily: "var(--font-ui)" }}
                 >
                   {p1.fullName.split(" ")[0]}
                 </span>
-                <span className="text-base font-bold tabular-nums">
+                <span
+                  className="text-base font-bold tabular-nums text-[#0A241E]"
+                  style={{ fontFamily: "var(--font-ui)" }}
+                >
                   {s.p1}
                 </span>
-                <span className="text-base font-bold tabular-nums">
+                <span
+                  className="text-base font-bold tabular-nums text-[#0A241E]"
+                  style={{ fontFamily: "var(--font-ui)" }}
+                >
                   {s.p2}
                 </span>
                 <span
                   className={`text-sm ${
-                    !p1Won ? "font-bold" : "text-zinc-500"
+                    !p1Won ? "font-bold text-[#0A241E]" : "text-zinc-400"
                   }`}
+                  style={{ fontFamily: "var(--font-ui)" }}
                 >
                   {p2.fullName.split(" ")[0]}
                 </span>
@@ -125,32 +152,43 @@ export default async function MatchPage(props: PageProps<"/match/[id]">) {
       </section>
 
       {isCompetitive(match.mode) && match.ratingChange ? (
-        <section className="border-t border-zinc-100 px-4 py-4 dark:border-zinc-800">
-          <h3 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+        <section className="border-t border-[#E5E7EB] px-4 py-4">
+          <h3
+            className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500"
+            style={{ fontFamily: "var(--font-ui)" }}
+          >
             Évolution ELO
           </h3>
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl bg-zinc-50 p-3 dark:bg-zinc-900">
-              <p className="text-xs text-zinc-500">{p1.fullName}</p>
+            <div className="rounded-xl bg-white border border-[#E5E7EB] p-3">
+              <p
+                className="text-xs text-zinc-500"
+                style={{ fontFamily: "var(--font-ui)" }}
+              >
+                {p1.fullName}
+              </p>
               <p
                 className={`text-lg font-bold ${
-                  match.ratingChange.p1 >= 0
-                    ? "text-emerald-600"
-                    : "text-rose-600"
+                  match.ratingChange.p1 >= 0 ? "text-[#0A241E]" : "text-[#BA1A1A]"
                 }`}
+                style={{ fontFamily: "var(--font-ui)" }}
               >
                 {match.ratingChange.p1 >= 0 ? "+" : ""}
                 {match.ratingChange.p1}
               </p>
             </div>
-            <div className="rounded-xl bg-zinc-50 p-3 dark:bg-zinc-900">
-              <p className="text-xs text-zinc-500">{p2.fullName}</p>
+            <div className="rounded-xl bg-white border border-[#E5E7EB] p-3">
+              <p
+                className="text-xs text-zinc-500"
+                style={{ fontFamily: "var(--font-ui)" }}
+              >
+                {p2.fullName}
+              </p>
               <p
                 className={`text-lg font-bold ${
-                  match.ratingChange.p2 >= 0
-                    ? "text-emerald-600"
-                    : "text-rose-600"
+                  match.ratingChange.p2 >= 0 ? "text-[#0A241E]" : "text-[#BA1A1A]"
                 }`}
+                style={{ fontFamily: "var(--font-ui)" }}
               >
                 {match.ratingChange.p2 >= 0 ? "+" : ""}
                 {match.ratingChange.p2}
@@ -158,20 +196,33 @@ export default async function MatchPage(props: PageProps<"/match/[id]">) {
             </div>
           </div>
           {match.venue ? (
-            <p className="mt-3 text-xs text-zinc-500">📍 {match.venue}</p>
+            <p
+              className="mt-3 text-xs text-zinc-500"
+              style={{ fontFamily: "var(--font-ui)" }}
+            >
+              📍 {match.venue}
+            </p>
           ) : null}
         </section>
       ) : (
-        <section className="border-t border-zinc-100 px-4 py-4 dark:border-zinc-800">
-          <div className="rounded-xl bg-zinc-50 p-3 text-xs text-zinc-600 dark:bg-zinc-900 dark:text-zinc-400">
+        <section className="border-t border-[#E5E7EB] px-4 py-4">
+          <div
+            className="rounded-xl bg-white border border-[#E5E7EB] p-3 text-xs text-zinc-500"
+            style={{ fontFamily: "var(--font-ui)" }}
+          >
             Match amical : aucun ELO modifié, comptabilisé séparément dans
             l'historique amical de chaque joueur.
           </div>
           {match.venue ? (
-            <p className="mt-3 text-xs text-zinc-500">📍 {match.venue}</p>
+            <p
+              className="mt-3 text-xs text-zinc-500"
+              style={{ fontFamily: "var(--font-ui)" }}
+            >
+              📍 {match.venue}
+            </p>
           ) : null}
         </section>
       )}
-    </>
+    </div>
   );
 }

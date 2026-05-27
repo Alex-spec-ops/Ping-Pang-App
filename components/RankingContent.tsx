@@ -15,8 +15,13 @@ export default function RankingContent() {
         <input
           type="search"
           placeholder="Rechercher un joueur…"
-          className="w-full px-3 py-2 text-sm"
-          style={{ background: "var(--color-cream)", border: "var(--border-thin)", fontFamily: "var(--font-ui)" }}
+          className="w-full rounded-xl px-3 py-2 text-sm outline-none"
+          style={{
+            background: "#fff",
+            border: "1px solid #E5E7EB",
+            fontFamily: "var(--font-ui)",
+            color: "#0A241E",
+          }}
         />
       </div>
 
@@ -25,11 +30,14 @@ export default function RankingContent() {
           <button
             key={label}
             type="button"
-            className="shrink-0 px-3 py-1.5 font-medium"
+            className="shrink-0 rounded-full px-3 py-1.5 font-bold uppercase tracking-wider transition-colors"
             style={{
-              background: i === 0 ? "var(--color-ink)" : "var(--color-cream)",
-              color: i === 0 ? "#fff" : "var(--color-muted)",
+              background: i === 0 ? "#0A241E" : "#fff",
+              color: i === 0 ? "#fff" : "#616363",
+              border: i === 0 ? "none" : "1px solid #E5E7EB",
               fontFamily: "var(--font-ui)",
+              fontSize: "9px",
+              letterSpacing: "0.05em",
             }}
           >
             {label}
@@ -39,36 +47,39 @@ export default function RankingContent() {
 
       {me >= 0 && (
         <div
-          className="mx-4 mb-3 flex items-center gap-3 p-3"
-          style={{ background: "rgba(14,61,46,0.08)", border: "1px solid var(--color-forest)" }}
+          className="mx-4 mb-3 flex items-center gap-3 rounded-xl p-3"
+          style={{ background: "#D1EAE2", border: "1px solid #BAE0D4" }}
         >
           <span
-            className="grid h-8 w-8 place-items-center text-xs font-bold"
-            style={{ background: "var(--color-forest)", color: "#fff", fontFamily: "var(--font-ui)" }}
+            className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-xs font-bold text-white"
+            style={{ background: "#0A241E", fontFamily: "var(--font-ui)" }}
           >
             #{me + 1}
           </span>
-          <p className="flex-1 text-sm font-semibold" style={{ fontFamily: "var(--font-ui)" }}>
+          <p className="flex-1 text-sm font-semibold text-[#0A241E]" style={{ fontFamily: "var(--font-ui)" }}>
             Ta position mondiale
           </p>
         </div>
       )}
 
-      <ol className="border-t pb-8" style={{ borderColor: "var(--color-line)" }}>
+      <ul className="space-y-2 px-4 pb-8">
         {ranked.map((p, idx) => {
           const rank = idx + 1;
           const isMe = p.id === CURRENT_USER_ID;
           return (
-            <li key={p.id} style={{ borderBottom: "var(--border-thin)" }}>
+            <li key={p.id}>
               <Link
                 href={`/profile/${p.id}`}
-                className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-zinc-50"
-                style={{ background: isMe ? "rgba(14,61,46,0.05)" : "transparent" }}
+                className="flex items-center gap-3 rounded-xl px-3 py-3 transition-all hover:translate-y-[-1px] hover:shadow-[0px_4px_20px_rgba(10,36,30,0.05)]"
+                style={{
+                  background: isMe ? "rgba(10,36,30,0.04)" : "#fff",
+                  border: isMe ? "1px solid #BAE0D4" : "1px solid #E5E7EB",
+                }}
               >
                 <span
                   className="w-7 text-center text-sm font-bold tabular-nums"
                   style={{
-                    color: rank <= 3 ? "var(--color-gold)" : "var(--color-muted)",
+                    color: rank <= 3 ? "var(--color-gold)" : "#616363",
                     fontFamily: "var(--font-ui)",
                   }}
                 >
@@ -76,28 +87,30 @@ export default function RankingContent() {
                 </span>
                 <Avatar emoji={p.avatar} size="md" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold" style={{ fontFamily: "var(--font-ui)" }}>
+                  <p className="truncate text-sm font-semibold text-[#0A241E]" style={{ fontFamily: "var(--font-ui)" }}>
                     {p.fullName}{" "}
-                    <span className="text-xs font-normal text-zinc-500">{p.countryFlag}</span>
+                    <span className="text-xs font-normal text-zinc-400">{p.countryFlag}</span>
                   </p>
-                  <p className="truncate text-xs text-zinc-500">
+                  <p className="truncate text-xs text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
                     @{p.username}{p.club ? ` · ${p.club}` : ""}
                   </p>
                 </div>
                 <div className="text-right">
                   <p
-                    className="text-base font-bold tabular-nums"
-                    style={{ color: "var(--color-forest)", fontFamily: "var(--font-display)" }}
+                    className="text-base font-bold tabular-nums text-[#0A241E]"
+                    style={{ fontFamily: "var(--font-display)" }}
                   >
                     {p.rating}
                   </p>
-                  <p className="text-[10px] uppercase tracking-wider text-zinc-500">ELO</p>
+                  <p className="text-[10px] uppercase tracking-wider text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
+                    ELO
+                  </p>
                 </div>
               </Link>
             </li>
           );
         })}
-      </ol>
+      </ul>
     </>
   );
 }

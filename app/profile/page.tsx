@@ -24,8 +24,9 @@ export default function MyProfilePage() {
             aria-label="Réglages"
             className="grid h-9 w-9 place-items-center text-lg"
             style={{
-              border: "var(--border-thin)",
-              background: "var(--color-cream)",
+              border: "1px solid #E5E7EB",
+              background: "#F9F9FF",
+              borderRadius: ".75rem",
             }}
           >
             ⚙️
@@ -48,7 +49,7 @@ export default function MyProfilePage() {
 
       <section
         className="px-4 py-6"
-        style={{ borderTop: "var(--border-thin)" }}
+        style={{ borderTop: "1px solid #E5E7EB" }}
       >
         <LogoutButton />
       </section>

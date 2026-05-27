@@ -181,8 +181,8 @@
 /* ── Tab Bar ──────────────────────────────────────────────────── */
 .profile-tab-bar {
   display: flex;
-  border-bottom: var(--border-thin);
-  background: var(--color-bg);
+  border-bottom: 1px solid #E5E7EB;
+  background: #F9F9FF;
   position: sticky; top: 0; z-index: 20;
 }
 
@@ -191,18 +191,18 @@
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   gap: 2px; padding: 0.65rem 0;
   font-size: 0.6875rem; font-weight: 600;
-  color: var(--color-muted);
+  color: #616363;
   position: relative;
   transition: color 0.15s;
   font-family: var(--font-ui);
 }
-.profile-tab--active { color: var(--color-forest); }
+.profile-tab--active { color: #0A241E; }
 .profile-tab-emoji { font-size: 1rem; line-height: 1; }
 .profile-tab-label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.06em; }
 .profile-tab-indicator {
   position: absolute; bottom: 0; left: 10%; right: 10%;
   height: 2.5px;
-  background: var(--color-forest);
+  background: #0A241E;
   animation: tab-indicator-in 0.2s ease-out;
 }
 @keyframes tab-indicator-in {

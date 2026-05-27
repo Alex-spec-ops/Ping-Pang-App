@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&family=Caveat:wght@400;700&display=swap');
 @import "tailwindcss";
 
 /* ── Design tokens — Ping Pang & Co. Elite ────────────────────────────────────── */
@@ -222,6 +221,12 @@ body {
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+@keyframes laserScan {
+  0%   { top: 0%; }
+  50%  { top: 100%; }
+  100% { top: 0%; }
 }
 
 /* Feed: offset for sticky filter bar (below sticky TopBar ~57px) */

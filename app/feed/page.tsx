@@ -17,7 +17,7 @@ export default function FeedPage() {
             type="button"
             aria-label="Notifications"
             className="grid h-9 w-9 place-items-center text-lg"
-            style={{ border: "var(--border-thin)", background: "var(--color-cream)" }}
+            style={{ border: "1px solid #E5E7EB", background: "#F9F9FF", borderRadius: ".75rem" }}
           >
             🔔
           </button>

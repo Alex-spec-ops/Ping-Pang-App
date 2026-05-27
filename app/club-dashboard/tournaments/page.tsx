@@ -50,7 +50,7 @@ export default function TournamentsPage() {
               <button
                 key={f}
                 type="button"
-                className="shrink-0 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider"
+                className="shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider"
                 style={{
                   background:
                     i === 0 ? "var(--color-gold)" : "rgba(255,255,255,0.06)",
@@ -75,7 +75,7 @@ export default function TournamentsPage() {
                 <ClubCard>
                   <div className="flex items-start gap-3">
                     <div
-                      className="flex h-12 w-12 shrink-0 flex-col items-center justify-center"
+                      className="flex h-12 w-12 shrink-0 flex-col items-center justify-center rounded-xl"
                       style={{
                         background: "var(--color-gold)",
                         color: "var(--color-forest-deep)",
@@ -134,11 +134,11 @@ export default function TournamentsPage() {
                       </span>
                     </div>
                     <div
-                      className="mt-1 h-1.5 overflow-hidden"
+                      className="mt-1 h-1.5 overflow-hidden rounded-full"
                       style={{ background: "rgba(255,255,255,0.08)" }}
                     >
                       <div
-                        className="h-full transition-all"
+                        className="h-full rounded-full transition-all"
                         style={{
                           width: `${fillRatio}%`,
                           background: "var(--color-gold)",

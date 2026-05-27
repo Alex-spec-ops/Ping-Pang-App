@@ -20,12 +20,13 @@ export default function PlayPageClient() {
         style={{ paddingTop: "calc(env(safe-area-inset-top) + 12px)" }}
       >
         <div
-          className="pointer-events-auto mx-auto flex max-w-md items-center gap-2 px-3 py-2"
+          className="pointer-events-auto mx-auto flex max-w-md items-center gap-2 rounded-xl px-3 py-2"
           style={{
-            background: "rgba(255,255,255,0.95)",
+            background: "rgba(249,249,255,0.97)",
             backdropFilter: "blur(8px)",
-            border: "var(--border-thin)",
+            border: "1px solid #E5E7EB",
             fontFamily: "var(--font-ui)",
+            boxShadow: "0px 4px 20px rgba(10,36,30,0.05)",
           }}
         >
           <span className="text-base">📍</span>

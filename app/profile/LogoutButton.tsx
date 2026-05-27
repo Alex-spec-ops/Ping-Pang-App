@@ -22,11 +22,11 @@ export default function LogoutButton() {
     <button
       type="button"
       onClick={handleLogout}
-      className="w-full py-3 text-sm font-bold uppercase tracking-wider"
+      className="w-full rounded-xl py-3 text-sm font-bold uppercase tracking-wider"
       style={{
         background: "transparent",
-        color: "#c4423a",
-        border: "1px solid #c4423a",
+        color: "#BA1A1A",
+        border: "1px solid #BA1A1A",
         fontFamily: "var(--font-ui)",
       }}
     >

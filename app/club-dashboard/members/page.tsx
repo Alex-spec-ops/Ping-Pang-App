@@ -36,10 +36,10 @@ export default function MembersPage() {
         <input
           type="search"
           placeholder="Rechercher un membre…"
-          className="w-full px-3 py-2 text-sm"
+          className="w-full rounded-xl px-3 py-2 text-sm outline-none"
           style={{
             background: "rgba(255,255,255,0.06)",
-            border: "1px solid rgba(255,255,255,0.1)",
+            border: "1px solid rgba(255,255,255,0.12)",
             color: "#f6f1e3",
             fontFamily: "var(--font-ui)",
           }}

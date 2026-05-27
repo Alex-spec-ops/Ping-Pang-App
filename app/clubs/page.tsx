@@ -21,7 +21,6 @@ export default function ClubsPage() {
 
   const myClubs = getUserClubs(CURRENT_USER_ID);
 
-  // For each of my clubs, build the card-ready info.
   const myClubCards = myClubs.map((club) => {
     const stats = getClubStats(club);
     const rank = ranked.findIndex((r) => r.club.id === club.id) + 1;
@@ -45,7 +44,7 @@ export default function ClubsPage() {
   });
 
   return (
-    <main className="mx-auto max-w-md pb-24">
+    <main className="mx-auto max-w-md pb-24 bg-[#F9F9FF] min-h-dvh">
       <TopBar
         title="Clubs"
         subtitle="Classement inter-clubs"
@@ -54,7 +53,7 @@ export default function ClubsPage() {
             href="/club/new"
             className="grid h-9 w-9 place-items-center rounded-full text-lg"
             aria-label="Créer un club"
-            style={{ background: "var(--color-forest)", color: "#fff" }}
+            style={{ background: "#0A241E", color: "#fff" }}
           >
             +
           </Link>
@@ -67,31 +66,21 @@ export default function ClubsPage() {
       ) : (
         <section className="px-4 pt-3">
           <div
-            className="flex items-center gap-3 p-3"
-            style={{
-              background: "var(--color-cream)",
-              border: "1px dashed var(--color-line)",
-            }}
+            className="flex items-center gap-3 rounded-xl p-3"
+            style={{ background: "#fff", border: "1px dashed #E5E7EB" }}
           >
             <span className="text-xl">🏛️</span>
             <p
-              className="flex-1 text-xs"
-              style={{
-                color: "var(--color-muted)",
-                fontFamily: "var(--font-ui)",
-              }}
+              className="flex-1 text-xs text-zinc-500"
+              style={{ fontFamily: "var(--font-ui)" }}
             >
               Tu n&apos;es membre d&apos;aucun club. Rejoins-en un dans la liste
               ou crée le tien.
             </p>
             <Link
               href="/club/new"
-              className="shrink-0 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider"
-              style={{
-                background: "var(--color-forest)",
-                color: "#fff",
-                fontFamily: "var(--font-ui)",
-              }}
+              className="shrink-0 rounded-xl px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider"
+              style={{ background: "#0A241E", color: "#fff", fontFamily: "var(--font-ui)" }}
             >
               Créer
             </Link>
@@ -101,11 +90,8 @@ export default function ClubsPage() {
 
       <div className="px-4 pt-5">
         <p
-          className="mb-2 text-[10px] font-bold uppercase tracking-widest"
-          style={{
-            color: "var(--color-forest)",
-            fontFamily: "var(--font-ui)",
-          }}
+          className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#0A241E]"
+          style={{ fontFamily: "var(--font-ui)" }}
         >
           Tous les clubs
         </p>
@@ -115,27 +101,27 @@ export default function ClubsPage() {
         <Link
           href="/clubs"
           className="rounded-full px-4 py-1.5 text-xs font-semibold"
-          style={{ background: "var(--color-ink)", color: "#fff" }}
+          style={{ background: "#0A241E", color: "#fff", fontFamily: "var(--font-ui)" }}
         >
           Tous
         </Link>
         <Link
           href="/clubs?type=public"
           className="rounded-full px-4 py-1.5 text-xs font-semibold"
-          style={{ border: "var(--border-thin)", color: "var(--color-muted)" }}
+          style={{ border: "1px solid #E5E7EB", color: "#616363", background: "#fff", fontFamily: "var(--font-ui)" }}
         >
           Publics
         </Link>
         <Link
           href="/clubs?type=private"
           className="rounded-full px-4 py-1.5 text-xs font-semibold"
-          style={{ border: "var(--border-thin)", color: "var(--color-muted)" }}
+          style={{ border: "1px solid #E5E7EB", color: "#616363", background: "#fff", fontFamily: "var(--font-ui)" }}
         >
           Privés
         </Link>
       </div>
 
-      <ol className="divide-y" style={{ borderColor: "var(--color-line)" }}>
+      <ol className="space-y-2 px-4">
         {ranked.map(({ club, stats }, i) => {
           const rank = i + 1;
           const mine = isMember(club, CURRENT_USER_ID);
@@ -143,17 +129,17 @@ export default function ClubsPage() {
             <li key={club.id}>
               <Link
                 href={`/club/${club.id}`}
-                className="flex items-center gap-4 px-4 py-3 transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-900"
+                className="flex items-center gap-4 rounded-xl px-4 py-3 transition-all hover:translate-y-[-2px] hover:shadow-[0px_4px_20px_rgba(10,36,30,0.05)]"
                 style={{
-                  borderBottom: "var(--border-thin)",
-                  background: mine ? "rgba(14,61,46,0.04)" : "transparent",
+                  background: mine ? "rgba(10,36,30,0.04)" : "#fff",
+                  border: mine ? "1px solid #BAE0D4" : "1px solid #E5E7EB",
                 }}
               >
                 <span
                   className="w-8 text-center text-sm font-bold"
                   style={{
-                    color:
-                      rank <= 3 ? "var(--color-gold)" : "var(--color-muted)",
+                    color: rank <= 3 ? "var(--color-gold)" : "#616363",
+                    fontFamily: "var(--font-ui)",
                   }}
                 >
                   {rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank}
@@ -168,15 +154,16 @@ export default function ClubsPage() {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="truncate font-semibold">{club.name}</p>
+                    <p
+                      className="truncate font-semibold text-[#0A241E]"
+                      style={{ fontFamily: "var(--font-ui)" }}
+                    >
+                      {club.name}
+                    </p>
                     {mine && (
                       <span
-                        className="shrink-0 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider"
-                        style={{
-                          background: "var(--color-forest)",
-                          color: "#fff",
-                          fontFamily: "var(--font-ui)",
-                        }}
+                        className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider"
+                        style={{ background: "#0A241E", color: "#fff", fontFamily: "var(--font-ui)" }}
                       >
                         Membre
                       </span>
@@ -184,16 +171,13 @@ export default function ClubsPage() {
                     {club.visibility === "private" && (
                       <span
                         className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
-                        style={{
-                          background: "var(--color-line)",
-                          color: "var(--color-muted)",
-                        }}
+                        style={{ background: "#F9F9FF", border: "1px solid #E5E7EB", color: "#616363", fontFamily: "var(--font-ui)" }}
                       >
                         Privé
                       </span>
                     )}
                   </div>
-                  <p className="text-xs" style={{ color: "var(--color-muted)" }}>
+                  <p className="text-xs text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
                     {stats.memberCount} membre{stats.memberCount !== 1 ? "s" : ""}
                     {club.city ? ` · ${club.city} ${club.countryFlag}` : ""}
                   </p>
@@ -201,12 +185,12 @@ export default function ClubsPage() {
 
                 <div className="text-right">
                   <p
-                    className="text-base font-bold tabular-nums"
-                    style={{ color: "var(--color-forest)" }}
+                    className="text-base font-bold tabular-nums text-[#0A241E]"
+                    style={{ fontFamily: "var(--font-display)" }}
                   >
                     {stats.winRate}%
                   </p>
-                  <p className="text-[10px]" style={{ color: "var(--color-muted)" }}>
+                  <p className="text-[10px] text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
                     {stats.totalMatches} matchs
                   </p>
                 </div>

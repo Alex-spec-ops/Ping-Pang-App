@@ -6,10 +6,10 @@ type Props = {
 export default function ClubCard({ children, className = "" }: Props) {
   return (
     <div
-      className={`p-3 ${className}`}
+      className={`rounded-xl p-3 ${className}`}
       style={{
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "rgba(255,255,255,0.06)",
+        border: "1px solid rgba(255,255,255,0.10)",
       }}
     >
       {children}
@@ -41,7 +41,7 @@ export function ClubPrimaryButton({
     <button
       type={type}
       onClick={onClick}
-      className="px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors"
+      className="rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition-opacity hover:opacity-90"
       style={{
         background: "var(--color-gold)",
         color: "var(--color-forest-deep)",
@@ -64,11 +64,11 @@ export function ClubGhostButton({
     <button
       type="button"
       onClick={onClick}
-      className="px-4 py-2 text-xs font-bold uppercase tracking-wider transition-colors"
+      className="rounded-xl px-4 py-2 text-xs font-bold uppercase tracking-wider transition-opacity hover:opacity-80"
       style={{
         background: "transparent",
         color: "#f6f1e3",
-        border: "1px solid rgba(255,255,255,0.18)",
+        border: "1px solid rgba(255,255,255,0.20)",
         fontFamily: "var(--font-ui)",
       }}
     >

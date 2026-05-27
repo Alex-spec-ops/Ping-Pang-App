@@ -26,12 +26,12 @@ const KIND_LABEL: Record<string, string> = {
 };
 
 const KIND_COLOR: Record<string, string> = {
-  match: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-300",
-  training: "bg-sky-50 text-sky-700 dark:bg-sky-950/30 dark:text-sky-300",
-  achievement: "bg-amber-50 text-amber-700 dark:bg-amber-950/30 dark:text-amber-300",
-  follow: "bg-violet-50 text-violet-700 dark:bg-violet-950/30 dark:text-violet-300",
-  tournament: "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/30 dark:text-emerald-300",
-  club_announce: "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/30 dark:text-indigo-300",
+  match:        "bg-[#F9F9FF] text-[#0A241E] border border-[#E5E7EB]",
+  training:     "bg-sky-50 text-sky-700 border border-sky-100",
+  achievement:  "bg-amber-50 text-amber-700 border border-amber-100",
+  follow:       "bg-violet-50 text-violet-700 border border-violet-100",
+  tournament:   "bg-[#D1EAE2] text-[#0A241E] border border-[#BAE0D4]",
+  club_announce:"bg-[#F9F9FF] text-[#0A241E] border border-[#E5E7EB]",
 };
 
 export default function ActivityCard({
@@ -69,7 +69,10 @@ export default function ActivityCard({
   const comments = getCommentsForActivity(activity.id);
 
   return (
-    <article className="px-4 py-4" style={{ borderBottom: "1px solid var(--color-line)", background: "var(--color-bg)" }}>
+    <article
+      className="px-4 py-4"
+      style={{ borderBottom: "1px solid #E5E7EB", background: "#F9F9FF" }}
+    >
       {/* ── Header ── */}
       <header className="mb-3 flex items-center gap-3">
         <Link href={`/profile/${player.id}`} className="shrink-0">
@@ -79,22 +82,27 @@ export default function ActivityCard({
           <div className="flex items-center gap-1.5 truncate">
             <Link
               href={`/profile/${player.id}`}
-              className="truncate text-sm font-semibold"
+              className="truncate text-sm font-semibold text-[#0A241E]"
+              style={{ fontFamily: "var(--font-ui)" }}
             >
               {player.fullName}
             </Link>
             {player.club && (
-              <span className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold" style={{ fontFamily: "var(--font-ui)", background: "var(--color-forest)", color: "#fff" }}>
+              <span
+                className="shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-semibold"
+                style={{ fontFamily: "var(--font-ui)", background: "var(--color-forest)", color: "#fff" }}
+              >
                 {player.club}
               </span>
             )}
           </div>
-          <p className="truncate text-xs text-zinc-500">
+          <p className="truncate text-xs text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
             {player.countryFlag} {player.city} · {timeAgo(activity.createdAt)}
           </p>
         </div>
         <span
           className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${KIND_COLOR[activity.kind] ?? KIND_COLOR.match}`}
+          style={{ fontFamily: "var(--font-ui)" }}
         >
           {KIND_LABEL[activity.kind]}
         </span>
@@ -105,12 +113,14 @@ export default function ActivityCard({
         <MatchBody matchId={activity.matchId} posterId={activity.playerId} />
       )}
       {activity.kind === "training" && (
-        <div className="rounded-xl bg-sky-50 p-3 ring-1 ring-sky-100 dark:bg-sky-950/20 dark:ring-sky-900/40">
+        <div className="rounded-xl bg-white border border-[#E5E7EB] p-3">
           <div className="flex items-center gap-2">
             <span className="text-xl">🏋️</span>
             <div>
-              <p className="text-sm font-medium">{activity.trainingTitle}</p>
-              <p className="mt-0.5 text-xs text-sky-700 dark:text-sky-400">
+              <p className="text-sm font-medium text-[#0A241E]" style={{ fontFamily: "var(--font-ui)" }}>
+                {activity.trainingTitle}
+              </p>
+              <p className="mt-0.5 text-xs text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
                 ⏱ {activity.trainingMinutes} min d'entraînement
               </p>
             </div>
@@ -118,10 +128,10 @@ export default function ActivityCard({
         </div>
       )}
       {activity.kind === "achievement" && (
-        <div className="rounded-xl bg-amber-50 p-3 ring-1 ring-amber-200 dark:bg-amber-950/30 dark:ring-amber-900">
+        <div className="rounded-xl bg-white border border-[#E5E7EB] p-3">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🏅</span>
-            <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+            <p className="text-sm font-semibold text-[#0A241E]" style={{ fontFamily: "var(--font-ui)" }}>
               {activity.achievementTitle}
             </p>
           </div>
@@ -144,18 +154,16 @@ export default function ActivityCard({
             key={r}
             type="button"
             onClick={() => toggleReaction(r)}
-            className="flex h-8 items-center gap-1 px-2.5 text-xs font-medium transition-all"
+            className="flex h-8 items-center gap-1 rounded-xl px-2.5 text-xs font-medium transition-all"
             style={{
               fontFamily: "var(--font-ui)",
-              background: reactions.has(r) ? "var(--color-forest)" : "transparent",
+              background: reactions.has(r) ? "var(--color-forest)" : "#fff",
               color: reactions.has(r) ? "#fff" : "var(--color-muted)",
-              border: reactions.has(r) ? "none" : "1px solid var(--color-line)",
+              border: reactions.has(r) ? "none" : "1px solid #E5E7EB",
             }}
           >
             <span>{r}</span>
-            {r === "👍" && likeCount > 0 && (
-              <span>{fmtCount(likeCount)}</span>
-            )}
+            {r === "👍" && likeCount > 0 && <span>{fmtCount(likeCount)}</span>}
           </button>
         ))}
 
@@ -165,12 +173,12 @@ export default function ActivityCard({
             setShowComments((v) => !v);
             if (!showComments) setTimeout(() => inputRef.current?.focus(), 150);
           }}
-          className="ml-1 flex h-8 items-center gap-1 px-2.5 text-xs font-medium transition-all"
+          className="ml-1 flex h-8 items-center gap-1 rounded-xl px-2.5 text-xs font-medium transition-all"
           style={{
             fontFamily: "var(--font-ui)",
-            background: showComments ? "var(--color-forest)" : "transparent",
+            background: showComments ? "var(--color-forest)" : "#fff",
             color: showComments ? "#fff" : "var(--color-muted)",
-            border: showComments ? "none" : "1px solid var(--color-line)",
+            border: showComments ? "none" : "1px solid #E5E7EB",
           }}
         >
           <span>💬</span>
@@ -179,7 +187,7 @@ export default function ActivityCard({
 
         <button
           type="button"
-          className="ml-auto flex h-8 items-center gap-1 px-2.5 text-xs font-medium"
+          className="ml-auto flex h-8 items-center gap-1 rounded-xl px-2.5 text-xs font-medium"
           style={{ fontFamily: "var(--font-ui)", color: "var(--color-muted)" }}
         >
           <span>↗</span>
@@ -189,21 +197,21 @@ export default function ActivityCard({
 
       {/* ── Comment section ── */}
       {showComments && (
-        <div className="mt-3 space-y-2 border-t border-zinc-100 pt-3 dark:border-zinc-800">
+        <div className="mt-3 space-y-2 border-t border-[#E5E7EB] pt-3">
           {comments.map((c) => {
             const commenter = getPlayer(c.playerId);
             if (!commenter) return null;
             return (
               <div key={c.id} className="flex gap-2">
                 <Avatar emoji={commenter.avatar} size="xs" />
-                <div className="min-w-0 flex-1 rounded-xl bg-zinc-50 px-3 py-2 dark:bg-zinc-900">
-                  <p className="text-[11px] font-semibold">
+                <div className="min-w-0 flex-1 rounded-xl bg-white border border-[#E5E7EB] px-3 py-2">
+                  <p className="text-[11px] font-semibold text-[#0A241E]" style={{ fontFamily: "var(--font-ui)" }}>
                     {commenter.fullName}
                     <span className="ml-1.5 font-normal text-zinc-400">
                       {timeAgo(c.createdAt)}
                     </span>
                   </p>
-                  <p className="mt-0.5 text-xs text-zinc-700 dark:text-zinc-300">
+                  <p className="mt-0.5 text-xs text-zinc-600" style={{ fontFamily: "var(--font-ui)" }}>
                     {c.text}
                   </p>
                 </div>
@@ -213,23 +221,24 @@ export default function ActivityCard({
 
           {/* Input */}
           <div className="flex gap-2 pt-1">
-            <Avatar
-              emoji={getPlayer(CURRENT_USER_ID)?.avatar ?? "🏓"}
-              size="xs"
-            />
+            <Avatar emoji={getPlayer(CURRENT_USER_ID)?.avatar ?? "🏓"} size="xs" />
             <input
               ref={inputRef}
               type="text"
               value={commentInput}
               onChange={(e) => setCommentInput(e.target.value)}
               placeholder="Écrire un commentaire… @mention"
-              className="min-w-0 flex-1 px-3 py-2 text-xs outline-none"
-              style={{ background: "var(--color-cream)", border: "var(--border-thin)", fontFamily: "var(--font-display)" }}
+              className="min-w-0 flex-1 rounded-xl px-3 py-2 text-xs outline-none"
+              style={{
+                background: "#fff",
+                border: "1px solid #E5E7EB",
+                fontFamily: "var(--font-ui)",
+              }}
             />
             <button
               type="button"
               disabled={!commentInput.trim()}
-              className="px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
+              className="rounded-xl px-3 py-2 text-xs font-semibold text-white disabled:opacity-40"
               style={{ background: "var(--color-forest)", fontFamily: "var(--font-ui)" }}
               onClick={() => setCommentInput("")}
             >
@@ -265,8 +274,7 @@ function MatchBody({ matchId, posterId }: { matchId: string; posterId: string })
   return (
     <Link
       href={`/match/${match.id}`}
-      className="block overflow-hidden transition-colors"
-      style={{ border: "var(--border-thin)" }}
+      className="block overflow-hidden rounded-xl border border-[#E5E7EB] transition-all hover:translate-y-[-2px] hover:shadow-[0px_4px_20px_rgba(10,36,30,0.05)]"
     >
       {/* Result banner */}
       <div
@@ -275,8 +283,8 @@ function MatchBody({ matchId, posterId }: { matchId: string; posterId: string })
           fontFamily: "var(--font-ui)",
           letterSpacing: "0.08em",
           background: competitive
-            ? posterWon ? "var(--color-forest)" : "var(--color-red)"
-            : "var(--color-muted)",
+            ? posterWon ? "#0A241E" : "#BA1A1A"
+            : "#616363",
         }}
       >
         <span>{posterWon ? "✓ Victoire" : "✕ Défaite"}</span>
@@ -290,20 +298,17 @@ function MatchBody({ matchId, posterId }: { matchId: string; posterId: string })
       </div>
 
       {/* Score table */}
-      <div className="overflow-x-auto px-3 pb-3 pt-2">
+      <div className="overflow-x-auto bg-white px-3 pb-3 pt-2">
         <table className="w-full min-w-[220px] text-xs">
           <thead>
             <tr>
               <th className="w-28 pr-2 text-left text-[10px] font-normal text-zinc-400" />
               {match.sets.map((_, i) => (
-                <th
-                  key={i}
-                  className="w-8 text-center text-[10px] font-normal text-zinc-400"
-                >
+                <th key={i} className="w-8 text-center text-[10px] font-normal text-zinc-400">
                   S{i + 1}
                 </th>
               ))}
-              <th className="w-8 text-center text-[10px] font-semibold text-zinc-600 dark:text-zinc-300">
+              <th className="w-8 text-center text-[10px] font-semibold text-zinc-600">
                 Tot
               </th>
             </tr>
@@ -317,24 +322,23 @@ function MatchBody({ matchId, posterId }: { matchId: string; posterId: string })
                 <td className="pr-2 py-1">
                   <div className="flex items-center gap-1.5">
                     <Avatar emoji={row.player.avatar} size="xs" />
-                    <span className="truncate font-medium">{row.player.fullName}</span>
+                    <span className="truncate font-medium text-[#0A241E]" style={{ fontFamily: "var(--font-ui)" }}>
+                      {row.player.fullName}
+                    </span>
                   </div>
                 </td>
                 {row.sets.map((score, i) => (
                   <td
                     key={i}
                     className="py-1 text-center tabular-nums font-semibold"
-                  style={{ color: row.wins[i] ? "var(--color-forest)" : "var(--color-muted)" }}
+                    style={{ color: row.wins[i] ? "#0A241E" : "#9CA3AF" }}
                   >
                     {score}
                   </td>
                 ))}
                 <td
-                  className={`py-1 text-center tabular-nums text-sm font-bold ${
-                    match.winnerId === row.player.id
-                      ? "text-zinc-900 dark:text-zinc-50"
-                      : "text-zinc-400"
-                  }`}
+                  className="py-1 text-center tabular-nums text-sm font-bold"
+                  style={{ color: match.winnerId === row.player.id ? "#0A241E" : "#9CA3AF" }}
                 >
                   {row.total}
                 </td>
@@ -345,16 +349,19 @@ function MatchBody({ matchId, posterId }: { matchId: string; posterId: string })
       </div>
 
       {/* ELO delta */}
-      <div className="px-3 py-1.5 text-[11px]" style={{ borderTop: "var(--border-thin)", fontFamily: "var(--font-ui)" }}>
+      <div
+        className="bg-white px-3 py-1.5 text-[11px]"
+        style={{ borderTop: "1px solid #E5E7EB", fontFamily: "var(--font-ui)" }}
+      >
         {delta !== null ? (
-          <span style={{ color: "var(--color-muted)" }}>
+          <span className="text-zinc-500">
             ELO :{" "}
-            <span style={{ fontWeight: 600, color: delta >= 0 ? "var(--color-forest)" : "var(--color-red)" }}>
+            <span style={{ fontWeight: 600, color: delta >= 0 ? "#0A241E" : "#BA1A1A" }}>
               {delta >= 0 ? "+" : ""}{delta}
             </span>
           </span>
         ) : (
-          <span className="italic" style={{ color: "var(--color-muted)" }}>Hors classement</span>
+          <span className="italic text-zinc-400">Hors classement</span>
         )}
       </div>
     </Link>
@@ -364,11 +371,7 @@ function MatchBody({ matchId, posterId }: { matchId: string; posterId: string })
 function TournamentBody({ activity }: { activity: Activity }) {
   const pct =
     activity.tournamentMaxParticipants && activity.tournamentParticipants
-      ? Math.round(
-          (activity.tournamentParticipants /
-            activity.tournamentMaxParticipants) *
-            100,
-        )
+      ? Math.round((activity.tournamentParticipants / activity.tournamentMaxParticipants) * 100)
       : null;
 
   const dateLabel = activity.tournamentDate
@@ -380,43 +383,45 @@ function TournamentBody({ activity }: { activity: Activity }) {
     : null;
 
   return (
-    <div className="overflow-hidden" style={{ border: "var(--border-thin)" }}>
-      <div className="px-3 py-2" style={{ background: "var(--color-forest)" }}>
-        <p className="text-sm font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>🏆 {activity.tournamentTitle}</p>
+    <div className="overflow-hidden rounded-xl border border-[#E5E7EB]">
+      <div className="px-3 py-2" style={{ background: "#0A241E" }}>
+        <p className="text-sm font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
+          🏆 {activity.tournamentTitle}
+        </p>
       </div>
-      <div className="space-y-1.5 px-3 py-3" style={{ background: "var(--color-cream)" }}>
+      <div className="space-y-1.5 px-3 py-3 bg-[#F9F9FF]">
         {dateLabel && (
-          <p className="flex items-center gap-1.5 text-xs" style={{ color: "var(--color-ink)" }}>
+          <p className="flex items-center gap-1.5 text-xs text-[#0A241E]" style={{ fontFamily: "var(--font-ui)" }}>
             <span>📅</span> {dateLabel}
           </p>
         )}
         {activity.tournamentVenue && (
-          <p className="flex items-center gap-1.5 text-xs" style={{ color: "var(--color-ink)" }}>
+          <p className="flex items-center gap-1.5 text-xs text-[#0A241E]" style={{ fontFamily: "var(--font-ui)" }}>
             <span>📍</span> {activity.tournamentVenue}
           </p>
         )}
         {activity.tournamentPrize && (
-          <p className="flex items-center gap-1.5 text-xs" style={{ color: "var(--color-ink)" }}>
+          <p className="flex items-center gap-1.5 text-xs text-[#0A241E]" style={{ fontFamily: "var(--font-ui)" }}>
             <span>🎖</span> {activity.tournamentPrize}
           </p>
         )}
         {pct !== null && (
           <div className="pt-1">
-            <div className="mb-1 flex justify-between text-[10px]" style={{ fontFamily: "var(--font-ui)", color: "var(--color-muted)" }}>
+            <div className="mb-1 flex justify-between text-[10px] text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
               <span>{activity.tournamentParticipants} / {activity.tournamentMaxParticipants} participants</span>
               <span>{pct}%</span>
             </div>
-            <div className="h-1.5 overflow-hidden" style={{ background: "var(--color-line)" }}>
-              <div className="h-full transition-all" style={{ width: `${pct}%`, background: "var(--color-forest)" }} />
+            <div className="h-1.5 overflow-hidden rounded-full bg-[#E5E7EB]">
+              <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: "#0A241E" }} />
             </div>
           </div>
         )}
       </div>
-      <div className="px-3 pb-3" style={{ background: "var(--color-cream)" }}>
+      <div className="px-3 pb-3 bg-[#F9F9FF]">
         <button
           type="button"
-          className="w-full py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
-          style={{ fontFamily: "var(--font-ui)", background: "var(--color-forest)", letterSpacing: "0.05em" }}
+          className="w-full rounded-xl py-1.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          style={{ fontFamily: "var(--font-ui)", background: "#0A241E", letterSpacing: "0.05em" }}
         >
           S'inscrire →
         </button>
@@ -428,15 +433,19 @@ function TournamentBody({ activity }: { activity: Activity }) {
 function ClubAnnounceBody({ activity }: { activity: Activity }) {
   const poster = getPlayer(activity.playerId);
   return (
-    <div className="overflow-hidden" style={{ border: "var(--border-ink)" }}>
-      <div className="px-3 py-2" style={{ background: "var(--color-ink)" }}>
-        <p className="text-sm font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>📢 {activity.announceTitle}</p>
+    <div className="overflow-hidden rounded-xl border border-[#E5E7EB]">
+      <div className="px-3 py-2" style={{ background: "#0A241E" }}>
+        <p className="text-sm font-bold text-white" style={{ fontFamily: "var(--font-display)" }}>
+          📢 {activity.announceTitle}
+        </p>
         {poster?.club && (
-          <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.6)", fontFamily: "var(--font-ui)", letterSpacing: "0.06em" }}>{poster.club}</p>
+          <p className="text-[10px]" style={{ color: "rgba(255,255,255,0.6)", fontFamily: "var(--font-ui)", letterSpacing: "0.06em" }}>
+            {poster.club}
+          </p>
         )}
       </div>
-      <div className="px-3 py-3" style={{ background: "var(--color-cream)" }}>
-        <p className="text-xs leading-relaxed" style={{ color: "var(--color-ink)" }}>
+      <div className="px-3 py-3 bg-[#F9F9FF]">
+        <p className="text-xs leading-relaxed text-zinc-600" style={{ fontFamily: "var(--font-ui)" }}>
           {activity.announceBody}
         </p>
       </div>
@@ -449,15 +458,17 @@ function FollowBody({ targetId, posterId }: { targetId: string; posterId: string
   const target = getPlayer(targetId);
   if (!poster || !target) return null;
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-violet-50 px-3 py-2.5 ring-1 ring-violet-100 dark:bg-violet-950/20 dark:ring-violet-900/40">
+    <div className="flex items-center gap-3 rounded-xl bg-white border border-[#E5E7EB] px-3 py-2.5">
       <Avatar emoji={poster.avatar} size="sm" />
-      <span className="text-xs text-zinc-600 dark:text-zinc-400">suit maintenant</span>
+      <span className="text-xs text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>suit maintenant</span>
       <Link href={`/profile/${target.id}`}>
         <Avatar emoji={target.avatar} size="sm" />
       </Link>
       <div className="min-w-0">
-        <p className="truncate text-xs font-semibold">{target.fullName}</p>
-        <p className="text-[10px] text-zinc-500">{target.rating} ELO</p>
+        <p className="truncate text-xs font-semibold text-[#0A241E]" style={{ fontFamily: "var(--font-ui)" }}>
+          {target.fullName}
+        </p>
+        <p className="text-[10px] text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>{target.rating} ELO</p>
       </div>
     </div>
   );

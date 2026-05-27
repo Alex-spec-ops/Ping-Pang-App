@@ -13,27 +13,18 @@ const accents: Record<string, string> = {
   green: "#7ad9a6",
 };
 
-export default function ClubKpi({
-  label,
-  value,
-  hint,
-  trend,
-  accent = "white",
-}: Props) {
+export default function ClubKpi({ label, value, hint, trend, accent = "white" }: Props) {
   return (
     <div
-      className="p-3"
+      className="rounded-xl p-3"
       style={{
-        background: "rgba(255,255,255,0.04)",
-        border: "1px solid rgba(255,255,255,0.08)",
+        background: "rgba(255,255,255,0.06)",
+        border: "1px solid rgba(255,255,255,0.10)",
       }}
     >
       <p
         className="text-[10px] font-semibold uppercase tracking-wider"
-        style={{
-          color: "rgba(255,255,255,0.55)",
-          fontFamily: "var(--font-ui)",
-        }}
+        style={{ color: "rgba(255,255,255,0.55)", fontFamily: "var(--font-ui)" }}
       >
         {label}
       </p>
@@ -44,10 +35,7 @@ export default function ClubKpi({
         {value}
       </p>
       {hint ? (
-        <p
-          className="mt-0.5 text-[11px]"
-          style={{ color: "rgba(255,255,255,0.55)" }}
-        >
+        <p className="mt-0.5 text-[11px]" style={{ color: "rgba(255,255,255,0.55)" }}>
           {trend === "up" ? "▲ " : trend === "down" ? "▼ " : ""}
           {hint}
         </p>

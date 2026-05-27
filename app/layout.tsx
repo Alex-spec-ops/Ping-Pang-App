@@ -1,8 +1,30 @@
 import type { Metadata, Viewport } from "next";
+import { Lexend, Manrope, Caveat } from "next/font/google";
 import "./globals.css";
 import "./profile.css";
 import "./clubs.css";
 import AppShell from "../components/AppShell";
+
+const lexend = Lexend({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-ui",
+  display: "swap",
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-handwriting",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Ping Pang & Co. Elite — FOR ATHLETES, by athletes",
@@ -30,7 +52,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" className="h-full">
+    <html lang="fr" className={`h-full ${lexend.variable} ${manrope.variable} ${caveat.variable}`}>
       <body className="min-h-full">
         <AppShell>{children}</AppShell>
       </body>

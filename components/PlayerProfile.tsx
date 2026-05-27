@@ -23,10 +23,8 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
 
   const rankedTotal = player.rankedWins + player.rankedLosses;
   const casualTotal = player.casualWins + player.casualLosses;
-  const rankedWinrate =
-    rankedTotal > 0 ? Math.round((player.rankedWins * 100) / rankedTotal) : 0;
-  const casualWinrate =
-    casualTotal > 0 ? Math.round((player.casualWins * 100) / casualTotal) : 0;
+  const rankedWinrate = rankedTotal > 0 ? Math.round((player.rankedWins * 100) / rankedTotal) : 0;
+  const casualWinrate = casualTotal > 0 ? Math.round((player.casualWins * 100) / casualTotal) : 0;
 
   const history = getMatchesForPlayer(player.id, tab);
 
@@ -36,101 +34,119 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
         <div className="flex items-center gap-4">
           <Avatar emoji={player.avatar} size="xl" />
           <div className="min-w-0 flex-1">
-            <h2 className="truncate text-lg font-bold">{player.fullName}</h2>
-            <p className="truncate text-sm text-zinc-500">@{player.username}</p>
-            <p className="mt-1 truncate text-xs text-zinc-500">
+            <h2
+              className="truncate text-lg font-bold text-[#0A241E]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
+              {player.fullName}
+            </h2>
+            <p className="truncate text-sm text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
+              @{player.username}
+            </p>
+            <p className="mt-1 truncate text-xs text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
               {player.countryFlag} {player.city}
               {player.club ? ` · ${player.club}` : ""}
             </p>
           </div>
         </div>
-        {player.bio ? (
-          <p className="mt-3 text-sm text-zinc-700 dark:text-zinc-300">
+
+        {player.bio && (
+          <p className="mt-3 text-sm text-zinc-600" style={{ fontFamily: "var(--font-ui)" }}>
             {player.bio}
           </p>
-        ) : null}
+        )}
 
         <div className="mt-4 grid grid-cols-2 gap-2">
-          <div className="rounded-xl bg-emerald-50 p-3 ring-1 ring-emerald-200 dark:bg-emerald-950/30 dark:ring-emerald-900">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">
+          <div className="rounded-xl bg-white border border-[#E5E7EB] p-3">
+            <p
+              className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500"
+              style={{ fontFamily: "var(--font-ui)" }}
+            >
               🏆 Compétitif
             </p>
-            <p className="mt-1 text-2xl font-bold tabular-nums text-emerald-900 dark:text-emerald-100">
+            <p
+              className="mt-1 text-2xl font-bold tabular-nums text-[#0A241E]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
               {player.rating}
-              <span className="ml-1 text-[10px] font-medium text-emerald-700 dark:text-emerald-300">
-                ELO
-              </span>
+              <span className="ml-1 text-[10px] font-medium text-zinc-500">ELO</span>
             </p>
-            <p className="mt-1 text-[11px] text-emerald-700 dark:text-emerald-300">
+            <p className="mt-1 text-[11px] text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
               {player.rankedWins}V – {player.rankedLosses}D · {rankedWinrate}%
             </p>
-            <p className="text-[10px] text-emerald-700/70 dark:text-emerald-300/70">
+            <p className="text-[10px] text-zinc-400" style={{ fontFamily: "var(--font-ui)" }}>
               Peak {player.peakRating}
             </p>
           </div>
-          <div className="rounded-xl bg-zinc-100 p-3 ring-1 ring-zinc-200 dark:bg-zinc-900 dark:ring-zinc-800">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-600 dark:text-zinc-400">
+          <div className="rounded-xl bg-white border border-[#E5E7EB] p-3">
+            <p
+              className="text-[10px] font-semibold uppercase tracking-wide text-zinc-500"
+              style={{ fontFamily: "var(--font-ui)" }}
+            >
               🤝 Amical
             </p>
-            <p className="mt-1 text-2xl font-bold tabular-nums">
+            <p
+              className="mt-1 text-2xl font-bold tabular-nums text-[#0A241E]"
+              style={{ fontFamily: "var(--font-display)" }}
+            >
               {casualTotal}
-              <span className="ml-1 text-[10px] font-medium text-zinc-500">
-                matchs
-              </span>
+              <span className="ml-1 text-[10px] font-medium text-zinc-500">matchs</span>
             </p>
-            <p className="mt-1 text-[11px] text-zinc-600 dark:text-zinc-400">
+            <p className="mt-1 text-[11px] text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
               {player.casualWins}V – {player.casualLosses}D · {casualWinrate}%
             </p>
-            <p className="text-[10px] text-zinc-500">Hors classement</p>
+            <p className="text-[10px] text-zinc-400" style={{ fontFamily: "var(--font-ui)" }}>
+              Hors classement
+            </p>
           </div>
         </div>
 
         <div className="mt-3 grid grid-cols-2 gap-2 text-center">
-          <Stat
-            value={player.followers.toLocaleString("fr-FR")}
-            label="Abonnés"
-          />
-          <Stat
-            value={(rankedTotal + casualTotal).toString()}
-            label="Matchs total"
-          />
+          <Stat value={player.followers.toLocaleString("fr-FR")} label="Abonnés" />
+          <Stat value={(rankedTotal + casualTotal).toString()} label="Matchs total" />
         </div>
 
         <div className="mt-4 flex gap-2">
           <button
             type="button"
-            className="flex-1 rounded-full bg-emerald-600 py-2 text-sm font-semibold text-white"
+            className="flex-1 rounded-xl py-2 text-sm font-bold text-white"
+            style={{ background: "#0A241E", fontFamily: "var(--font-ui)" }}
           >
             Suivre
           </button>
           <button
             type="button"
-            className="flex-1 rounded-full bg-zinc-100 py-2 text-sm font-semibold dark:bg-zinc-800"
+            className="flex-1 rounded-xl py-2 text-sm font-bold text-[#0A241E]"
+            style={{ background: "#F9F9FF", border: "1px solid #E5E7EB", fontFamily: "var(--font-ui)" }}
           >
             Défier
           </button>
         </div>
       </section>
 
-      <section className="border-t border-zinc-100 px-4 py-4 dark:border-zinc-800">
-        <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+      <section className="border-t border-[#E5E7EB] px-4 py-4">
+        <h3
+          className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500"
+          style={{ fontFamily: "var(--font-ui)" }}
+        >
           Historique des matchs
         </h3>
 
         <div
           role="tablist"
-          className="mb-3 flex rounded-full bg-zinc-100 p-1 text-xs font-semibold dark:bg-zinc-900"
+          className="mb-3 flex rounded-xl border border-[#E5E7EB] bg-[#F9F9FF] p-1 text-xs font-semibold"
         >
           <button
             type="button"
             role="tab"
             aria-selected={tab === "competitive"}
             onClick={() => setTab("competitive")}
-            className={`flex-1 rounded-full py-1.5 transition-colors ${
+            className={`flex-1 rounded-xl py-1.5 transition-colors ${
               tab === "competitive"
-                ? "bg-white text-emerald-700 shadow-sm dark:bg-zinc-950 dark:text-emerald-300"
+                ? "bg-white text-[#0A241E] shadow-sm"
                 : "text-zinc-500"
             }`}
+            style={{ fontFamily: "var(--font-ui)" }}
           >
             🏆 Compétitif
           </button>
@@ -139,25 +155,25 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
             role="tab"
             aria-selected={tab === "casual"}
             onClick={() => setTab("casual")}
-            className={`flex-1 rounded-full py-1.5 transition-colors ${
+            className={`flex-1 rounded-xl py-1.5 transition-colors ${
               tab === "casual"
-                ? "bg-white text-zinc-900 shadow-sm dark:bg-zinc-950 dark:text-zinc-100"
+                ? "bg-white text-[#0A241E] shadow-sm"
                 : "text-zinc-500"
             }`}
+            style={{ fontFamily: "var(--font-ui)" }}
           >
             🤝 Amical
           </button>
         </div>
 
         {history.length === 0 ? (
-          <p className="py-6 text-center text-sm text-zinc-500">
+          <p className="py-6 text-center text-sm text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
             Aucun match {tab === "competitive" ? "compétitif" : "amical"} enregistré.
           </p>
         ) : (
           <ul className="space-y-2">
             {history.map((m) => {
-              const opponentId =
-                m.player1Id === player.id ? m.player2Id : m.player1Id;
+              const opponentId = m.player1Id === player.id ? m.player2Id : m.player1Id;
               const opponent = getPlayer(opponentId);
               if (!opponent) return null;
               const isP1 = m.player1Id === player.id;
@@ -168,44 +184,45 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
               const competitive = isCompetitive(m.mode);
               const delta =
                 competitive && m.ratingChange
-                  ? isP1
-                    ? m.ratingChange.p1
-                    : m.ratingChange.p2
+                  ? isP1 ? m.ratingChange.p1 : m.ratingChange.p2
                   : null;
               return (
                 <li key={m.id}>
                   <Link
                     href={`/match/${m.id}`}
-                    className="flex items-center gap-3 rounded-xl bg-zinc-50 p-3 transition-colors hover:bg-zinc-100 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+                    className="flex items-center gap-3 rounded-xl bg-white border border-[#E5E7EB] p-3 transition-all hover:translate-y-[-1px] hover:shadow-[0px_4px_20px_rgba(10,36,30,0.05)]"
                   >
                     <span
-                      className={`grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-bold text-white ${
-                        playerWon ? "bg-emerald-600" : "bg-rose-600"
-                      }`}
+                      className="grid h-8 w-8 shrink-0 place-items-center rounded-full text-[11px] font-bold text-white"
+                      style={{ background: playerWon ? "#0A241E" : "#BA1A1A" }}
                     >
                       {playerWon ? "V" : "D"}
                     </span>
                     <Avatar emoji={opponent.avatar} size="sm" />
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">
+                      <p
+                        className="truncate text-sm font-medium text-[#0A241E]"
+                        style={{ fontFamily: "var(--font-ui)" }}
+                      >
                         vs {opponent.fullName}
                       </p>
-                      <p className="text-[11px] text-zinc-500">
+                      <p className="text-[11px] text-zinc-500" style={{ fontFamily: "var(--font-ui)" }}>
                         {timeAgo(m.playedAt)} · {getMatchModeLabel(m.mode)} · {setScoreLine(m.sets)}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-bold tabular-nums">
+                      <p
+                        className="text-sm font-bold tabular-nums text-[#0A241E]"
+                        style={{ fontFamily: "var(--font-ui)" }}
+                      >
                         {me}–{them}
                       </p>
                       {delta !== null ? (
                         <p
-                          className={`text-[11px] font-semibold ${
-                            delta >= 0 ? "text-emerald-600" : "text-rose-600"
-                          }`}
+                          className="text-[11px] font-semibold"
+                          style={{ color: delta >= 0 ? "#0A241E" : "#BA1A1A", fontFamily: "var(--font-ui)" }}
                         >
-                          {delta >= 0 ? "+" : ""}
-                          {delta}
+                          {delta >= 0 ? "+" : ""}{delta}
                         </p>
                       ) : (
                         <p className="text-[11px] text-zinc-400">—</p>
@@ -224,9 +241,17 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
 
 function Stat({ value, label }: { value: string; label: string }) {
   return (
-    <div className="rounded-xl bg-zinc-50 px-2 py-2 dark:bg-zinc-900">
-      <p className="text-base font-bold tabular-nums">{value}</p>
-      <p className="text-[10px] uppercase tracking-wide text-zinc-500">
+    <div className="rounded-xl bg-white border border-[#E5E7EB] px-2 py-2">
+      <p
+        className="text-base font-bold tabular-nums text-[#0A241E]"
+        style={{ fontFamily: "var(--font-display)" }}
+      >
+        {value}
+      </p>
+      <p
+        className="text-[10px] uppercase tracking-wide text-zinc-500"
+        style={{ fontFamily: "var(--font-ui)" }}
+      >
         {label}
       </p>
     </div>

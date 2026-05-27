@@ -26,61 +26,45 @@ export default function ClubModeSwitch({ clubs }: { clubs: ClubItem[] }) {
   }
 
   return (
-    <section className="border-b" style={{ borderColor: "var(--color-line)" }}>
-      <div className="px-4 py-4">
-        <p
-          className="mb-2 text-[10px] font-bold uppercase tracking-widest"
-          style={{
-            color: "var(--color-forest)",
-            fontFamily: "var(--font-ui)",
-          }}
-        >
-          Vous gérez {adminClubs.length} club{adminClubs.length > 1 ? "s" : ""}
-        </p>
-        <div className="space-y-2">
-          {adminClubs.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => activate(c.id)}
-              className="flex w-full items-center gap-3 p-3 text-left transition-colors"
-              style={{
-                background: "var(--color-forest-deep)",
-                color: "#f6f1e3",
-              }}
+    <section className="px-4 pt-3 pb-1 border-b border-[#E5E7EB]">
+      <p
+        className="mb-2 text-[10px] font-bold uppercase tracking-widest text-[#0A241E]"
+        style={{ fontFamily: "var(--font-ui)" }}
+      >
+        Vous gérez {adminClubs.length} club{adminClubs.length > 1 ? "s" : ""}
+      </p>
+      <div className="space-y-2 pb-3">
+        {adminClubs.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            onClick={() => activate(c.id)}
+            className="flex w-full items-center gap-3 rounded-xl p-3 text-left transition-all hover:translate-y-[-1px] hover:shadow-[0px_4px_20px_rgba(10,36,30,0.05)]"
+            style={{ background: "#fff", border: "1px solid #E5E7EB" }}
+          >
+            <span
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-xl text-xl"
+              style={{ background: "#F9F9FF", border: "1px solid #E5E7EB" }}
             >
-              <span
-                className="grid h-10 w-10 place-items-center text-xl"
-                style={{ background: "rgba(255,255,255,0.08)" }}
+              {c.logo}
+            </span>
+            <div className="min-w-0 flex-1">
+              <p
+                className="truncate text-sm font-semibold text-[#0A241E]"
+                style={{ fontFamily: "var(--font-ui)" }}
               >
-                {c.logo}
-              </span>
-              <div className="min-w-0 flex-1">
-                <p
-                  className="truncate text-sm font-semibold"
-                  style={{ fontFamily: "var(--font-ui)" }}
-                >
-                  {c.name}
-                </p>
-                <p
-                  className="truncate text-[10px] font-bold uppercase tracking-widest"
-                  style={{
-                    color: "var(--color-gold)",
-                    fontFamily: "var(--font-ui)",
-                  }}
-                >
-                  Ouvrir le mode admin · {c.role}
-                </p>
-              </div>
-              <span
-                className="text-lg"
-                style={{ color: "var(--color-gold)" }}
+                {c.name}
+              </p>
+              <p
+                className="truncate text-[10px] font-bold uppercase tracking-widest text-zinc-500"
+                style={{ fontFamily: "var(--font-ui)" }}
               >
-                →
-              </span>
-            </button>
-          ))}
-        </div>
+                Mode admin · {c.role}
+              </p>
+            </div>
+            <span className="text-sm font-bold text-[#0A241E]">→</span>
+          </button>
+        ))}
       </div>
     </section>
   );
