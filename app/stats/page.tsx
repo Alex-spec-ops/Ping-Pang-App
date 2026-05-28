@@ -121,9 +121,9 @@ export default function StatsPage() {
     <div className="flex min-h-dvh flex-col bg-[#F9F9FF] text-[#151C27]">
       <StatsTabs
         tabs={[
-          { id: "suivi", label: "Suivi", icon: "📊", content: <StatsContent /> },
-          { id: "rang", label: "Rang", icon: "🏆", content: rangContent },
-          { id: "matchs", label: "Matchs", icon: "🏁", content: matchsContent },
+          { id: "suivi", label: "Suivi", icon: <img src="/icons/graphique.png" alt="Suivi" className="w-5 h-5 object-contain" />, content: <StatsContent /> },
+          { id: "rang", label: "Rang", icon: <img src="/icons/tournoi.png" alt="Rang" className="w-5 h-5 object-contain" />, content: rangContent },
+          { id: "matchs", label: "Matchs", icon: <img src="/icons/ping-pong-2.png" alt="Matchs" className="w-5 h-5 object-contain" />, content: matchsContent },
         ]}
       />
     </div>

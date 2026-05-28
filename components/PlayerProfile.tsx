@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import Avatar from "./Avatar";
-import { getMatchesForPlayer, getMatchModeLabel, getPlayer } from "../lib/data";
+import { CURRENT_USER_ID, getMatchesForPlayer, getMatchModeLabel, getPlayer } from "../lib/data";
 import { setScoreLine, setsWon, timeAgo } from "../lib/format";
 import { isCompetitive } from "../lib/types";
 
@@ -106,22 +106,49 @@ export default function PlayerProfile({ playerId }: { playerId: string }) {
           <Stat value={(rankedTotal + casualTotal).toString()} label="Matchs total" />
         </div>
 
-        <div className="mt-4 flex gap-2">
-          <button
-            type="button"
-            className="flex-1 rounded-xl py-2 text-sm font-bold text-white"
-            style={{ background: "#0A241E", fontFamily: "var(--font-ui)" }}
-          >
-            Suivre
-          </button>
-          <button
-            type="button"
-            className="flex-1 rounded-xl py-2 text-sm font-bold text-[#0A241E]"
-            style={{ background: "#F9F9FF", border: "1px solid #E5E7EB", fontFamily: "var(--font-ui)" }}
-          >
-            Défier
-          </button>
-        </div>
+        {playerId === CURRENT_USER_ID ? (
+          <div className="mt-6 flex flex-col gap-3">
+            {[
+              { title: "ping pang paris, Les icons", image: "/ping-pang-icons.png", link: "https://pingpang.paris/collections/icons-collection-paris-2024" },
+              { title: "ping pang paris, les essentiels", image: "/ping-pang-essentiels.png", link: "https://pingpang.paris/collections/collection-version-0-0" },
+              { title: "ping pang effect", image: "/ping-pang-effect.png", link: "https://pingpang.paris/blogs/effect-magazine" },
+            ].map((item, idx) => (
+              <a 
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                key={idx} 
+                className="w-full h-28 rounded-2xl bg-[#0A241E] flex items-center justify-center relative overflow-hidden shadow-sm bg-cover bg-center transition-transform hover:scale-[1.02] active:scale-[0.98] block"
+                style={{ backgroundImage: `url('${item.image}')`, textDecoration: "none" }}
+              >
+                <div className="absolute inset-0 bg-black/30 transition-opacity hover:bg-black/40" />
+                <h4 
+                  className="relative z-10 text-white font-black uppercase tracking-wider text-base px-4 text-center" 
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  {item.title}
+                </h4>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-4 flex gap-2">
+            <button
+              type="button"
+              className="flex-1 rounded-xl py-2 text-sm font-bold text-white transition-transform active:scale-95"
+              style={{ background: "#0A241E", fontFamily: "var(--font-ui)" }}
+            >
+              Suivre
+            </button>
+            <button
+              type="button"
+              className="flex-1 rounded-xl py-2 text-sm font-bold text-[#0A241E] transition-transform active:scale-95"
+              style={{ background: "#F9F9FF", border: "1px solid #E5E7EB", fontFamily: "var(--font-ui)" }}
+            >
+              Défier
+            </button>
+          </div>
+        )}
       </section>
 
       <section className="border-t border-[#E5E7EB] px-4 py-4">

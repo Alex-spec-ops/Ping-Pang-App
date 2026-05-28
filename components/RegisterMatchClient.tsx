@@ -4,35 +4,21 @@ import { useState } from "react";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 
-type Mode = "amical" | "classé";
+type Mode = "Amical" | "Compétitif";
 type Format = "rapide" | "normal" | "tournoi";
 type SetScore = { p1: number; p2: number };
 
 type Step =
-  | { kind: "idle" }
-  | { kind: "mode" }
-  | { kind: "choice"; mode: Mode }
-  | { kind: "classé-format" }
-  | { kind: "code-display"; mode: Mode; format?: Format; code: string }
-  | { kind: "code-join"; mode: Mode }
+  | { kind: "table-choice" }
+  | { kind: "table-photo" }
+  | { kind: "mode-choice" }
+  | { kind: "qr-code"; mode: Mode }
   | { kind: "playing"; mode: Mode; format?: Format; code: string };
 
 /* ── Helpers ───────────────────────────────────────────────────── */
 
 function genCode(): string {
   return String(Math.floor(100000 + Math.random() * 900000));
-}
-
-function setsToWin(format?: Format): number {
-  if (format === "rapide") return 2;
-  if (format === "tournoi") return 4;
-  return 3; // normal + amical
-}
-
-function formatLabel(f: Format) {
-  if (f === "rapide") return "Match Rapide";
-  if (f === "tournoi") return "Tournoi";
-  return "Match Normal";
 }
 
 /* ── Styles partagés ───────────────────────────────────────────── */
@@ -58,10 +44,11 @@ function Btn({
     fontWeight: 700,
     padding: "10px 18px",
     border: "none",
+    borderRadius: "8px",
     cursor: disabled ? "not-allowed" : "pointer",
     opacity: disabled ? 0.5 : 1,
     width: fullWidth ? "100%" : undefined,
-    transition: "opacity 0.15s",
+    transition: "opacity 0.15s, transform 0.1s",
   };
   const variants: Record<string, React.CSSProperties> = {
     primary: { background: "var(--color-forest)", color: "#fff" },
@@ -69,7 +56,7 @@ function Btn({
     ghost: { background: "transparent", color: "var(--color-muted)", border: "var(--border-thin)" },
   };
   return (
-    <button type="button" onClick={onClick} disabled={disabled} style={{ ...base, ...variants[variant] }}>
+    <button type="button" onClick={onClick} disabled={disabled} style={{ ...base, ...variants[variant] }} className="active:scale-95">
       {children}
     </button>
   );
@@ -85,7 +72,7 @@ function BackBtn({ onClick }: { onClick: () => void }) {
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ border: "var(--border-thin)", background: "#fff", padding: 20, display: "flex", flexDirection: "column", gap: 16 }}>
+    <div style={{ border: "var(--border-thin)", background: "#fff", padding: 20, display: "flex", flexDirection: "column", gap: 16, borderRadius: "12px" }}>
       {children}
     </div>
   );
@@ -101,104 +88,47 @@ function Sub({ children }: { children: React.ReactNode }) {
 
 /* ── Composant principal ───────────────────────────────────────── */
 
-export default function RegisterMatchClient() {
-  const [step, setStep] = useState<Step>({ kind: "idle" });
+export default function RegisterMatchClient({ preselectedTableId }: { preselectedTableId?: string | null }) {
+  const [step, setStep] = useState<Step>(
+    preselectedTableId ? { kind: "mode-choice" } : { kind: "table-choice" }
+  );
 
   return (
-    <div className="px-8 py-4" style={{ borderBottom: "var(--border-thin)" }}>
-      {step.kind === "idle" && (
-        <button
-          type="button"
-          onClick={() => setStep({ kind: "mode" })}
-          style={{
-            ...UI,
-            width: "100%",
-            height: "15vh",
-            borderRadius: "4px",
-            background: "var(--color-forest)",
-            color: "#fff",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "15px",
-            fontWeight: 800,
-            letterSpacing: "0.04em",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 6,
-          }}
-        >
-          Enregistrer ma partie
-        </button>
-      )}
-
-      {step.kind === "mode" && (
-        <Card>
-          <Title>Quel type de partie ?</Title>
-          <div className="flex gap-3">
-            <Btn fullWidth variant="secondary" onClick={() => setStep({ kind: "choice", mode: "amical" })}>
-              🤝 Amical
-            </Btn>
-            <Btn fullWidth onClick={() => setStep({ kind: "choice", mode: "classé" })}>
-              🎯 Classé
-            </Btn>
-          </div>
-          <BackBtn onClick={() => setStep({ kind: "idle" })} />
-        </Card>
-      )}
-
-      {step.kind === "choice" && step.mode === "amical" && (
-        <StepAmicalChoice
-          onBack={() => setStep({ kind: "mode" })}
-          onCreate={() => setStep({ kind: "code-display", mode: "amical", code: genCode() })}
-          onJoin={() => setStep({ kind: "code-join", mode: "amical" })}
+    <div className="px-6 py-4">
+      {step.kind === "table-choice" && (
+        <StepTableChoice
+          onSelectTable={() => setStep({ kind: "mode-choice" })}
+          onSelectHome={() => setStep({ kind: "table-photo" })}
         />
       )}
 
-      {step.kind === "choice" && step.mode === "classé" && (
-        <StepClasséChoice
-          onBack={() => setStep({ kind: "mode" })}
-          onCreate={() => setStep({ kind: "classé-format" })}
-          onJoin={() => setStep({ kind: "code-join", mode: "classé" })}
+      {step.kind === "table-photo" && (
+        <StepTablePhoto
+          onBack={() => setStep({ kind: "table-choice" })}
+          onPhotoTaken={() => setStep({ kind: "mode-choice" })}
         />
       )}
 
-      {step.kind === "classé-format" && (
-        <StepClasséFormat
-          onBack={() => setStep({ kind: "choice", mode: "classé" })}
-          onSelect={(f) => setStep({ kind: "code-display", mode: "classé", format: f, code: genCode() })}
+      {step.kind === "mode-choice" && (
+        <StepModeChoice
+          onBack={() => setStep({ kind: "table-choice" })}
+          onSelect={(mode) => setStep({ kind: "qr-code", mode })}
         />
       )}
 
-      {step.kind === "code-display" && (
-        <StepCodeDisplay
+      {step.kind === "qr-code" && (
+        <StepQrCode
           mode={step.mode}
-          format={step.format}
-          code={step.code}
-          onBack={() =>
-            step.mode === "amical"
-              ? setStep({ kind: "choice", mode: "amical" })
-              : setStep({ kind: "classé-format" })
-          }
-          onStart={() => setStep({ kind: "playing", mode: step.mode, format: step.format, code: step.code })}
-        />
-      )}
-
-      {step.kind === "code-join" && (
-        <StepCodeJoin
-          mode={step.mode}
-          onBack={() => setStep({ kind: "choice", mode: step.mode })}
-          onJoin={(code) => setStep({ kind: "playing", mode: step.mode, code })}
+          onBack={() => setStep({ kind: "mode-choice" })}
+          onStart={() => setStep({ kind: "playing", mode: step.mode, code: genCode() })}
         />
       )}
 
       {step.kind === "playing" && (
         <ScoreGrid
           mode={step.mode}
-          format={step.format}
           code={step.code}
-          onEnd={() => setStep({ kind: "idle" })}
+          onEnd={() => setStep({ kind: "table-choice" })}
         />
       )}
     </div>
@@ -207,164 +137,147 @@ export default function RegisterMatchClient() {
 
 /* ── Étapes ────────────────────────────────────────────────────── */
 
-function StepAmicalChoice({
-  onBack, onCreate, onJoin,
-}: { onBack: () => void; onCreate: () => void; onJoin: () => void }) {
-  return (
-    <Card>
-      <BackBtn onClick={onBack} />
-      <Title>🤝 Partie amicale</Title>
-      <Sub>Crée une session ou rejoins celle d'un ami.</Sub>
-      <div className="flex gap-3">
-        <Btn fullWidth variant="secondary" onClick={onCreate}>Créer</Btn>
-        <Btn fullWidth onClick={onJoin}>Rejoindre</Btn>
-      </div>
-    </Card>
-  );
-}
-
-function StepClasséChoice({
-  onBack, onCreate, onJoin,
-}: { onBack: () => void; onCreate: () => void; onJoin: () => void }) {
-  return (
-    <Card>
-      <BackBtn onClick={onBack} />
-      <Title>🎯 Partie classée</Title>
-      <Sub>Crée une session ou rejoins celle d'un adversaire.</Sub>
-      <div className="flex gap-3">
-        <Btn fullWidth variant="secondary" onClick={onCreate}>Créer</Btn>
-        <Btn fullWidth onClick={onJoin}>Rejoindre</Btn>
-      </div>
-    </Card>
-  );
-}
-
-function StepClasséFormat({
-  onBack, onSelect,
-}: { onBack: () => void; onSelect: (f: Format) => void }) {
-  const formats: { id: Format; label: string; desc: string }[] = [
-    { id: "rapide",  label: "Match Rapide",  desc: "2 sets gagnants" },
-    { id: "normal",  label: "Match Normal",  desc: "3 sets gagnants" },
-    { id: "tournoi", label: "Tournoi",        desc: "4 sets gagnants" },
+function StepTableChoice({ onSelectTable, onSelectHome }: { onSelectTable: () => void; onSelectHome: () => void }) {
+  const tables = [
+    { id: "1", name: "Table Parc des Buttes-Chaumont", dist: "400m" },
+    { id: "2", name: "Square de la Roquette", dist: "1.2km" },
   ];
+
   return (
     <Card>
-      <BackBtn onClick={onBack} />
-      <Title>Choisis le format</Title>
-      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-        {formats.map((f) => (
-          <button
-            key={f.id}
-            type="button"
-            onClick={() => onSelect(f.id)}
-            style={{
-              ...UI,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: "12px 16px",
-              border: "var(--border-thin)",
-              background: "#fff",
-              cursor: "pointer",
-              textAlign: "left",
-            }}
+      <Title>Choisis ta table</Title>
+      <Sub>Sélectionne une table à proximité ou joue chez toi.</Sub>
+      
+      <div className="flex flex-col gap-2">
+        {tables.map(t => (
+          <button 
+            key={t.id} 
+            onClick={onSelectTable}
+            className="flex items-center justify-between p-3 rounded-xl border border-[#E5E7EB] bg-[#F9F9FF] text-left hover:border-[#0A241E] transition-colors"
           >
-            <span style={{ fontWeight: 700, fontSize: "13px", color: "var(--color-ink)" }}>{f.label}</span>
-            <span style={{ fontSize: "11px", color: "var(--color-muted)" }}>{f.desc}</span>
+            <span className="text-sm font-bold text-[#0A241E]" style={UI}>{t.name}</span>
+            <span className="text-[10px] font-bold text-[#616363] uppercase" style={UI}>{t.dist}</span>
           </button>
         ))}
+        
+        <div className="my-3 flex items-center gap-2">
+          <div className="h-px bg-[#E5E7EB] flex-1" />
+          <span className="text-[10px] text-[#616363] uppercase font-bold tracking-wider" style={UI}>OU</span>
+          <div className="h-px bg-[#E5E7EB] flex-1" />
+        </div>
+        
+        <button 
+          onClick={onSelectHome}
+          className="flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-[#0A241E] bg-white text-[#0A241E] font-bold text-sm transition-colors hover:bg-[#F9F9FF]"
+          style={UI}
+        >
+          🏠 À la maison
+        </button>
       </div>
     </Card>
   );
 }
 
-function StepCodeDisplay({
-  mode, format, code, onBack, onStart,
-}: { mode: Mode; format?: Format; code: string; onBack: () => void; onStart: () => void }) {
-  const [copied, setCopied] = useState(false);
+function StepTablePhoto({ onBack, onPhotoTaken }: { onBack: () => void; onPhotoTaken: () => void }) {
+  const [photo, setPhoto] = useState<string | null>(null);
 
-  function copy() {
-    navigator.clipboard.writeText(code).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    });
-  }
-
-  return (
-    <Card>
-      <BackBtn onClick={onBack} />
-      <Title>Code de session</Title>
-      <Sub>
-        {mode === "amical" ? "🤝 Amical" : `🎯 Classé${format ? ` · ${formatLabel(format)}` : ""}`}
-        {" "}— partage ce code à ton adversaire.
-      </Sub>
-
-      {/* Code affiché */}
-      <div style={{ textAlign: "center", padding: "20px 0" }}>
-        <p style={{ ...UI, fontSize: "40px", fontWeight: 800, letterSpacing: "0.2em", color: "var(--color-forest)", margin: 0 }}>
-          {code}
-        </p>
-      </div>
-
-      <div className="flex gap-3">
-        <Btn fullWidth variant="ghost" onClick={copy}>
-          {copied ? "✅ Copié !" : "📋 Copier"}
-        </Btn>
-        <Btn fullWidth onClick={onStart}>
-          Lancer la partie →
-        </Btn>
-      </div>
-    </Card>
-  );
-}
-
-function StepCodeJoin({
-  mode, onBack, onJoin,
-}: { mode: Mode; onBack: () => void; onJoin: (code: string) => void }) {
-  const [value, setValue] = useState("");
-  const valid = /^\d{6}$/.test(value);
+  // Simulate taking a photo
+  const handleCapture = () => {
+    // In a real app, this would open a camera or file picker
+    setTimeout(() => {
+      setPhoto("captured");
+    }, 500);
+  };
 
   return (
     <Card>
       <BackBtn onClick={onBack} />
-      <Title>Rejoindre une session</Title>
-      <Sub>{mode === "amical" ? "🤝 Amical" : "🎯 Classé"} — saisis le code partagé par ton adversaire.</Sub>
+      <Title>Prends ta table en photo</Title>
+      <Sub>Pour jouer à la maison, nous avons besoin d'une photo de votre installation.</Sub>
+      
+      {!photo ? (
+        <div 
+          onClick={handleCapture}
+          className="w-full h-48 bg-[#F9F9FF] border-2 border-[#E5E7EB] border-dashed rounded-xl flex flex-col items-center justify-center gap-3 cursor-pointer hover:border-[#0A241E] transition-colors"
+        >
+          <span className="text-4xl opacity-80">📷</span>
+          <span className="text-[11px] font-bold text-[#616363] uppercase tracking-wider" style={UI}>Appuyer pour capturer</span>
+        </div>
+      ) : (
+        <div className="w-full h-48 bg-[#D1EAE2] border-2 border-[#0A241E] rounded-xl flex flex-col items-center justify-center gap-3 relative overflow-hidden">
+          <span className="text-4xl drop-shadow-md">✅</span>
+          <span className="text-[11px] font-black text-[#0A241E] uppercase tracking-wider" style={UI}>Photo enregistrée</span>
+          <button 
+            onClick={() => setPhoto(null)} 
+            className="absolute top-3 right-3 text-[10px] bg-white px-3 py-1.5 rounded-lg font-bold text-[#BA1A1A] shadow-sm hover:scale-105 transition-transform"
+            style={UI}
+          >
+            Reprendre
+          </button>
+        </div>
+      )}
 
-      <input
-        type="number"
-        inputMode="numeric"
-        maxLength={6}
-        value={value}
-        onChange={(e) => setValue(e.target.value.slice(0, 6))}
-        placeholder="000000"
-        style={{
-          ...UI,
-          fontSize: "28px",
-          fontWeight: 800,
-          letterSpacing: "0.2em",
-          textAlign: "center",
-          padding: "14px",
-          border: "var(--border-thin)",
-          background: "var(--color-cream)",
-          color: "var(--color-ink)",
-          width: "100%",
-          outline: "none",
-        }}
-      />
-
-      <Btn fullWidth disabled={!valid} onClick={() => valid && onJoin(value)}>
-        Rejoindre →
+      <Btn fullWidth disabled={!photo} onClick={onPhotoTaken}>
+        Continuer →
       </Btn>
     </Card>
   );
 }
 
-/* ── Grille de score ───────────────────────────────────────────── */
+function StepModeChoice({ onBack, onSelect }: { onBack: () => void; onSelect: (m: Mode) => void }) {
+  return (
+    <Card>
+      <BackBtn onClick={onBack} />
+      <Title>Quel type de partie ?</Title>
+      <div className="flex gap-3">
+        <Btn fullWidth variant="secondary" onClick={() => onSelect("Amical")}>
+          🤝 Amical
+        </Btn>
+        <Btn fullWidth onClick={() => onSelect("Compétitif")}>
+          🎯 Compétitif
+        </Btn>
+      </div>
+    </Card>
+  );
+}
+
+function StepQrCode({ mode, onBack, onStart }: { mode: Mode; onBack: () => void; onStart: () => void }) {
+  return (
+    <Card>
+      <BackBtn onClick={onBack} />
+      <Title>QR Code de session</Title>
+      <Sub>
+        Mode : <span className="font-bold text-[#0A241E]">{mode}</span> — Fais scanner ce QR code à ton adversaire pour qu'il rejoigne la partie.
+      </Sub>
+
+      {/* Mock QR Code */}
+      <div className="flex justify-center py-6">
+        <div className="w-48 h-48 bg-[#F9F9FF] border border-[#E5E7EB] rounded-2xl flex items-center justify-center shadow-inner relative overflow-hidden">
+          {/* Simulated QR Pattern */}
+          <div className="absolute inset-4 border-8 border-[#0A241E] rounded-xl"></div>
+          <div className="absolute top-8 left-8 w-6 h-6 bg-[#0A241E] rounded-sm"></div>
+          <div className="absolute top-8 right-8 w-6 h-6 bg-[#0A241E] rounded-sm"></div>
+          <div className="absolute bottom-8 left-8 w-6 h-6 bg-[#0A241E] rounded-sm"></div>
+          <div className="w-16 h-16 bg-[#0A241E] rounded-full flex items-center justify-center z-10 text-white font-black text-[10px] uppercase shadow-lg border-4 border-white tracking-widest" style={UI}>
+            Ping
+          </div>
+          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPgo8cmVjdCB3aWR0aD0iNCIgaGVpZ2h0PSI0IiBmaWxsPSIjMEEyNDFFIiBmaWxsLW9wYWNpdHk9IjAuMTUiLz4KPC9zdmc+')] opacity-60"></div>
+        </div>
+      </div>
+
+      <Btn fullWidth onClick={onStart}>
+        L'adversaire a rejoint →
+      </Btn>
+    </Card>
+  );
+}
+
+/* ── Grille de score (Existant) ───────────────────────────────────────────── */
 
 function ScoreGrid({
-  mode, format, code, onEnd,
-}: { mode: Mode; format?: Format; code: string; onEnd: () => void }) {
-  const target = setsToWin(format);
+  mode, code, onEnd,
+}: { mode: Mode; code: string; onEnd: () => void }) {
+  const target = mode === "Compétitif" ? 3 : 2; // Default sets
   const [sets, setSets] = useState<SetScore[]>([]);
   const [cur, setCur] = useState<SetScore>({ p1: 0, p2: 0 });
   const [finished, setFinished] = useState(false);
@@ -388,18 +301,16 @@ function ScoreGrid({
     setCur((prev) => ({ ...prev, [player]: Math.max(0, prev[player] + delta) }));
   }
 
-  const label = mode === "amical"
-    ? "🤝 Amical"
-    : `🎯 Classé · ${format ? formatLabel(format) : ""}`;
+  const label = mode === "Amical" ? "🤝 Amical" : "🎯 Compétitif";
 
   return (
-    <div style={{ border: "var(--border-thin)", background: "#fff", display: "flex", flexDirection: "column", gap: 0 }}>
+    <div style={{ border: "var(--border-thin)", background: "#fff", display: "flex", flexDirection: "column", gap: 0, borderRadius: "12px", overflow: "hidden" }}>
       {/* Header */}
       <div
         style={{ background: "var(--color-forest)", color: "#fff", padding: "10px 16px", display: "flex", justifyContent: "space-between", alignItems: "center" }}
       >
         <span style={{ ...UI, fontSize: "12px", fontWeight: 700 }}>{label}</span>
-        <span style={{ ...UI, fontSize: "11px", opacity: 0.7 }}>Code : {code}</span>
+        <span style={{ ...UI, fontSize: "11px", opacity: 0.7 }}>Partie en cours</span>
       </div>
 
       {/* Sets gagnés */}
@@ -431,6 +342,7 @@ function ScoreGrid({
                 padding: "2px 8px",
                 background: s.p1 > s.p2 ? "var(--color-forest)" : "#e53e3e",
                 color: "#fff",
+                borderRadius: "4px"
               }}
             >
               Set {i + 1} : {s.p1}-{s.p2}
@@ -451,9 +363,9 @@ function ScoreGrid({
           <div style={{ display: "grid", gridTemplateColumns: "1fr auto 1fr", padding: "8px 16px 16px", gap: 8, alignItems: "center" }}>
             {/* P1 */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-              <button type="button" onClick={() => adj("p1", 1)} style={{ ...UI, fontSize: "22px", width: 48, height: 48, background: "var(--color-forest)", color: "#fff", border: "none", cursor: "pointer", fontWeight: 700 }}>+</button>
+              <button type="button" onClick={() => adj("p1", 1)} className="active:scale-95 transition-transform" style={{ ...UI, fontSize: "22px", width: 48, height: 48, background: "var(--color-forest)", color: "#fff", border: "none", borderRadius: "12px", cursor: "pointer", fontWeight: 700 }}>+</button>
               <p style={{ ...UI, fontSize: "40px", fontWeight: 800, color: "var(--color-ink)", margin: 0, lineHeight: 1 }}>{cur.p1}</p>
-              <button type="button" onClick={() => adj("p1", -1)} style={{ ...UI, fontSize: "22px", width: 48, height: 48, background: "var(--color-line)", color: "var(--color-ink)", border: "none", cursor: "pointer", fontWeight: 700 }}>−</button>
+              <button type="button" onClick={() => adj("p1", -1)} className="active:scale-95 transition-transform" style={{ ...UI, fontSize: "22px", width: 48, height: 48, background: "var(--color-line)", color: "var(--color-ink)", border: "none", borderRadius: "12px", cursor: "pointer", fontWeight: 700 }}>−</button>
             </div>
 
             {/* VS */}
@@ -461,9 +373,9 @@ function ScoreGrid({
 
             {/* P2 */}
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 8 }}>
-              <button type="button" onClick={() => adj("p2", 1)} style={{ ...UI, fontSize: "22px", width: 48, height: 48, background: "#e53e3e", color: "#fff", border: "none", cursor: "pointer", fontWeight: 700 }}>+</button>
+              <button type="button" onClick={() => adj("p2", 1)} className="active:scale-95 transition-transform" style={{ ...UI, fontSize: "22px", width: 48, height: 48, background: "#e53e3e", color: "#fff", border: "none", borderRadius: "12px", cursor: "pointer", fontWeight: 700 }}>+</button>
               <p style={{ ...UI, fontSize: "40px", fontWeight: 800, color: "var(--color-ink)", margin: 0, lineHeight: 1 }}>{cur.p2}</p>
-              <button type="button" onClick={() => adj("p2", -1)} style={{ ...UI, fontSize: "22px", width: 48, height: 48, background: "var(--color-line)", color: "var(--color-ink)", border: "none", cursor: "pointer", fontWeight: 700 }}>−</button>
+              <button type="button" onClick={() => adj("p2", -1)} className="active:scale-95 transition-transform" style={{ ...UI, fontSize: "22px", width: 48, height: 48, background: "var(--color-line)", color: "var(--color-ink)", border: "none", borderRadius: "12px", cursor: "pointer", fontWeight: 700 }}>−</button>
             </div>
           </div>
 

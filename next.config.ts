@@ -1,9 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   turbopack: {
     root: __dirname,
+  },
+
+  // Optimise les imports des librairies core
+  experimental: {
+    optimizePackageImports: ["react", "react-dom"],
   },
 };
 

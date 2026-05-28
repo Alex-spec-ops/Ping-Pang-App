@@ -20,7 +20,9 @@ export default function Avatar({
       className={`inline-flex shrink-0 items-center justify-center rounded-full ${sizes[size]}`}
       style={{ background: "var(--color-cream)", border: "var(--border-thin)" }}
     >
-      <span aria-hidden>{emoji}</span>
+      <span aria-hidden className="flex items-center justify-center w-full h-full p-1">
+        <img src="/icons/ping-pong-1.png" alt="Avatar" className="w-full h-full object-contain" />
+      </span>
     </span>
   );
 }

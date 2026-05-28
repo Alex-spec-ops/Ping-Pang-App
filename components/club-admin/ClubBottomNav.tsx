@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const tabs = [
-  { href: "/club-dashboard",               label: "Dashboard",      icon: "📊", exact: true },
-  { href: "/club-dashboard/members",        label: "Membres",        icon: "👥" },
-  { href: "/club-dashboard/tournaments",    label: "Tournois",       icon: "🏆" },
-  { href: "/club-dashboard/communication",  label: "Comms",          icon: "📣" },
-  { href: "/club-dashboard/settings",       label: "Réglages",       icon: "⚙️" },
+  { href: "/club-dashboard",               label: "Dashboard",      icon: <img src="/icons/graphique.png" alt="Dashboard" className="w-5 h-5 object-contain brightness-0 invert" />, exact: true },
+  { href: "/club-dashboard/members",        label: "Membres",        icon: <img src="/icons/membres.png" alt="Membres" className="w-5 h-5 object-contain brightness-0 invert" /> },
+  { href: "/club-dashboard/tournaments",    label: "Tournois",       icon: <img src="/icons/tournoi.png" alt="Tournois" className="w-5 h-5 object-contain brightness-0 invert" /> },
+  { href: "/club-dashboard/communication",  label: "Comms",          icon: <img src="/icons/promotion.png" alt="Comms" className="w-5 h-5 object-contain brightness-0 invert" /> },
+  { href: "/club-dashboard/settings",       label: "Réglages",       icon: <img src="/icons/reparation.png" alt="Réglages" className="w-5 h-5 object-contain brightness-0 invert" /> },
 ];
 
 export default function ClubBottomNav() {

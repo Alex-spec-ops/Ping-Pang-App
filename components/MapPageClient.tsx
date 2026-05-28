@@ -4,20 +4,31 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import Avatar from "./Avatar";
 import { CURRENT_USER_ID, getPlayer } from "../lib/data";
+import RegisterMatchClient from "./RegisterMatchClient";
+
+import MapWidget from "./MapWidget";
 
 export default function MapPageClient() {
   const me = getPlayer(CURRENT_USER_ID);
 
-  // Drawer: "peek" = handle only, "half" = half screen, "full" = full info
-  const [drawerState, setDrawerState] = useState<"peek" | "half" | "full">("peek");
+  // Drawer: "min" = handle only, "peek" = rank, "half" = half screen, "full" = full info
+  const [drawerState, setDrawerState] = useState<"min" | "peek" | "half" | "full">("peek");
   const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [isPlaySheetOpen, setIsPlaySheetOpen] = useState(false);
   const [challengeTarget, setChallengeTarget] = useState<string | null>(null);
+  const [selectedTableId, setSelectedTableId] = useState<string | null>(null);
+
+  function handlePlayOnTable(tableId: string) {
+    setSelectedTableId(tableId);
+    setIsPlaySheetOpen(true);
+  }
 
   const dragStartY = useRef<number | null>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
 
   const DRAWER_HEIGHTS = {
-    peek: 52,   // just the handle bar
+    min: 36,    // just the handle bar
+    peek: 96,   // handle bar + rank header tightly
     half: 340,
     full: 560,
   };
@@ -30,9 +41,9 @@ export default function MapPageClient() {
     if (dragStartY.current === null) return;
     const dy = dragStartY.current - clientY; // positive = swipe up
     if (dy > 40) {
-      setDrawerState((s) => (s === "peek" ? "half" : s === "half" ? "full" : "full"));
+      setDrawerState((s) => (s === "min" ? "peek" : s === "peek" ? "half" : s === "half" ? "full" : "full"));
     } else if (dy < -40) {
-      setDrawerState((s) => (s === "full" ? "half" : s === "half" ? "peek" : "peek"));
+      setDrawerState((s) => (s === "full" ? "half" : s === "half" ? "peek" : s === "peek" ? "min" : "min"));
     }
     dragStartY.current = null;
   }
@@ -41,12 +52,8 @@ export default function MapPageClient() {
     <div className="relative w-full overflow-hidden bg-[#c9e8f5] select-none"
       style={{ height: "calc(100dvh - 64px)" }}
     >
-      {/* ── Map placeholder ── */}
-      <div className="absolute inset-0 z-0 bg-[#c9e8f5] flex items-center justify-center">
-        <p className="text-[#0A241E]/30 text-sm font-bold uppercase tracking-widest" style={{ fontFamily: "var(--font-ui)" }}>
-          Carte à venir
-        </p>
-      </div>
+      {/* ── Map ── */}
+      <MapWidget onPlayClick={handlePlayOnTable} />
 
       {/* ── Floating controls ── */}
       <div className="absolute right-4 top-4 z-20 flex flex-col gap-2">
@@ -73,6 +80,22 @@ export default function MapPageClient() {
         </Link>
       </div>
 
+      {/* ── Play FAB ── */}
+      <div 
+        className="absolute left-1/2 -translate-x-1/2 z-40 transition-all duration-300 ease-out"
+        style={{ bottom: DRAWER_HEIGHTS[drawerState] + 24 }}
+      >
+        <button
+          type="button"
+          onClick={() => setIsPlaySheetOpen(true)}
+          className="flex items-center justify-center px-8 py-3.5 rounded-full bg-[#0A241E] text-white shadow-[0_8px_30px_rgba(10,36,30,0.3)] backdrop-blur-md transition-transform hover:scale-105 active:scale-95"
+        >
+          <span className="text-sm font-black uppercase tracking-widest" style={{ fontFamily: "var(--font-ui)" }}>
+            Jouer
+          </span>
+        </button>
+      </div>
+
       {/* ── Slide-up Drawer ── */}
       <div
         ref={drawerRef}
@@ -82,25 +105,24 @@ export default function MapPageClient() {
           height: DRAWER_HEIGHTS[drawerState],
         }}
       >
-        {/* Drag handle */}
+        {/* Drag handle & Header (Always visible, draggable, clickable) */}
         <div
-          className="flex justify-center pt-3 pb-2 cursor-grab active:cursor-grabbing"
+          className="cursor-pointer active:cursor-grabbing"
           onMouseDown={(e) => onDragStart(e.clientY)}
           onMouseUp={(e) => onDragEnd(e.clientY)}
           onTouchStart={(e) => onDragStart(e.touches[0].clientY)}
           onTouchEnd={(e) => onDragEnd(e.changedTouches[0].clientY)}
           onClick={() => {
-            if (drawerState === "peek") setDrawerState("half");
-            else if (drawerState === "full") setDrawerState("peek");
+            if (drawerState === "min") setDrawerState("peek");
+            else if (drawerState === "peek") setDrawerState("full");
+            else if (drawerState === "half" || drawerState === "full") setDrawerState("peek");
           }}
         >
-          <div className="w-10 h-1 rounded-full bg-[#DFE0E0]" />
-        </div>
-
-        {/* Drawer content */}
-        <div className="px-4 overflow-y-auto" style={{ height: "calc(100% - 36px)" }}>
-          {/* Rank header */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex justify-center pt-3 pb-2">
+            <div className="w-10 h-1 rounded-full bg-[#DFE0E0]" />
+          </div>
+          
+          <div className="flex items-center justify-between px-4 pb-2">
             <div>
               <p className="text-[9px] font-bold text-[#616363] uppercase tracking-wider" style={{ fontFamily: "var(--font-ui)" }}>
                 Votre classement
@@ -115,7 +137,10 @@ export default function MapPageClient() {
               <span className="text-sm font-black text-[#0A241E] mt-0.5 leading-none">+20</span>
             </div>
           </div>
+        </div>
 
+        {/* Drawer scrollable content */}
+        <div className="px-4 overflow-y-auto" style={{ height: "calc(100% - 100px)" }}>
           <hr className="border-[#E5E7EB] mb-4" />
 
           {/* Segment chaud */}
@@ -215,13 +240,63 @@ export default function MapPageClient() {
               <button type="button" onClick={() => setChallengeTarget(null)} className="flex-1 py-3 bg-[#F9F9FF] border border-[#E5E7EB] text-[#616363] font-bold rounded-xl text-xs" style={{ fontFamily: "var(--font-ui)" }}>
                 Annuler
               </button>
-              <Link href="/play" className="flex-1 py-3 bg-[#0A241E] text-white text-center font-bold rounded-xl text-xs block" style={{ fontFamily: "var(--font-ui)" }}>
+              <button 
+                type="button" 
+                onClick={() => {
+                  setChallengeTarget(null);
+                  setIsPlaySheetOpen(true);
+                }} 
+                className="flex-1 py-3 bg-[#0A241E] text-white text-center font-bold rounded-xl text-xs block" 
+                style={{ fontFamily: "var(--font-ui)" }}
+              >
                 Enregistrer match
-              </Link>
+              </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* ── Play Bottom Sheet ── */}
+      {isPlaySheetOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm"
+            onClick={() => setIsPlaySheetOpen(false)}
+          />
+          <div
+            className="fixed bottom-0 left-0 right-0 z-50 mx-auto flex max-h-[90dvh] max-w-md flex-col bg-white shadow-2xl rounded-t-2xl"
+            style={{
+              animation: "slideUp 0.25s var(--ease-out)",
+            }}
+          >
+            <div className="flex items-center justify-between px-4 py-3 border-b border-[#E5E7EB] bg-[#F9F9FF]">
+              <h2 className="text-sm font-black uppercase text-[#0A241E] tracking-wider" style={{ fontFamily: "var(--font-display)" }}>
+                Nouveau Match
+              </h2>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsPlaySheetOpen(false);
+                  setSelectedTableId(null);
+                }}
+                className="grid h-8 w-8 place-items-center rounded-full bg-[#E5E7EB] text-[#616363] hover:bg-[#D1EAE2] hover:text-[#0A241E] transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              <RegisterMatchClient key={selectedTableId || 'default'} preselectedTableId={selectedTableId} />
+            </div>
+          </div>
+        </>
+      )}
+      
+      <style jsx global>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); }
+          to   { transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
